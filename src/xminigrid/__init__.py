@@ -406,3 +406,13 @@ register(
     id="MiniGrid-UnlockPickUp",
     entry_point="xminigrid.envs.minigrid.unlockpickup:UnlockPickUp",
 )
+
+
+# ToM
+register(
+    id="MiniGrid-SwapEmpty-9x9",
+    entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
+    height=7,
+    width=7,
+    view_size=3,
+)
