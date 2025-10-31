@@ -39,8 +39,7 @@ class SwapCarry:
 
 class SwapParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
-    swap_prob: float = struct.field(pytree_node=False, default=0.5)
-
+    swap_prob: float = struct.field(pytree_node=False, default=0.1)
 
 
 
@@ -109,7 +108,11 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
 
         # We need 1 agent + 1 goal + 1 star + 4 squares = 7 distinct free positions
         key, pos_key, dir_key = jax.random.split(key, num=3)
+
+        # for visualization only (this is to control the initial state of two episodes: swap or not swap)
+        demo_init_states = jnp.asarray([[2,2],[2,6],[7,1],[2,5],[7,3],[5,7],[1,1]], jnp.int32)
         coords = sample_coordinates(pos_key, grid, num=7)  # int32[7, 2], unique free cells
+        coords = demo_init_states
         # Order: [agent, goal, star, sq1, sq2, sq3, sq4] — each (y, x)
         agent_yx = coords[0]
         goal_yx  = coords[1]
@@ -117,7 +120,7 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
         squares_yx = coords[3:7]  # [4,2]
 
         # Place tiles
-        grid = self._place(grid, goal_yx,       TILES_REGISTRY[Tiles.GOAL,   Colors.BLUE])
+        grid = self._place(grid, goal_yx,       TILES_REGISTRY[Tiles.GOAL,   Colors.GREEN])
         grid = self._place(grid, star_yx,       TILES_REGISTRY[Tiles.STAR,   Colors.GREEN])
         grid = self._place(grid, squares_yx[0], TILES_REGISTRY[Tiles.SQUARE, Colors.YELLOW])
         grid = self._place(grid, squares_yx[1], TILES_REGISTRY[Tiles.SQUARE, Colors.PURPLE])
@@ -130,7 +133,38 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
             direction=sample_direction(dir_key),
         )
 
+        # In test mode: override agent so GOAL is visible; then place STAR far & hidden
+        if isinstance(params, SwapParams) and params.testing:
 
+            agent = self._agent_pose_to_see_goal(goal_yx=goal_yx, H=params.height, W=params.width, view_size=params.view_size)
+            min_sep = jnp.asarray(params.view_size, jnp.int32)
+
+            # pick a new star location
+            new_star_yx = self._pick_star_far_and_hidden(
+                key,
+                goal_yx=goal_yx,
+                agent=agent,
+                squares_yx=squares_yx,
+                H=params.height,
+                W=params.width,
+                view_size=params.view_size,
+                min_sep=min_sep,
+            )
+
+            # --- move star on the grid (JAX-safe indices) ---
+            old_sy = jnp.asarray(star_yx[0], jnp.int32)
+            old_sx = jnp.asarray(star_yx[1], jnp.int32)
+            grid = grid.at[old_sy, old_sx].set(empty_tile)
+
+            new_sy = jnp.asarray(new_star_yx[0], jnp.int32)
+            new_sx = jnp.asarray(new_star_yx[1], jnp.int32)
+            grid = grid.at[new_sy, new_sx].set(TILES_REGISTRY[Tiles.STAR, Colors.GREEN])
+
+            # keep the updated coord in carry
+            star_yx = new_star_yx
+            init_states = jnp.stack([agent_yx, goal_yx, star_yx, squares_yx[0], squares_yx[1], squares_yx[2], squares_yx[3]], axis=0)  # shape (3, 2)
+
+            jax.debug.print("init_states (goal, star, agent):\n{}", init_states)
         carry = SwapCarry(
             star_reached=jnp.asarray(False, dtype=jnp.bool_),
             swap_done=jnp.asarray(False, dtype=jnp.bool_),
@@ -249,6 +283,92 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
             state.carry.star_reached,
             self._is_adjacent_and_facing(state.agent, state.carry.goal_yx),
         )
+
+    def _fov_bounds(self, agent: AgentState, view_size: int):
+        """Return inclusive (ymin, ymax, xmin, xmax) for the agent's FoV per your renderer.
+        Directions: 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT."""
+        ay, ax = agent.position[0], agent.position[1]
+        v = view_size
+        h = v // 2
+        def up(_):
+            ymin = ay - v + 1; ymax = ay
+            xmin = ax - h;      xmax = ax + h
+            return ymin, ymax, xmin, xmax
+        def right(_):
+            ymin = ay - h;      ymax = ay + h
+            xmin = ax;          xmax = ax + v - 1
+            return ymin, ymax, xmin, xmax
+        def down(_):
+            ymin = ay;          ymax = ay + v - 1
+            xmin = ax - h;      xmax = ax + h
+            return ymin, ymax, xmin, xmax
+        def left(_):
+            ymin = ay - h;      ymax = ay + h
+            xmin = ax - v + 1;  xmax = ax
+            return ymin, ymax, xmin, xmax
+        return jax.lax.switch(agent.direction, (up, right, down, left), operand=None)
+
+    def _in_rect(self, yx: jnp.ndarray, rect):
+        ymin, ymax, xmin, xmax = rect
+        y, x = yx[0], yx[1]
+        return jnp.logical_and(
+            jnp.logical_and(y >= ymin, y <= ymax),
+            jnp.logical_and(x >= xmin, x <= xmax),
+        )
+
+    def _agent_pose_to_see_goal(self, goal_yx: jnp.ndarray, H: int, W: int, view_size: int) -> AgentState:
+        """Pick a pose so goal is visible initially. Use dir=UP; center x on goal, y so goal is in view."""
+        v = view_size; h = v // 2
+        gy, gx = goal_yx[0], goal_yx[1]
+        ay = jnp.clip(gy + h, 1, H - 2)  # interior
+        ax = jnp.clip(gx,       1, W - 2)
+        return AgentState(position=jnp.stack([ay, ax], 0), direction=jnp.asarray(0, jnp.int32))  # UP
+
+    def _pick_star_far_and_hidden(
+        self,
+        key: jax.Array,
+        goal_yx: jnp.ndarray,
+        agent: AgentState,
+        squares_yx: jnp.ndarray,
+        H: int,
+        W: int,
+        view_size: int,
+        min_sep: int,
+    ):
+        """Choose a star position outside the agent FoV and at least min_sep (Manhattan) from the goal."""
+        # All interior coords
+        ys = jnp.arange(1, H - 1, dtype=jnp.int32)
+        xs = jnp.arange(1, W - 1, dtype=jnp.int32)
+        YY, XX = jnp.meshgrid(ys, xs, indexing="ij")   # [H-2, W-2]
+        all_yx = jnp.stack([YY.reshape(-1), XX.reshape(-1)], axis=1)  # [N,2]
+
+        # Masks: not at goal, not at agent, not at any square
+        neq_goal = jnp.any(all_yx != goal_yx[None, :], axis=1)
+        neq_agent = jnp.any(all_yx != agent.position[None, :], axis=1)
+        neq_squares = jnp.all(jnp.any(all_yx[:, None, :] != squares_yx[None, :, :], axis=2), axis=1)
+
+        # Outside FoV
+        rect = self._fov_bounds(agent, view_size)
+        outside_fov = jnp.logical_not(self._in_rect(all_yx.T, rect).T)  # vectorize via transpose trick
+
+        # Far from goal
+        gy, gx = goal_yx[0], goal_yx[1]
+        manhattan = jnp.abs(all_yx[:, 0] - gy) + jnp.abs(all_yx[:, 1] - gx)
+        far = manhattan >= jnp.asarray(min_sep, jnp.int32)
+
+        valid = jnp.logical_and(jnp.logical_and(neq_goal, neq_agent), jnp.logical_and(neq_squares, outside_fov))
+        valid = jnp.logical_and(valid, far)
+
+        # Pick the farthest valid cell; if none valid, pick farthest ignoring FoV
+        score_valid   = jnp.where(valid,   manhattan, jnp.full_like(manhattan, -10_000))
+        score_backup  = manhattan  # used if no valid
+        has_valid = jnp.any(valid)
+
+        idx_valid = jnp.argmax(score_valid)
+        idx_backup = jnp.argmax(score_backup)
+        idx = jax.lax.select(has_valid, idx_valid, idx_backup)
+
+        return all_yx[idx]
 
     def step(
         self,

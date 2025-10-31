@@ -412,7 +412,7 @@ register(
 register(
     id="MiniGrid-SwapEmpty-9x9",
     entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
-    height=7,
-    width=7,
-    view_size=3,
+    height=9,
+    width=9,
+    view_size=5,
 )
