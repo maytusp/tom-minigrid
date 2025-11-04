@@ -38,8 +38,8 @@ class SwapCarry:
 
 
 class SwapParams(EnvParams):
-    testing: bool = struct.field(pytree_node=False, default=True)
-    swap_prob: float = struct.field(pytree_node=False, default=0.1)
+    testing: bool = struct.field(pytree_node=False, default=False)
+    swap_prob: float = struct.field(pytree_node=False, default=0.0)
 
 
 
