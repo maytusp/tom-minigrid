@@ -14,17 +14,19 @@ import pyrallis
 import wandb
 from flax.jax_utils import replicate, unreplicate
 from flax.training.train_state import TrainState
+from flax.serialization import to_bytes
 from nn import ActorCriticRNN
 from utils import Transition, calculate_gae, ppo_update_networks, rollout
 
 import xminigrid
 from xminigrid.environment import Environment, EnvParams
 from xminigrid.wrappers import DirectionObservationWrapper, GymAutoResetWrapper
+import os
 
 # this will be default in new jax versions anyway
 jax.config.update("jax_threefry_partitionable", True)
 
-
+#  CUDA_VISIBLE_DEVICES=1 python train_1st.py 
 @dataclass
 class TrainConfig:
     project: str = "tomminigrid"
@@ -42,11 +44,11 @@ class TrainConfig:
     head_hidden_dim: int = 256
     # training
     enable_bf16: bool = False
-    num_envs: int = 8192
+    num_envs: int = 4096
     num_steps: int = 16
     update_epochs: int = 1
     num_minibatches: int = 16
-    total_timesteps: int = 1_000_000
+    total_timesteps: int = 5_000_000
     lr: float = 0.001
     clip_eps: float = 0.2
     gamma: float = 0.99
@@ -55,7 +57,9 @@ class TrainConfig:
     vf_coef: float = 0.5
     max_grad_norm: float = 0.5
     eval_episodes: int = 80
-    seed: int = 42
+    seed: int = 1
+    save_dir: str = "./checkpoints"        # --- SAVE MODEL ---
+    save_every: int = 5                   # --- SAVE MODEL --- (save every 50 updates)
 
     def __post_init__(self):
         num_devices = jax.local_device_count()
@@ -294,6 +298,9 @@ def train(config: TrainConfig):
         config=asdict(config),
         save_code=True,
     )
+    # --- SAVE MODEL ---
+    os.makedirs(config.save_dir, exist_ok=True)
+    checkpoint_path = os.path.join(config.save_dir, f"{config.name}_final.msgpack")
 
     rng, env, env_params, init_hstate, train_state = make_states(config)
     # replicating args across devices
@@ -324,6 +331,19 @@ def train(config: TrainConfig):
         info = jtu.tree_map(lambda x: x[i].item(), loss_info)
         info["transitions"] = total_transitions
         wandb.log(info)
+
+        # --- SAVE MODEL PERIODICALLY ---
+        if (i + 1) % config.save_every == 0:
+            save_path = os.path.join(config.save_dir, f"{config.name}_step_{i+1}.msgpack")
+            with open(save_path, "wb") as f:
+                f.write(to_bytes(unreplicate(train_info["runner_state"][1].params)))
+            print(f"Model saved to {save_path}")
+
+    # --- SAVE FINAL MODEL ---
+    final_state = unreplicate(train_info["runner_state"][1])  # TrainState
+    with open(checkpoint_path, "wb") as f:
+        f.write(to_bytes(final_state.params))
+    print(f"Final model saved to {checkpoint_path}")
 
     run.summary["training_time"] = elapsed_time
     run.summary["steps_per_second"] = (config.total_timesteps_per_device * jax.local_device_count()) / elapsed_time

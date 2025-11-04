@@ -14,7 +14,7 @@ from ...core.constants import TILES_REGISTRY, Colors, Tiles
 from ...core.goals import AgentOnTileGoal, check_goal
 from ...core.grid import room, sample_coordinates, sample_direction
 from ...core.rules import EmptyRule, check_rule
-from ...core.actions import take_action
+from ...core.actions import take_move_action as take_action
 from ...core.observation import transparent_field_of_view
 
 from ...environment import Environment, EnvParams
@@ -38,8 +38,8 @@ class SwapCarry:
 
 
 class SwapParams(EnvParams):
-    testing: bool = struct.field(pytree_node=False, default=False)
-    swap_prob: float = struct.field(pytree_node=False, default=0.0)
+    testing: bool = struct.field(pytree_node=False, default=True)
+    swap_prob: float = struct.field(pytree_node=False, default=0.1)
 
 
 
@@ -49,6 +49,8 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
     Test-time Sally–Anne: with prob 0.1 right after STAR is reached, swap the GOAL with a
     randomly chosen SQUARE.
     """
+    def num_actions(self, params: EnvParamsT) -> int:
+        return 3
 
     def default_params(self, **kwargs) -> SwapParams:
         params = SwapParams(height=9, width=9)
@@ -110,9 +112,9 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
         key, pos_key, dir_key = jax.random.split(key, num=3)
 
         # for visualization only (this is to control the initial state of two episodes: swap or not swap)
-        demo_init_states = jnp.asarray([[2,2],[2,6],[7,1],[2,5],[7,3],[5,7],[1,1]], jnp.int32)
+        # demo_init_states = jnp.asarray([[2,2],[2,6],[7,1],[2,5],[7,3],[5,7],[1,1]], jnp.int32)
         coords = sample_coordinates(pos_key, grid, num=7)  # int32[7, 2], unique free cells
-        coords = demo_init_states
+        # coords = demo_init_states
         # Order: [agent, goal, star, sq1, sq2, sq3, sq4] — each (y, x)
         agent_yx = coords[0]
         goal_yx  = coords[1]

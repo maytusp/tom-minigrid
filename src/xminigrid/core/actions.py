@@ -123,3 +123,15 @@ def take_action(grid: GridState, agent: AgentState, action: IntOrArray) -> Actio
     new_grid, new_agent, changed_position = jax.lax.switch(action, actions)
 
     return new_grid, new_agent, changed_position
+
+def take_move_action(grid: GridState, agent: AgentState, action: IntOrArray) -> ActionOutput:
+    # This will evaluate all actions.
+    # Can we fix this and choose only one function? It'll speed everything up dramatically.
+    actions = (
+        lambda: move_forward(grid, agent),
+        lambda: turn_clockwise(grid, agent),
+        lambda: turn_counterclockwise(grid, agent),
+    )
+    new_grid, new_agent, changed_position = jax.lax.switch(action, actions)
+
+    return new_grid, new_agent, changed_position
