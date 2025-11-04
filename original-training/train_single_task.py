@@ -27,10 +27,10 @@ jax.config.update("jax_threefry_partitionable", True)
 
 @dataclass
 class TrainConfig:
-    project: str = "xminigrid"
+    project: str = "tomminigrid"
     group: str = "default"
-    name: str = "single-task-ppo"
-    env_id: str = "MiniGrid-Empty-6x6"
+    name: str = "ppo"
+    env_id: str = "MiniGrid-SwapEmpty-9x9"
     benchmark_id: Optional[str] = None
     ruleset_id: Optional[int] = None
     img_obs: bool = False

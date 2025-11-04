@@ -164,7 +164,7 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
             star_yx = new_star_yx
             init_states = jnp.stack([agent_yx, goal_yx, star_yx, squares_yx[0], squares_yx[1], squares_yx[2], squares_yx[3]], axis=0)  # shape (3, 2)
 
-            jax.debug.print("init_states (goal, star, agent):\n{}", init_states)
+            # jax.debug.print("init_states (goal, star, agent):\n{}", init_states)
         carry = SwapCarry(
             star_reached=jnp.asarray(False, dtype=jnp.bool_),
             swap_done=jnp.asarray(False, dtype=jnp.bool_),
