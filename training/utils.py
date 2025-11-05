@@ -1,10 +1,13 @@
 # utilities for PPO training and evaluation
 import jax
+from jax import lax
 import jax.numpy as jnp
 from flax import struct
 from flax.training.train_state import TrainState
 
 from xminigrid.environment import Environment, EnvParams
+
+from typing import NamedTuple
 
 
 # Training stuff
@@ -156,3 +159,129 @@ def rollout(
 
     final_carry = jax.lax.while_loop(_cond_fn, _body_fn, init_val=init_carry)
     return final_carry[1]
+
+
+class RolloutWithObs(NamedTuple):
+    stats: RolloutStats
+    obs_seq: jax.Array    # [T_max, *obs_img_shape], symbolic grid per step
+    allo_obs_seq: jax.Array # [T_max, *allo_obs_img_shape], symbolic grid per step
+    agent_seq: jax.Array # [T_max, 2+1] agent's position + direction
+    length: jax.Array     # scalar int32, actual T (<= T_max)
+
+def rollout_with_obs(
+    rng: jax.Array,
+    env: Environment,
+    env_params: EnvParams,
+    train_state: TrainState,
+    init_hstate: jax.Array,
+    *,
+    max_steps: int = 1000,
+) -> RolloutWithObs:
+    """
+    Runs a SINGLE episode fully in JAX (lax.while_loop), collecting the symbolic
+    obs["img"] at each step into a preallocated buffer of length max_steps.
+
+    Returns:
+      - stats: same fields as your RolloutStats (reward, length, episodes)
+      - obs_seq: [max_steps, *obs_img_shape] symbolic frames (not RGB)
+      - length: actual number of steps taken (<= max_steps)
+    """
+    # Reset once (single episode)
+    timestep0 = env.reset(env_params, rng)
+
+    # Shapes/dtypes for the obs buffer
+    obs_img0 = timestep0.observation["img"]
+    grid0 = timestep0.state.grid
+    agent_pos0 = timestep0.state.agent.position
+    agent_dir0 = timestep0.state.agent.direction
+    
+    obs_buf0 = jnp.zeros((max_steps, *obs_img0.shape), obs_img0.dtype)
+    allo_obs_buf0 = jnp.zeros((max_steps, *grid0.shape), grid0.dtype)
+    agent_buf0 = jnp.zeros((max_steps, agent_pos0.shape[0]+1), agent_pos0.dtype)
+
+    # Initial prev_* and bookkeeping
+    prev_action0 = jnp.asarray(0)
+    prev_reward0 = jnp.asarray(0)
+    stats0 = RolloutStats()  # same as your rollout
+    h0 = init_hstate
+    step0 = jnp.int32(0)
+
+    # Write the very first frame (pre-step) at index 0
+    obs_buf0 = obs_buf0.at[0].set(obs_img0)
+    allo_obs_buf0 = allo_obs_buf0.at[0].set(grid0)
+
+    def cond_fn(carry):
+        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, allo_obs_buf, agent_buf, step = carry
+        # Continue while not done with episode (episodes<1) AND under max_steps-1
+        # We allow writing index 0..length, so we stop when the *next* write would overflow.
+        return jnp.logical_and(stats.episodes < 1, step < max_steps - 1)
+
+    def body_fn(carry):
+        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, allo_obs_buf, agent_buf, step = carry
+
+        rng, _rng = jax.random.split(rng)
+        # Forward policy on symbolic obs
+        dist, _, h = train_state.apply_fn(
+            train_state.params,
+            {
+                "obs_img": timestep.observation["img"][None, None, ...],
+                "obs_dir": timestep.observation["direction"][None, None, ...],
+                "prev_action": prev_action[None, None, ...],
+                "prev_reward": prev_reward[None, None, ...],
+            },
+            h,
+        )
+
+        action = dist.sample(seed=_rng).squeeze()
+        timestep_next = env.step(env_params, timestep, action)
+
+        # Update stats like your rollout
+        stats_next = stats.replace(
+            reward=stats.reward + timestep_next.reward,
+            length=stats.length + 1,
+            episodes=stats.episodes + timestep_next.last(),
+        )
+
+        # Write the next pre-step frame (the observation we’ll act on next)
+        # i.e., store obs for timestep_next at index (step+1)
+        obs_buf = obs_buf.at[step + 1].set(timestep_next.observation["img"])
+        allo_obs_buf = allo_obs_buf.at[step + 1].set(timestep_next.state.grid)
+        pos = timestep_next.state.agent.position        # shape (2,)
+        direction = jnp.asarray(timestep_next.state.agent.direction)  # shape ()
+        agent_buf = agent_buf.at[step + 1].set(
+            jnp.concatenate([pos, direction[None]], axis=0)           # shape (3,)
+        )
+        return (
+            rng,
+            stats_next,
+            timestep_next,
+            action,
+            timestep_next.reward,
+            h,
+            obs_buf,
+            allo_obs_buf,
+            agent_buf,
+            step + 1,
+        )
+
+    final = lax.while_loop(
+        cond_fn,
+        body_fn,
+        (rng, stats0, timestep0, prev_action0, prev_reward0, h0, obs_buf0, allo_obs_buf0, agent_buf0, step0),
+    )
+
+    _, stats_f, _, _, _, _, obs_buf_f, allo_obs_buf_f, agent_buf_f, step_f = final
+
+    # The actual usable frames run from [0 .. stats_f.length] inclusive of the first frame,
+    # but since we wrote one frame per step (including the last post-step obs at index=length),
+    # the effective count to keep is `stats_f.length + 1`, capped by max_steps.
+    # For downstream convenience, return `length = stats_f.length + 1`.
+    length_plus_one = jnp.minimum(step_f + 1, jnp.int32(max_steps))
+
+    return RolloutWithObs(
+        stats=stats_f,
+        obs_seq=obs_buf_f,
+        allo_obs_seq=allo_obs_buf_f,
+        agent_seq=agent_buf_f,
+        length=length_plus_one,
+    )

@@ -175,3 +175,10 @@ g
 scripts/*testing*
 configs/wip
 scripts/eval_example.py
+
+
+
+# files
+training/checkpoints
+training/videos
+

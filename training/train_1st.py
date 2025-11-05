@@ -31,8 +31,8 @@ jax.config.update("jax_threefry_partitionable", True)
 class TrainConfig:
     project: str = "tomminigrid"
     group: str = "default"
-    name: str = "ppo"
-    env_id: str = "MiniGrid-SwapEmpty-9x9"
+    env_id: str = "MiniGrid-SwapEmpty-13x13"
+    name: str = f"{env_id}-ppo"
     benchmark_id: Optional[str] = None
     ruleset_id: Optional[int] = None
     img_obs: bool = False
@@ -45,10 +45,10 @@ class TrainConfig:
     # training
     enable_bf16: bool = False
     num_envs: int = 4096
-    num_steps: int = 16
-    update_epochs: int = 1
+    num_steps: int = 32
+    update_epochs: int = 4
     num_minibatches: int = 16
-    total_timesteps: int = 5_000_000
+    total_timesteps: int = 20_000_000
     lr: float = 0.001
     clip_eps: float = 0.2
     gamma: float = 0.99
@@ -59,7 +59,7 @@ class TrainConfig:
     eval_episodes: int = 80
     seed: int = 1
     save_dir: str = "./checkpoints"        # --- SAVE MODEL ---
-    save_every: int = 5                   # --- SAVE MODEL --- (save every 50 updates)
+    save_every: int = 10                   # --- SAVE MODEL --- (save every 50 updates)
 
     def __post_init__(self):
         num_devices = jax.local_device_count()
@@ -80,9 +80,10 @@ def make_states(config: TrainConfig):
 
     # setup environment
     env, env_params = xminigrid.make(config.env_id)
+    print(f"NUM ACTIONS: {env.num_actions(env_params)}")
     env = GymAutoResetWrapper(env)
     env = DirectionObservationWrapper(env)
-
+    
     # for single-task XLand environments
     if config.benchmark_id is not None:
         assert "XLand-MiniGrid" in config.env_id, "Benchmarks should be used only with XLand environments."

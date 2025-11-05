@@ -19,25 +19,29 @@ import os
 import time
 from dataclasses import dataclass
 
+import numpy as np
+
 import jax
 import jax, jax.numpy as jnp, optax
-from jax import jit, device_put
-
+from jax import lax, jit, device_put
+from flax.training.train_state import TrainState
 from flax.serialization import from_bytes
 from flax.training.train_state import TrainState
 
-from utils import rollout  # the same function used in training
+from utils import rollout, rollout_with_obs  # the same function used in training
 
 from nn import ActorCriticRNN
 
 import xminigrid
 from xminigrid.environment import EnvParams
 from xminigrid.wrappers import DirectionObservationWrapper, GymAutoResetWrapper
+from xminigrid.experimental.img_obs import RGBImgObservationWrapper, _render_obs, render_grid_allocentric
 
 from pathlib import Path
 from typing import Optional
 import imageio.v2 as imageio
 from tqdm import trange
+from imageio_ffmpeg import write_frames
 
 # Match training default unless you changed them there.
 @dataclass
@@ -62,7 +66,6 @@ def build_env(env_id: str, img_obs: bool, benchmark_id: str | None = None, rules
         env_params = env_params.replace(ruleset=benchmark.get_ruleset(ruleset_id))
 
     if img_obs:
-        from xminigrid.experimental.img_obs import RGBImgObservationWrapper
         env = RGBImgObservationWrapper(env)
 
     return env, env_params
@@ -90,91 +93,43 @@ def load_params(checkpoint_path: str, net: ActorCriticRNN, env, env_params: EnvP
     return params
 
 
-def save_eval_videos(
+
+def record_with_rollout_jax(
     env,
     env_params,
     net,
     params,
     *,
-    num_videos: int = 10,
+    episodes: int = 1,
     max_steps: int = 1000,
-    fps: int = 32,
-    out_dir: str = "videos",
     seed: int = 0,
+    out_dir: str = "trajs",
     enable_bf16: bool = False,
 ):
-    """
-    Runs `num_videos` single-episode rollouts and saves each episode as an MP4.
-    Files: videos/ep_000.mp4, videos/ep_001.mp4, ..., videos/ep_009.mp4
-    """
+    os.makedirs(out_dir, exist_ok=True)
 
-    Path(out_dir).mkdir(parents=True, exist_ok=True)
-    params = device_put(params)
-    dtype = jnp.bfloat16 if enable_bf16 else None
+    ts = TrainState.create(apply_fn=net.apply, params=params, tx=optax.sgd(0.0))
+    h0 = net.initialize_carry(batch_size=1)
+    if enable_bf16:
+        h0 = h0.astype(jnp.bfloat16)
 
-    @jit
-    def policy_step(params, carry, obs_img, obs_dir, prev_action, prev_reward, rng):
-        # inputs need shape (B=1, 1, ...) to match training apply
-        inputs = {
-            "obs_img": obs_img[None, None, ...],       # (1,1,...)
-            "obs_dir": obs_dir[None, None, ...],       # (1,1)
-            "prev_action": prev_action[None, ...],     # (1,1)
-            "prev_reward": prev_reward[None, ...],     # (1,1)
-        }
-        dist, value, carry = net.apply(params, inputs, carry)
+    @jax.jit
+    def run_one(rng):
+        out = rollout_with_obs(rng, env, env_params, ts, h0, max_steps=max_steps)
+        # out.obs_seq: [T_max, *, *, *] symbolic grid
+        # Render all frames on device
+        frames = jax.vmap(render_grid_allocentric)(out.allo_obs_seq, out.agent_seq)  # [T_max, H, W, 3] uint8
+        return frames, out.length  # length = (steps + 1) frames to keep
+
+    rng = jax.random.key(seed)
+    for ep in range(episodes):
         rng, sub = jax.random.split(rng)
-        action = dist.sample(seed=sub).squeeze(1)      # (1,)
-        return action, carry, rng
-    base_key = jax.random.PRNGKey(seed)
-
-    for ep in trange(num_videos, desc="Saving videos"):
-        # Reset env
-        rng = jax.random.fold_in(base_key, ep)
-        timestep = env.reset(env_params, rng)
-
-        carry = net.initialize_carry(batch_size=1)
-        if dtype is not None:
-            carry = carry.astype(dtype)
-
-        prev_action = jnp.zeros((1,), dtype=jnp.int32)
-        prev_reward = jnp.zeros((1,), dtype=jnp.float32)
-
-        # Open writer
-        video_path = os.path.join(out_dir, f"ep_{ep:03d}.mp4")
-        images = []
-
-        # First frame (at reset)
-        frame0 = env.render(env_params, timestep)
-
-
-        # Rollout
-        for _ in range(max_steps):
-            # Policy step on GPU
-            action, carry, rng = policy_step(
-                params,
-                carry,
-                timestep.observation["img"],
-                timestep.observation["direction"],
-                prev_action,               # shape (1,)
-                prev_reward,               # shape (1,)
-                rng,
-            )
-
-            # Step env (scalar action)
-            timestep = env.step(env_params, timestep, int(action[0]))
-
-            # Append frame
-            frame = env.render(env_params, timestep)
-            images.append(frame)
-
-            # Prep next inputs (keep shape (1,))
-            prev_action = action
-            prev_reward = jnp.asarray([timestep.reward], dtype=jnp.float32)
-
-            if bool(timestep.last()):
-                break
-        imageio.mimsave(video_path, images, fps=32, format="mp4")
-        print(f"Saved {video_path}")
+        frames_dev, T = run_one(sub)
+        T_int = int(np.asarray(T))
+        frames = np.asarray(frames_dev[:T_int])  # single host copy
+        out_path = os.path.join(out_dir, f"ep_{ep:03d}.mp4")
+        imageio.mimsave(out_path, frames, fps=10)
+        print(f"[record] {out_path}  frames={T_int}  size={frames.shape[1]}x{frames.shape[2]}")
 
 def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, enable_bf16: bool = False):
     dtype = jnp.bfloat16 if enable_bf16 else None
@@ -209,9 +164,10 @@ def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, en
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/ppo_step_15.msgpack")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-SwapEmpty-9x9")
-    parser.add_argument("--episodes", type=int, default=100000)
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-SwapEmpty-13x13-ppo_step_150.msgpack")
+    parser.add_argument("--env_id", type=str, default="MiniGrid-SwapEmpty-13x13")
+    parser.add_argument("--vid_out_dir", type=str, default="videos/MiniGrid-SwapEmpty-13x13")
+    parser.add_argument("--episodes", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--img_obs", action="store_true", help="Use image observations (must match training)")
     parser.add_argument("--obs_emb_dim", type=int, default=16)
@@ -255,19 +211,9 @@ def main():
         raise FileNotFoundError(f"Checkpoint not found: {args.checkpoint}")
     params = load_params(args.checkpoint, net, env, env_params, cfg)
     print(f"Loaded params from: {args.checkpoint}")
-    save_eval_videos(
-        env,
-        env_params,
-        net,
-        params,
-        num_videos=10,
-        max_steps=1000,
-        fps=32,
-        out_dir="videos",
-        seed=args.seed,
-        enable_bf16=args.enable_bf16,
-    )
-    # Run quick evaluation
+    record_with_rollout_jax(env, env_params, net, params,
+                        episodes=10, max_steps=1000, seed=0,
+                        out_dir=args.vid_out_dir, enable_bf16=args.enable_bf16)
     eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed, enable_bf16=args.enable_bf16)
 
 if __name__ == "__main__":

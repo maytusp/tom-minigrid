@@ -39,7 +39,7 @@ class SwapCarry:
 
 class SwapParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
-    swap_prob: float = struct.field(pytree_node=False, default=0.1)
+    swap_prob: float = struct.field(pytree_node=False, default=1.0)
 
 
 
@@ -122,7 +122,7 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
         squares_yx = coords[3:7]  # [4,2]
 
         # Place tiles
-        grid = self._place(grid, goal_yx,       TILES_REGISTRY[Tiles.GOAL,   Colors.GREEN])
+        grid = self._place(grid, goal_yx,       TILES_REGISTRY[Tiles.GOAL,   Colors.BLUE])
         grid = self._place(grid, star_yx,       TILES_REGISTRY[Tiles.STAR,   Colors.GREEN])
         grid = self._place(grid, squares_yx[0], TILES_REGISTRY[Tiles.SQUARE, Colors.YELLOW])
         grid = self._place(grid, squares_yx[1], TILES_REGISTRY[Tiles.SQUARE, Colors.PURPLE])
