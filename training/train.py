@@ -14,7 +14,7 @@ import pyrallis
 import wandb
 from flax.jax_utils import replicate, unreplicate
 from flax.training.train_state import TrainState
-from flax.serialization import to_bytes
+from flax.serialization import to_bytes, from_bytes
 from nn import ActorCriticRNN
 from utils import Transition, calculate_gae, ppo_update_networks, rollout
 
@@ -26,12 +26,12 @@ import os
 # this will be default in new jax versions anyway
 jax.config.update("jax_threefry_partitionable", True)
 
-#  CUDA_VISIBLE_DEVICES=1 python train_1st.py 
+#  CUDA_VISIBLE_DEVICES=1 python train.py 
 @dataclass
 class TrainConfig:
     project: str = "tomminigrid"
     group: str = "default"
-    env_id: str = "MiniGrid-SwapEmpty-13x13"
+    env_id: str = "MiniGrid-SwapFourRooms-13x13" # "MiniGrid-SwapEmpty-13x13" or "MiniGrid-SwapFourRooms-13x13"
     name: str = f"{env_id}-ppo"
     benchmark_id: Optional[str] = None
     ruleset_id: Optional[int] = None
@@ -48,7 +48,7 @@ class TrainConfig:
     num_steps: int = 32
     update_epochs: int = 4
     num_minibatches: int = 16
-    total_timesteps: int = 20_000_000
+    total_timesteps: int = 50_000_000
     lr: float = 0.001
     clip_eps: float = 0.2
     gamma: float = 0.99
@@ -58,9 +58,11 @@ class TrainConfig:
     max_grad_norm: float = 0.5
     eval_episodes: int = 80
     seed: int = 1
-    save_dir: str = "./checkpoints"        # --- SAVE MODEL ---
-    save_every: int = 10                   # --- SAVE MODEL --- (save every 50 updates)
-
+    save_dir: str = f"./checkpoints/{name}"        # --- SAVE MODEL ---
+    save_every: int = 50                   # --- SAVE MODEL --- (save every 50 updates)
+    load_path: Optional[str] = None      # <— NEW: path to a .msgpack to load
+    start_update: int = 0                 # <— NEW: where to resume the loop (0 = fresh)
+    
     def __post_init__(self):
         num_devices = jax.local_device_count()
         # splitting computation across all available devices
@@ -304,6 +306,19 @@ def train(config: TrainConfig):
     checkpoint_path = os.path.join(config.save_dir, f"{config.name}_final.msgpack")
 
     rng, env, env_params, init_hstate, train_state = make_states(config)
+
+    
+    if config.load_path and os.path.exists(config.load_path):
+        with open(config.load_path, "rb") as f:
+            ckpt = f.read()
+        try:
+            train_state = from_bytes(train_state, ckpt)              # full TrainState
+            print(f"Loaded FULL TrainState from {config.load_path}")
+        except Exception as e:
+            params = from_bytes(train_state.params, ckpt)            # params-only fallback
+            train_state = train_state.replace(params=params)
+            print(f"Loaded PARAMS-ONLY checkpoint from {config.load_path}")
+
     # replicating args across devices
     rng = jax.random.split(rng, num=jax.local_device_count())
     train_state = replicate(train_state, jax.local_devices())
@@ -334,16 +349,19 @@ def train(config: TrainConfig):
         wandb.log(info)
 
         # --- SAVE MODEL PERIODICALLY ---
+        # Periodic save
         if (i + 1) % config.save_every == 0:
             save_path = os.path.join(config.save_dir, f"{config.name}_step_{i+1}.msgpack")
+            state_to_save = unreplicate(train_state)           # TrainState on host
             with open(save_path, "wb") as f:
-                f.write(to_bytes(unreplicate(train_info["runner_state"][1].params)))
+                f.write(to_bytes(state_to_save))               # save FULL TrainState
             print(f"Model saved to {save_path}")
 
+
     # --- SAVE FINAL MODEL ---
-    final_state = unreplicate(train_info["runner_state"][1])  # TrainState
+    final_state = unreplicate(train_state)                 # TrainState
     with open(checkpoint_path, "wb") as f:
-        f.write(to_bytes(final_state.params))
+        f.write(to_bytes(final_state))                     # save FULL TrainState
     print(f"Final model saved to {checkpoint_path}")
 
     run.summary["training_time"] = elapsed_time

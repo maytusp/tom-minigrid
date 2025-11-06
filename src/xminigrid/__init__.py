@@ -414,7 +414,7 @@ register(
     entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
     height=9,
     width=9,
-    view_size=5,
+    view_size=7,
 )
 
 register(
@@ -422,7 +422,7 @@ register(
     entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
     height=13,
     width=13,
-    view_size=5,
+    view_size=7,
 )
 
 
@@ -440,5 +440,5 @@ register(
     entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
     height=20,
     width=20,
-    view_size=5,
+    view_size=7,
 )
