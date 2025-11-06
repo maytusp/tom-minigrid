@@ -427,6 +427,14 @@ register(
 
 
 register(
+    id="MiniGrid-SwapFourRooms-9x9",
+    entry_point="xminigrid.envs.minigrid.swapgoalfourrooms:SwapGoalRandom",
+    height=9,
+    width=9,
+    view_size=7,
+)
+
+register(
     id="MiniGrid-SwapFourRooms-13x13",
     entry_point="xminigrid.envs.minigrid.swapgoalfourrooms:SwapGoalRandom",
     height=13,
