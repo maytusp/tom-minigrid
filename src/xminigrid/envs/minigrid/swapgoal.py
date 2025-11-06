@@ -14,7 +14,7 @@ from ...core.constants import TILES_REGISTRY, Colors, Tiles
 from ...core.goals import AgentOnTileGoal, check_goal
 from ...core.grid import room, sample_coordinates, sample_direction
 from ...core.rules import EmptyRule, check_rule
-from ...core.actions import take_move_action as take_action
+from ...core.actions import take_action
 from ...core.observation import minigrid_field_of_view as transparent_field_of_view
 
 from ...environment import Environment, EnvParams
@@ -50,7 +50,7 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
     randomly chosen SQUARE.
     """
     def num_actions(self, params: EnvParamsT) -> int:
-        return 3
+        return 6
 
     def default_params(self, **kwargs) -> SwapParams:
         params = SwapParams(height=9, width=9)

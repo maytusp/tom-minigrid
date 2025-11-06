@@ -12,9 +12,9 @@ from flax import struct  # <-- make carry a JAX pytree
 
 from ...core.constants import TILES_REGISTRY, Colors, Tiles
 from ...core.goals import AgentOnTileGoal, check_goal
-from ...core.grid import room, sample_coordinates, sample_direction
+from ...core.grid import four_rooms, sample_coordinates, sample_direction, cartesian_product_1d
 from ...core.rules import EmptyRule, check_rule
-from ...core.actions import take_move_action as take_action
+from ...core.actions import take_action
 from ...core.observation import minigrid_field_of_view as transparent_field_of_view
 
 from ...environment import Environment, EnvParams
@@ -24,6 +24,17 @@ from ...types import AgentState, State, TimeStep, StepType, IntOrArray
 _goal_encoding = AgentOnTileGoal(tile=TILES_REGISTRY[Tiles.GOAL, Colors.GREEN]).encode()
 _rule_encoding = EmptyRule().encode()[None, ...]
 
+_allowed_colors = jnp.array(
+    (
+        Colors.RED,
+        Colors.GREEN,
+        Colors.BLUE,
+        Colors.PURPLE,
+        Colors.YELLOW,
+        Colors.GREY,
+    ),
+    dtype=jnp.uint8,
+)
 
 # --- Carry for this environment (stores bookkeeping for Sally-Anne test) ---
 @struct.dataclass  # <- JAX/Flax-friendly dataclass (pytree)
@@ -41,8 +52,12 @@ class SwapParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
 
-
-
+# number of doors with 4 rooms
+_total_doors = 4
+_allowed_doors = cartesian_product_1d(
+    jnp.array((Tiles.DOOR_CLOSED,), dtype=jnp.uint8),
+    _allowed_colors,
+)
 class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
     """Four squares, one goal, one star.
     Task: go to STAR first (adjacent & facing) → STAR disappears. Then go to GOAL.
@@ -50,7 +65,7 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
     randomly chosen SQUARE.
     """
     def num_actions(self, params: EnvParamsT) -> int:
-        return 3
+        return 6
 
     def default_params(self, **kwargs) -> SwapParams:
         params = SwapParams(height=9, width=9)
@@ -102,8 +117,32 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
         """Spawn 1 goal (GREEN), 1 star (GREEN), and 4 squares (YELLOW, PURPLE, PINK, GREY)
         at random, all in distinct cells. Agent also at a distinct random cell.
         """
+        
         # Build empty room (walls on border)
         grid = four_rooms(params.height, params.width)
+        roomW, roomH = params.width // 2, params.height // 2
+
+        # assuming that rooms are square!
+        key, *keys = jax.random.split(key, num=6)
+        door_coords = jax.random.randint(keys[0], shape=(_total_doors,), minval=1, maxval=roomW)
+        doors = jax.random.choice(keys[1], _allowed_doors, shape=(_total_doors,))
+
+        # adapted from minigrid playground
+        door_idx = 0
+        for i in range(0, 2):
+            for j in range(0, 2):
+                xL = i * roomW
+                yT = j * roomH
+                xR = xL + roomW
+                yB = yT + roomH
+
+                if i + 1 < 2:
+                    grid = grid.at[yT + door_coords[door_idx], xR].set(doors[door_idx])
+                    door_idx = door_idx + 1
+
+                if j + 1 < 2:
+                    grid = grid.at[yB, xL + door_coords[door_idx]].set(doors[door_idx])
+                    door_idx = door_idx + 1
 
         # capture an interior 'empty' tile to later remove the star reliably
         empty_tile = grid[1, 1]  # assumes (1,1) is interior floor (correct tile dtype)
