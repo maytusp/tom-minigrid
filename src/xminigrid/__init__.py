@@ -434,6 +434,13 @@ register(
     view_size=7,
 )
 
+register(
+    id="MiniGrid-TestSwap-13x13",
+    entry_point="xminigrid.envs.minigrid.testswapgoal:SwapGoalRandom",
+    height=13,
+    width=13,
+    view_size=7,
+)
 
 register(
     id="MiniGrid-SwapEmpty-20x20",
