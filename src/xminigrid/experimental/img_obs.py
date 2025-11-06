@@ -87,7 +87,6 @@ def _render_obs(obs: jax.Array) -> jax.Array:
 def render_grid_allocentric(
     grid: jax.Array,        # [H, W, 2]  (type, color)
     agent_state: jax.Array, # [3]        (row, col, dir) for THIS timestep
-    *,
     view_size: int = 7,     # odd is best: agent centered on back edge
     fov_alpha: float = 0.20,
     highlight_rgb: jnp.ndarray | None = None,

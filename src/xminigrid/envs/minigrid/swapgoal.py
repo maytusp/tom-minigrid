@@ -15,7 +15,7 @@ from ...core.goals import AgentOnTileGoal, check_goal
 from ...core.grid import room, sample_coordinates, sample_direction
 from ...core.rules import EmptyRule, check_rule
 from ...core.actions import take_move_action as take_action
-from ...core.observation import transparent_field_of_view
+from ...core.observation import minigrid_field_of_view as transparent_field_of_view
 
 from ...environment import Environment, EnvParams
 from ...types import AgentState, State, TimeStep, StepType, IntOrArray

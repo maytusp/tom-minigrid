@@ -120,6 +120,7 @@ class ManualControl:
             f"StepType: {self.timestep.step_type} | ",
             f"Discount: {self.timestep.discount} | ",
             f"Reward: {self.timestep.reward}",
+            f"Ego Obs: {self.timestep.observation[:,:,0]}",
         )
         self.render()
 

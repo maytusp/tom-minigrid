@@ -11,7 +11,7 @@ from flax import struct
 from .core.actions import take_action
 from .core.constants import NUM_ACTIONS, NUM_LAYERS
 from .core.goals import check_goal
-from .core.observation import transparent_field_of_view
+from .core.observation import minigrid_field_of_view as transparent_field_of_view
 from .core.rules import check_rule
 from .rendering.rgb_render import render as rgb_render
 from .rendering.text_render import render as text_render
