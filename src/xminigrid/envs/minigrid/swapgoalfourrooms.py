@@ -52,7 +52,7 @@ class SwapParams(EnvParams):
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
     # ---- NEW: door curriculum controls ----
     progress: float = struct.field(pytree_node=False, default=0.0)          # 0 = start of training, 1 = end
-    door_open_prob_start: float = struct.field(pytree_node=False, default=1.0)  # p(open) at progress=0
+    door_open_prob_start: float = struct.field(pytree_node=False, default=0.0)  # p(open) at progress=0
     door_open_prob_end: float = struct.field(pytree_node=False, default=0.0)    # p(open) at progress=1
 
 

@@ -27,7 +27,7 @@ import os
 # this will be default in new jax versions anyway
 jax.config.update("jax_threefry_partitionable", True)
 
-#  CUDA_VISIBLE_DEVICES=0 python train.py 
+#  CUDA_VISIBLE_DEVICES=0 python train_1st.py 
 @dataclass
 class TrainConfig:
     project: str = "tomminigrid"
@@ -49,7 +49,7 @@ class TrainConfig:
     num_steps: int = 32
     update_epochs: int = 4
     num_minibatches: int = 16
-    total_timesteps: int = 50_000_000
+    total_timesteps: int = 20_000_000
     lr: float = 0.001
     clip_eps: float = 0.2
     gamma: float = 0.99
@@ -60,7 +60,7 @@ class TrainConfig:
     eval_episodes: int = 80
     seed: int = 1
     save_dir: str = "./checkpoints"        # --- SAVE MODEL ---
-    save_every: int = 100                   # --- SAVE MODEL --- (save every 50 updates)
+    save_every: int = 10                   # --- SAVE MODEL --- (save every 50 updates)
 
     def __post_init__(self):
         num_devices = jax.local_device_count()

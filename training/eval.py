@@ -28,7 +28,6 @@ from flax.training.train_state import TrainState
 from flax.serialization import from_bytes, msgpack_restore, from_state_dict
 from flax.core import freeze, unfreeze
 from flax import traverse_util
-from flax.training.train_state import TrainState
 
 from utils import rollout, rollout_with_obs  # the same function used in training
 
@@ -72,53 +71,8 @@ def build_env(env_id: str, img_obs: bool, benchmark_id: str | None = None, rules
 
     return env, env_params
 
-
-def _shape_safe_merge(target_params, loaded_params, verbose=True, max_print=12):
-    """Copy only leaves with identical shapes; keep others as initialized."""
-    tp = unfreeze(target_params)
-    flat_t = traverse_util.flatten_dict(tp, sep="/")
-    flat_l = traverse_util.flatten_dict(loaded_params, sep="/")
-
-    copied, skipped = 0, []
-    for k, v in flat_l.items():
-        if k in flat_t:
-            tv = flat_t[k]
-            if hasattr(tv, "shape") and hasattr(v, "shape") and tv.shape == v.shape:
-                flat_t[k] = v
-                copied += 1
-            else:
-                skipped.append((k, getattr(v, "shape", None), getattr(tv, "shape", None)))
-        # silently ignore extra keys in checkpoint
-
-    # re-inflate
-    def inflate(flat):
-        nested = {}
-        for path, val in flat.items():
-            d = nested
-            parts = path.split("/")
-            for p in parts[:-1]:
-                d = d.setdefault(p, {})
-            d[parts[-1]] = val
-        return nested
-
-    merged = inflate(flat_t)
-    if verbose:
-        print(f"[shape-safe] copied {copied} leaves, skipped {len(skipped)} due to shape/name mismatch.")
-        for name, s_loaded, s_target in skipped[:max_print]:
-            print(f"  - skip {name}: ckpt {s_loaded} vs target {s_target}")
-        if len(skipped) > max_print:
-            print(f"  ... and {len(skipped)-max_print} more")
-    return freeze(merged)
-
 def load_params(checkpoint_path: str, net, env, env_params, cfg):
-    """
-    Robust loader:
-      1) Build param structure with dummy init.
-      2) Try strict from_state_dict with params-only.
-      3) If ckpt is a full TrainState, take ['params'].
-      4) If names/shapes still disagree, do shape-safe merge.
-    """
-    # Build the exact dummy inputs your training used (seq_len=1)
+    # build target variables & params collection for shape checking
     shapes = env.observation_shape(env_params)
     init_obs = {
         "obs_img": jnp.zeros((1, 1, *shapes["img"])),
@@ -128,33 +82,22 @@ def load_params(checkpoint_path: str, net, env, env_params, cfg):
     }
     init_hstate = net.initialize_carry(batch_size=1)
     rng = jax.random.key(0)
-    params_shape = net.init(rng, init_obs, init_hstate)  # param structure
-
-    if not os.path.exists(checkpoint_path):
-        raise FileNotFoundError(checkpoint_path)
+    target_vars = net.init(rng, init_obs, init_hstate)   # {'params': ...}
+    target_params = target_vars["params"]
 
     with open(checkpoint_path, "rb") as f:
-        ckpt_bytes = f.read()
+        raw = msgpack_restore(f.read())
 
-    raw = msgpack_restore(ckpt_bytes)
+    raw_params = raw["params"] if (isinstance(raw, dict) and "params" in raw) else raw
+    loaded_params = from_state_dict(target_params, raw_params)
 
-    # If this was a full TrainState (.to_bytes(train_state)), drill down.
-    if isinstance(raw, dict) and "params" in raw:
-        raw_params = raw["params"]
-    else:
-        raw_params = raw
+    print(f"[loader] strict restore OK from {checkpoint_path}")
+    return freeze({"params": loaded_params})  # <-- return variables dict
 
-    # First try strict restore (names must match)
-    try:
-        params = from_state_dict(params_shape, raw_params)
-        print(f"Loaded params strictly from {checkpoint_path}")
-        return params
-    except Exception as e:
-        print(f"Strict load failed: {e}\nFalling back to shape-safe merge...")
 
-    # Shape/name tolerant restore
-    merged = _shape_safe_merge(params_shape, raw_params)
-    return merged
+
+
+
 
 
 def record_with_rollout_jax(
@@ -227,7 +170,7 @@ def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, en
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-SwapFourRooms-13x13-ppo/MiniGrid-SwapFourRooms-13x13-ppo_final.msgpack")
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-SwapFourRooms-13x13-ppo_final.msgpack")
     parser.add_argument("--env_id", type=str, default="MiniGrid-SwapFourRooms-13x13")
     parser.add_argument("--vid_out_dir", type=str, default="videos/MiniGrid-SwapFourRooms-13x13")
     parser.add_argument("--episodes", type=int, default=1000)
@@ -274,6 +217,8 @@ def main():
         raise FileNotFoundError(f"Checkpoint not found: {args.checkpoint}")
     params = load_params(args.checkpoint, net, env, env_params, cfg)
     print(f"Loaded params from: {args.checkpoint}")
+
+
     record_with_rollout_jax(env, env_params, net, params,
                         episodes=10, max_steps=1000, seed=0,
                         out_dir=args.vid_out_dir, enable_bf16=args.enable_bf16)

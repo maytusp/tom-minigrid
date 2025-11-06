@@ -410,21 +410,13 @@ register(
 
 # ToM
 register(
-    id="MiniGrid-SwapEmpty-9x9",
-    entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
-    height=9,
-    width=9,
-    view_size=7,
-)
-
-register(
     id="MiniGrid-SwapEmpty-13x13",
     entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
     height=13,
     width=13,
     view_size=7,
+    testing=False,
 )
-
 
 register(
     id="MiniGrid-SwapFourRooms-9x9",
@@ -432,6 +424,7 @@ register(
     height=9,
     width=9,
     view_size=7,
+    testing=False,
 )
 
 register(
@@ -440,20 +433,15 @@ register(
     height=13,
     width=13,
     view_size=7,
+    testing=False,
 )
 
 register(
-    id="MiniGrid-TestSwap-13x13",
+    id="MiniGrid-SwapTest-13x13",
     entry_point="xminigrid.envs.minigrid.testswapgoal:SwapGoalRandom",
     height=13,
     width=13,
     view_size=7,
+    testing=True,
 )
 
-register(
-    id="MiniGrid-SwapEmpty-20x20",
-    entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
-    height=20,
-    width=20,
-    view_size=7,
-)
