@@ -27,12 +27,12 @@ import os
 # this will be default in new jax versions anyway
 jax.config.update("jax_threefry_partitionable", True)
 
-#  CUDA_VISIBLE_DEVICES=0 python train.py 
+#  CUDA_VISIBLE_DEVICES=1 python train.py 
 @dataclass
 class TrainConfig:
     project: str = "tomminigrid"
     group: str = "default"
-    env_id: str = "MiniGrid-SwapFourRooms-13x13"
+    env_id: str = "MiniGrid-ToMTestNoSwap-13x13" # MiniGrid-ToMTestNoSwap-13x13
     name: str = f"{env_id}-ppo"
     benchmark_id: Optional[str] = None
     ruleset_id: Optional[int] = None

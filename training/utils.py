@@ -9,6 +9,9 @@ from xminigrid.environment import Environment, EnvParams
 
 from typing import NamedTuple
 
+import numpy as np
+import os
+
 
 # Training stuff
 class Transition(struct.PyTreeNode):
@@ -285,3 +288,165 @@ def rollout_with_obs(
         agent_seq=agent_buf_f,
         length=length_plus_one,
     )
+
+
+def _dir_to_id(d: str) -> int:
+    # We normalize "bottom" to "down"
+    if d == "bottom":
+        d = "down"
+    mapping = {"up": 0, "right": 1, "down": 2, "left": 3}
+    if d not in mapping:
+        raise ValueError(f"Unknown fov_dir: {d}")
+    return mapping[d]
+
+
+def crop_fov_from_allocentric_rgb(
+    frame_rgb: jnp.ndarray,     # [Hpx, Wpx, 3] uint8
+    grid_cells_h: int,          # rows in grid (cells) — pass Python ints
+    grid_cells_w: int,          # cols in grid (cells)
+    r: int, c: int,             # observer row/col (cells)
+    view_size: int,             # FOV (cells, square)
+    dir_id: int,                # 0=up, 1=right, 2=down, 3=left
+) -> jnp.ndarray:
+    Hpx, Wpx = frame_rgb.shape[0], frame_rgb.shape[1]
+    # pixels-per-cell from static shapes -> Python ints
+    tile_h = Hpx // int(grid_cells_h)
+    tile_w = Wpx // int(grid_cells_w)
+    tile   = min(tile_h, tile_w)
+
+    half = view_size // 2
+    if dir_id == 0:      # up
+        r0, r1 = r - (view_size - 1), r + 1
+        c0, c1 = c - half, c + half + 1
+        rot_k = 0
+    elif dir_id == 2:    # down
+        r0, r1 = r, r + view_size
+        c0, c1 = c - half, c + half + 1
+        rot_k = 2
+    elif dir_id == 3:    # left
+        r0, r1 = r - half, r + half + 1
+        c0, c1 = c - (view_size - 1), c + 1
+        rot_k = -1
+    else:                # right
+        r0, r1 = r - half, r + half + 1
+        c0, c1 = c, c + view_size
+        rot_k = 1
+
+    # Desired output size in pixels (static under jit)
+    out_h = (r1 - r0) * tile
+    out_w = (c1 - c0) * tile
+
+    # Clamp slice size so it always fits the source image (must be static ints)
+    slice_h = min(out_h, Hpx)
+    slice_w = min(out_w, Wpx)
+
+    # Compute start indices (dynamic) such that start + size <= dim
+    pr0 = r0 * tile
+    pc0 = c0 * tile
+    start_r = jnp.clip(pr0, 0, Hpx - slice_h)
+    start_c = jnp.clip(pc0, 0, Wpx - slice_w)
+
+    # Extract valid portion with dynamic_slice (sizes must be static)
+    patch_valid = lax.dynamic_slice(frame_rgb, (start_r, start_c, 0), (slice_h, slice_w, 3))
+
+    # Prepare zero canvas of desired FOV size and paste the valid slice at the right offset
+    out = jnp.zeros((out_h, out_w, 3), dtype=frame_rgb.dtype)
+    dr = start_r - pr0   # amount we had to shift down due to clamping (>=0)
+    dc = start_c - pc0   # amount we had to shift right due to clamping (>=0)
+    out = lax.dynamic_update_slice(out, patch_valid, (dr, dc, 0))
+
+    # Rotate so "forward" is up
+    if rot_k != 0:
+        out = jnp.rot90(out, k=rot_k, axes=(0, 1))
+    return out
+
+def crop_fov_symbolic_allocentric(
+    grid_sym: jnp.ndarray,   # [Hc, Wc, C]
+    r: int, c: int,
+    view_size: int,
+    dir_id: int,             # 0=up, 1=right, 2=down, 3=left
+) -> jnp.ndarray:
+    Hc, Wc, C = grid_sym.shape
+    half = view_size // 2
+
+    if dir_id == 0:      # up
+        r0, r1 = r - (view_size - 1), r + 1
+        c0, c1 = c - half, c + half + 1
+        rot_k = 0
+    elif dir_id == 2:    # down
+        r0, r1 = r, r + view_size
+        c0, c1 = c - half, c + half + 1
+        rot_k = 2
+    elif dir_id == 3:    # left
+        r0, r1 = r - half, r + half + 1
+        c0, c1 = c - (view_size - 1), c + 1
+        rot_k = -1
+    else:                # right
+        r0, r1 = r - half, r + half + 1
+        c0, c1 = c, c + view_size
+        rot_k = 1
+
+    out_h = (r1 - r0)
+    out_w = (c1 - c0)
+
+    slice_h = min(out_h, Hc)
+    slice_w = min(out_w, Wc)
+
+    start_r = jnp.clip(r0, 0, Hc - slice_h)
+    start_c = jnp.clip(c0, 0, Wc - slice_w)
+
+    patch_valid = lax.dynamic_slice(grid_sym, (start_r, start_c, 0), (slice_h, slice_w, C))
+
+    out = jnp.zeros((out_h, out_w, C), dtype=grid_sym.dtype)
+    dr = start_r - r0
+    dc = start_c - c0
+    out = lax.dynamic_update_slice(out, patch_valid, (dr, dc, 0))
+
+    if rot_k != 0:
+        out = jnp.rot90(out, k=rot_k, axes=(0, 1))
+    return out
+
+
+
+def symbol_to_color_rgb(
+    sym_patch: jnp.ndarray,  # [V,V,C] (assume channel 0 is "entity" id)
+) -> jnp.ndarray:
+    """
+    Lightweight visualization: map entity IDs (channel 0) to grayscale RGB.
+    This is only for quick viewing; .npz will store the exact symbolic values.
+    """
+    ent = sym_patch[..., 0].astype(jnp.int32)
+    max_id = jnp.maximum(ent.max(), 1)
+    gray = (ent * (255 // max_id)).astype(jnp.uint8)
+    rgb = jnp.stack([gray, gray, gray], axis=-1)
+    return rgb
+
+
+
+def append_episode_flat(buffers, obs_sym_np):
+    # obs_sym_np: [T, V, V, C] (your observer symbolic crop)
+    # Build (x_t, x_{t+1}) pairs:
+    X = obs_sym_np[:-1]               # [T-1, V, V, C]
+    Y = obs_sym_np[1:]                # [T-1, V, V, C]
+    N = X.shape[0]
+    ep_id = np.int32(buffers["next_episode_id"])
+    ep = np.full((N,), ep_id, dtype=np.int32)
+    t  = np.arange(N, dtype=np.int32)
+
+    # Append to buffers (lists)
+    buffers["X"].append(X)
+    buffers["Y"].append(Y)
+    buffers["ep"].append(ep)
+    buffers["t"].append(t)
+    buffers["next_episode_id"] += 1
+    return buffers
+
+def write_shard_npz(buffers, out_dir, shard_idx, meta):
+    X = np.concatenate(buffers["X"], axis=0) if buffers["X"] else np.zeros((0,), dtype=np.uint8)
+    Y = np.concatenate(buffers["Y"], axis=0) if buffers["Y"] else np.zeros((0,), dtype=np.uint8)
+    ep = np.concatenate(buffers["ep"], axis=0) if buffers["ep"] else np.zeros((0,), dtype=np.int32)
+    t  = np.concatenate(buffers["t"], axis=0) if buffers["t"] else np.zeros((0,), dtype=np.int32)
+
+    path = os.path.join(out_dir, f"observer_sym_shard_{shard_idx:04d}.npz")
+    np.savez_compressed(path, X=X, Y=Y, ep=ep, t=t, meta=meta)
+    return path

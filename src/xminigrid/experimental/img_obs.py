@@ -117,7 +117,7 @@ def render_grid_allocentric(
 
     # Inclusive ranges (agent included):
     # up:    rows [r-(vs-1), r],        cols [c-half, c+half]
-    mask_up    = (rows > (r - (vs - 1))) & (rows <= r)             & (cols >= (c - half)) & (cols <= (c + half))
+    mask_up    = (rows >= (r - (vs - 1))) & (rows <= r)             & (cols >= (c - half)) & (cols <= (c + half))
     # right: rows [r-half, r+half],      cols [c, c+(vs-1)]
     mask_right = (rows >= (r - half))     & (rows <= (r + half))    & (cols >= c)          & (cols <= (c + (vs - 1)))
     # down:  rows [r, r+(vs-1)],         cols [c-half, c+half]

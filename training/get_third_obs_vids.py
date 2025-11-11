@@ -1,3 +1,6 @@
+# Record Third-Person Observation
+# Input: Observer row,column, FOV size and FOV direction
+# The observer sees the protagonist plays.
 #!/usr/bin/env python3
 """
 Minimal test loader & evaluator for the PPO-RNN model.
@@ -29,7 +32,7 @@ from flax.serialization import from_bytes, msgpack_restore, from_state_dict
 from flax.core import freeze, unfreeze
 from flax import traverse_util
 
-from utils import rollout, rollout_with_obs  # the same function used in training
+from utils import rollout, rollout_with_obs, crop_fov_from_allocentric_rgb, _dir_to_id, crop_fov_symbolic_allocentric, symbol_to_color_rgb
 
 from nn import ActorCriticRNN
 
@@ -94,7 +97,8 @@ def load_params(checkpoint_path: str, net, env, env_params, cfg):
     print(f"[loader] strict restore OK from {checkpoint_path}")
     return freeze({"params": loaded_params})  # <-- return variables dict
 
-def record_with_rollout_jax(
+
+def record_vid_with_rollout_jax(
     env,
     env_params,
     net,
@@ -105,6 +109,11 @@ def record_with_rollout_jax(
     seed: int = 0,
     out_dir: str = "trajs",
     enable_bf16: bool = False,
+    # observer settings
+    observer_r: int = 6,
+    observer_c: int = 6,
+    fov_size: int = 7,
+    fov_dir: str = "up",
 ):
     os.makedirs(out_dir, exist_ok=True)
 
@@ -113,60 +122,84 @@ def record_with_rollout_jax(
     if enable_bf16:
         h0 = h0.astype(jnp.bfloat16)
 
+    dir_id = _dir_to_id(fov_dir)
+
     @jax.jit
     def run_one(rng):
         out = rollout_with_obs(rng, env, env_params, ts, h0, max_steps=max_steps)
-        # out.obs_seq: [T_max, *, *, *] symbolic grid
-        # Render all frames on device
-        frames = jax.vmap(render_grid_allocentric)(out.allo_obs_seq, out.agent_seq)  # [T_max, H, W, 3] uint8
-        return frames, out.length  # length = (steps + 1) frames to keep
+        # world RGB (allocentric)
+        world_frames = jax.vmap(render_grid_allocentric)(out.allo_obs_seq, out.agent_seq)  # [T,Hpx,Wpx,3] uint8
+
+        # observer RGB crop
+        def _crop_rgb(frame_rgb, grid_symbolic):
+            Hc = grid_symbolic.shape[0]
+            Wc = grid_symbolic.shape[1]
+            return crop_fov_from_allocentric_rgb(
+                frame_rgb=frame_rgb,
+                grid_cells_h=Hc,
+                grid_cells_w=Wc,
+                r=observer_r,
+                c=observer_c,
+                view_size=fov_size,
+                dir_id=dir_id,
+            )
+        obs_rgb_frames = jax.vmap(_crop_rgb)(world_frames, out.allo_obs_seq)  # [T, fpx, fpx, 3]
+
+        # observer SYMBOLIC crop (cell space), then simple colorization for MP4
+        obs_sym_patches = jax.vmap(
+            lambda grid_sym: crop_fov_symbolic_allocentric(
+                grid_sym=grid_sym, r=observer_r, c=observer_c, view_size=fov_size, dir_id=dir_id
+            )
+        )(out.allo_obs_seq)  # [T, V, V, C]
+
+        obs_sym_vis = jax.vmap(symbol_to_color_rgb)(obs_sym_patches)  # [T, V, V, 3] uint8
+
+        return world_frames, obs_rgb_frames, obs_sym_patches, obs_sym_vis, out.length - 1
 
     rng = jax.random.key(seed)
     for ep in range(episodes):
         rng, sub = jax.random.split(rng)
-        frames_dev, T = run_one(sub)
-        T_int = int(np.asarray(T-1))
-        frames = np.asarray(frames_dev[:T_int])  # single host copy
-        out_path = os.path.join(out_dir, f"ep_{ep:03d}.mp4")
-        imageio.mimsave(out_path, frames, fps=10)
-        print(f"[record] {out_path}  frames={T_int}  size={frames.shape[1]}x{frames.shape[2]}")
+        world_dev, obs_rgb_dev, obs_sym_dev, obs_sym_vis_dev, T = run_one(sub)
+        T_int = int(np.asarray(T))
 
-def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, enable_bf16: bool = False):
-    dtype = jnp.bfloat16 if enable_bf16 else None
+        world_np = np.asarray(world_dev[:T_int])
+        obs_rgb_np = np.asarray(obs_rgb_dev[:T_int])
+        obs_sym_np = np.asarray(obs_sym_dev[:T_int])        # raw symbolic [T,V,V,C]
+        obs_sym_vis_np = np.asarray(obs_sym_vis_dev[:T_int])  # colorized for MP4
 
-    # Make a dummy TrainState so rollout can call `apply_fn`
-    ts = TrainState.create(apply_fn=net.apply, params=params, tx=optax.sgd(0.0))
+        # paths
+        out_world_mp4 = os.path.join(out_dir, f"ep_{ep:03d}.mp4")
+        out_obs_rgb_mp4 = os.path.join(out_dir, f"ep_{ep:03d}_observer_rgb.mp4")
+        out_obs_sym_npz = os.path.join(out_dir, f"ep_{ep:03d}_observer_sym.npz")
 
-    # Hidden state for batch=1 (rollout handles time)
-    init_hstate = net.initialize_carry(batch_size=1)
-    if dtype is not None:
-        init_hstate = init_hstate.astype(dtype)
+        # write videos
+        imageio.mimsave(out_world_mp4, world_np, fps=10)
+        imageio.mimsave(out_obs_rgb_mp4, obs_rgb_np, fps=10)
 
-    @jax.jit
-    def eval_one(rng):
-        stats = rollout(rng, env, env_params, ts, init_hstate, 1)
-        # These are scalars in your setup; axis-less reduce is safe for 0-D or 1-D.
-        ret = jnp.sum(stats.reward)
-        length = jnp.sum(stats.length)
-        return ret, length
+        # write raw arrays
+        np.savez_compressed(
+            out_obs_sym_npz,
+            sym=obs_sym_np,            # [T, V, V, C] exact symbolic crop per frame
+            meta=dict(
+                observer_r=observer_r,
+                observer_c=observer_c,
+                fov_size=fov_size,
+                fov_dir=fov_dir,
+                channels="[..., entity, color] (if your grid uses that convention)",
+            ),
+        )
 
-    rng = jax.random.key(seed)
-    rngs = jax.random.split(rng, episodes)
+        print(f"[record] {out_world_mp4}         frames={T_int} size={world_np.shape[1]}x{world_np.shape[2]}")
+        print(f"[record] {out_obs_rgb_mp4}      frames={T_int} size={obs_rgb_np.shape[1]}x{obs_rgb_np.shape[2]}")
+        print(f"[record] {out_obs_sym_npz}      saved raw symbolic crops")
 
-    # Vectorize + jit across episodes
-    returns, lengths = jax.jit(jax.vmap(eval_one))(rngs)
-    returns = jnp.asarray(returns); lengths = jnp.asarray(lengths)
 
-    print("\n=== Eval Summary (JAX rollout) ===")
-    print(f"Episodes: {episodes}")
-    print(f"Avg return: {float(returns.mean()):.3f}")
-    print(f"Avg length: {float(lengths.mean()):.3f}")
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-FourRoomsNoSwap-13x13-ppo_final.msgpack")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-FourRoomsNoSwap-13x13")
-    parser.add_argument("--vid_out_dir", type=str, default="videos/MiniGrid-ToM-FourRoomsNoSwap-13x13")
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-13x13-ppo_final.msgpack")
+    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-SmallRoomsNoSwap-13x13") # TwoRoomsNoSwap-13x13"
+    parser.add_argument("--vid_out_dir", type=str, default="videos/belief-test/MiniGrid-ToM-SmallRoomsNoSwap-13x13")
     parser.add_argument("--episodes", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--img_obs", action="store_true", help="Use image observations (must match training)")
@@ -178,7 +211,11 @@ def main():
     parser.add_argument("--enable_bf16", action="store_true")
     parser.add_argument("--benchmark_id", type=str, default=None)
     parser.add_argument("--ruleset_id", type=int, default=None)
-
+    parser.add_argument("--observer_r", type=int, default=9, help="Observer row (cell index) in allocentric grid")
+    parser.add_argument("--observer_c", type=int, default=6, help="Observer col (cell index) in allocentric grid")
+    parser.add_argument("--fov_size", type=int, default=7, help="Square FOV size in cells (odd recommended)")
+    parser.add_argument("--fov_dir", type=str, default="up", choices=["up", "down", "bottom", "left", "right"],
+                        help="Observer FOV direction in allocentric frame")
     args = parser.parse_args()
 
     # Build config & env
@@ -213,11 +250,16 @@ def main():
     params = load_params(args.checkpoint, net, env, env_params, cfg)
     print(f"Loaded params from: {args.checkpoint}")
 
+    record_vid_with_rollout_jax(
+        env, env_params, net, params,
+        episodes=10, max_steps=1000, seed=0,
+        out_dir=args.vid_out_dir, enable_bf16=args.enable_bf16,
+        observer_r=args.observer_r,
+        observer_c=args.observer_c,
+        fov_size=args.fov_size,
+        fov_dir=args.fov_dir,
+    )
 
-    record_with_rollout_jax(env, env_params, net, params,
-                        episodes=10, max_steps=1000, seed=0,
-                        out_dir=args.vid_out_dir, enable_bf16=args.enable_bf16)
-    eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed, enable_bf16=args.enable_bf16)
 
 if __name__ == "__main__":
     # This flag matches your training script default and will become default in newer JAX versions.

@@ -410,8 +410,18 @@ register(
 
 # ToM
 register(
-    id="MiniGrid-SwapEmpty-13x13",
-    entry_point="xminigrid.envs.minigrid.swapgoal:SwapGoalRandom",
+    id="MiniGrid-ToM-Empty-13x13",
+    entry_point="xminigrid.envs.tom.empty:EmptyRoom",
+    height=13,
+    width=13,
+    view_size=7,
+    testing=False,
+)
+
+
+register(
+    id="MiniGrid-ToM-FourRoomsNoSwap-13x13",
+    entry_point="xminigrid.envs.tom.fourrooms:FourRooms",
     height=13,
     width=13,
     view_size=7,
@@ -419,29 +429,46 @@ register(
 )
 
 register(
-    id="MiniGrid-SwapFourRooms-9x9",
-    entry_point="xminigrid.envs.minigrid.swapgoalfourrooms:SwapGoalRandom",
-    height=9,
-    width=9,
-    view_size=7,
-    testing=False,
-)
-
-register(
-    id="MiniGrid-SwapFourRooms-13x13",
-    entry_point="xminigrid.envs.minigrid.swapgoalfourrooms:SwapGoalRandom",
-    height=13,
-    width=13,
-    view_size=7,
-    testing=False,
-)
-
-register(
-    id="MiniGrid-SwapTest-13x13",
-    entry_point="xminigrid.envs.minigrid.testswapgoal:SwapGoalRandom",
+    id="MiniGrid-ToM-FourRoomsSwap-13x13",
+    entry_point="xminigrid.envs.tom.fourrooms:FourRooms",
     height=13,
     width=13,
     view_size=7,
     testing=True,
 )
 
+
+register(
+    id="MiniGrid-ToM-TwoRoomsNoSwap-13x13",
+    entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
+    height=13,
+    width=13,
+    view_size=7,
+    testing=False,
+)
+register(
+    id="MiniGrid-ToM-TwoRoomsSwap-13x13",
+    entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
+    height=13,
+    width=13,
+    view_size=7,
+    testing=True,
+)
+
+register(
+    id="MiniGrid-ToM-SmallRoomsNoSwap-13x13",
+    entry_point="xminigrid.envs.tom.smallrooms:TwoRoomsRandom",
+    height=13,
+    width=13,
+    view_size=7,
+    testing=False,
+)
+
+register(
+    id="MiniGrid-ToM-SmallRoomsSwap-13x13",
+    entry_point="xminigrid.envs.tom.smallrooms:TwoRoomsRandom",
+    height=13,
+    width=13,
+    view_size=7,
+    testing=False,
+)

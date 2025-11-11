@@ -181,4 +181,4 @@ scripts/eval_example.py
 # files
 training/checkpoints
 training/videos
-
+data

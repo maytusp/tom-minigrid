@@ -12,7 +12,7 @@ from flax import struct  # <-- make carry a JAX pytree
 
 from ...core.constants import TILES_REGISTRY, Colors, Tiles
 from ...core.goals import AgentOnTileGoal, check_goal
-from ...core.grid import room, sample_coordinates, sample_direction, horizontal_line, vertical_line, rectangle
+from ...core.grid import four_rooms, sample_coordinates, sample_direction, cartesian_product_1d
 from ...core.rules import EmptyRule, check_rule
 from ...core.actions import take_action
 from ...core.observation import minigrid_field_of_view as transparent_field_of_view
@@ -24,25 +24,45 @@ from ...types import AgentState, State, TimeStep, StepType, IntOrArray
 _goal_encoding = AgentOnTileGoal(tile=TILES_REGISTRY[Tiles.GOAL, Colors.GREEN]).encode()
 _rule_encoding = EmptyRule().encode()[None, ...]
 
+_allowed_colors = jnp.array(
+    (
+        Colors.RED,
+        Colors.GREEN,
+        Colors.BLUE,
+        Colors.PURPLE,
+        Colors.YELLOW,
+        Colors.GREY,
+    ),
+    dtype=jnp.uint8,
+)
 
 # --- Carry for this environment (stores bookkeeping for Sally-Anne test) ---
-@struct.dataclass
+@struct.dataclass  # <- JAX/Flax-friendly dataclass (pytree)
 class SwapCarry:
     star_reached: jnp.ndarray            # bool[] scalar
     swap_done: jnp.ndarray               # bool[] scalar
-    goal_yx: jnp.ndarray                 # int32[2]
-    star_yx: jnp.ndarray                 # int32[2]
-    empty_tile: jnp.ndarray              # tile dtype
-    p_swap_test: jnp.ndarray             # float32[] scalar
-    doors_yx: jnp.ndarray                # int32[2,2] -> [left_door_yx, right_door_yx]
-    
+    goal_yx: jnp.ndarray                 # int32[2] (y, x)
+    star_yx: jnp.ndarray                 # int32[2] (y, x)
+    empty_tile: jnp.ndarray              # tile dtype (same as grid's entries)
+    p_swap_test: jnp.ndarray             # float32[] scalar (e.g., 0.1)
+
+
 class SwapParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
+    # ---- NEW: door curriculum controls ----
+    progress: float = struct.field(pytree_node=False, default=0.0)          # 0 = start of training, 1 = end
+    door_open_prob_start: float = struct.field(pytree_node=False, default=0.0)  # p(open) at progress=0
+    door_open_prob_end: float = struct.field(pytree_node=False, default=0.0)    # p(open) at progress=1
 
 
 
-class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
+# number of doors with 4 rooms
+_total_doors = 4
+
+
+
+class FourRooms(Environment[EnvParams, SwapCarry]):
     """Four squares, one goal, one star.
     Task: go to STAR first (adjacent & facing) → STAR disappears. Then go to GOAL.
     Test-time Sally–Anne: with prob 0.1 right after STAR is reached, swap the GOAL with a
@@ -54,23 +74,21 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
     def default_params(self, **kwargs) -> SwapParams:
         params = SwapParams(height=13, width=13)
         params = params.replace(**{k: v for k, v in kwargs.items() if k in {
-            "height","width","view_size","max_steps","render_mode","testing","swap_prob"}})
+            "height","width","view_size","max_steps","render_mode",
+            "testing","swap_prob",
+            "progress","door_open_prob_start","door_open_prob_end"
+        }})
         if params.max_steps is None:
             params = params.replace(max_steps=4 * (params.height * params.width))
         return params
-
-
-    @staticmethod
-    def _sample_row_from_mask(key: jax.Array, rows: jnp.ndarray, mask: jnp.ndarray) -> jnp.ndarray:
-        """Return one row from `rows` (shape [N,2]) whose index satisfies `mask` (shape [N]).
-        JAX-safe: uses integer gather instead of boolean indexing."""
-        idxs = jnp.nonzero(mask, size=rows.shape[0], fill_value=0)[0]    # [N] padded with 0s
-        count = jnp.sum(mask).astype(jnp.int32)
-        count = jnp.maximum(count, 1)  # avoid 0; if none valid, falls back to idx 0 (safe due to padding)
-        ridx = jax.random.randint(key, shape=(), minval=0, maxval=count)
-        sel = idxs[ridx]
-        return rows[sel]
-
+    def _sample_doors(self, key: jax.Array, p_open: float) -> Tuple[jnp.ndarray, jnp.ndarray]:
+        """
+        Returns (is_open[4], colors[4]) where each door is open with prob p_open.
+        """
+        key_color, key_open = jax.random.split(key)
+        colors = jax.random.choice(key_color, _allowed_colors, shape=(_total_doors,))
+        is_open = jax.random.bernoulli(key_open, p=jnp.asarray(p_open, jnp.float32), shape=(_total_doors,))
+        return is_open.astype(jnp.uint8), colors
     # -------------------------
     # Helpers
     # -------------------------
@@ -110,104 +128,86 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
     # Problem generation
     # -------------------------
     def _generate_problem(self, params: EnvParams, key: jax.Array) -> State[SwapCarry]:
-        H, W = params.height, params.width
-        assert (H, W) == (13, 13), "This layout assumes a 13x13 grid."
+        """
+        13x13 four-rooms map; doors with curriculum. Spawn GOAL (BLUE), STAR, AGENT on free tiles.
+        No squares. (GOAL may later move to another room after STAR is reached.)
+        """
+        def _door_tile(color_u8, open_bool):
+            color_i = color_u8.astype(jnp.int32)
+            closed_row = TILES_REGISTRY[Tiles.DOOR_CLOSED]
+            open_row   = TILES_REGISTRY[Tiles.DOOR_OPEN]
+            tile_closed = jnp.take(closed_row, color_i, axis=0)
+            tile_open   = jnp.take(open_row,   color_i, axis=0)
+            return jax.lax.select(open_bool, tile_open, tile_closed)
 
-        # Base world with perimeter walls
-        grid = room(H, W)
-        empty_tile = grid[1, 1]
+        # Build four-rooms base
+        grid = four_rooms(params.height, params.width)
+        roomW, roomH = params.width // 2, params.height // 2
 
-        WALL = TILES_REGISTRY[Tiles.WALL, Colors.GREY]
-        DOOR = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.PURPLE]  # closed door, as you set
+        key, *keys = jax.random.split(key, num=6)
+        door_coords = jax.random.randint(keys[0], shape=(_total_doors,), minval=1, maxval=roomW)
 
-        # Central 7x7 bounds (inclusive) and vertical split
-        y0, y1 = 3, 9
-        x0, x1 = 3, 9
-        midx = 6
+        p_open = (1.0 - jnp.asarray(params.progress, jnp.float32)) * jnp.asarray(params.door_open_prob_start, jnp.float32) \
+            + (jnp.asarray(params.progress, jnp.float32))        * jnp.asarray(params.door_open_prob_end,   jnp.float32)
 
-        # 7x7 ring + vertical separator
-        grid = rectangle(grid, x0, y0, h=(y1 - y0 + 1), w=(x1 - x0 + 1), tile=WALL)
-        grid = vertical_line(grid, x=midx, y=y0 + 1, length=(y1 - y0 - 1), tile=WALL)
+        key, k_doors = jax.random.split(key)
+        is_open, door_colors = self._sample_doors(k_doors, p_open)
 
-        # Doors: one for each room, on the OUTER ring (no door between rooms)
-        key, k_left, k_right, k_pick = jax.random.split(key, 4)
+        # Place 4 doors (two vertical splits + two horizontal splits)
+        door_idx = 0
+        for i in range(0, 2):
+            for j in range(0, 2):
+                xL = i * roomW
+                yT = j * roomH
+                xR = xL + roomW
+                yB = yT + roomH
 
-        left_top_xs   = jnp.arange(x0 + 1, midx, dtype=jnp.int32)
-        left_bot_xs   = jnp.arange(x0 + 1, midx, dtype=jnp.int32)
-        left_edge_ys  = jnp.arange(y0 + 1, y1, dtype=jnp.int32)
-        left_candidates = jnp.concatenate([
-            jnp.stack([jnp.full_like(left_top_xs,  y0), left_top_xs], axis=1),
-            jnp.stack([jnp.full_like(left_bot_xs,  y1), left_bot_xs], axis=1),
-            jnp.stack([left_edge_ys, jnp.full_like(left_edge_ys, x0)], axis=1),
-        ], axis=0)
+                if i + 1 < 2:
+                    tile = _door_tile(door_colors[door_idx], is_open[door_idx])
+                    grid = grid.at[yT + door_coords[door_idx], xR].set(tile)
+                    door_idx += 1
 
-        right_top_xs  = jnp.arange(midx + 1, x1, dtype=jnp.int32)
-        right_bot_xs  = jnp.arange(midx + 1, x1, dtype=jnp.int32)
-        right_edge_ys = jnp.arange(y0 + 1, y1, dtype=jnp.int32)
-        right_candidates = jnp.concatenate([
-            jnp.stack([jnp.full_like(right_top_xs, y0), right_top_xs], axis=1),
-            jnp.stack([jnp.full_like(right_bot_xs, y1), right_bot_xs], axis=1),
-            jnp.stack([right_edge_ys, jnp.full_like(right_edge_ys, x1)], axis=1),
-        ], axis=0)
+                if j + 1 < 2:
+                    tile = _door_tile(door_colors[door_idx], is_open[door_idx])
+                    grid = grid.at[yB, xL + door_coords[door_idx]].set(tile)
+                    door_idx += 1
 
-        li = jax.random.randint(k_left,  shape=(), minval=0, maxval=left_candidates.shape[0])
-        ri = jax.random.randint(k_right, shape=(), minval=0, maxval=right_candidates.shape[0])
-        left_door_yx  = left_candidates[li]
-        right_door_yx = right_candidates[ri]
-        grid = grid.at[left_door_yx[0],  left_door_yx[1]].set(DOOR)
-        grid = grid.at[right_door_yx[0], right_door_yx[1]].set(DOOR)
+        empty_tile = grid[1, 1]  # interior floor exemplar
 
-        # -------- JAX-safe, WALL-SAFE sampling via grid-shaped masks --------
-        # Build boolean masks over the entire grid for room interiors and for the outside.
-        Y = jnp.arange(H, dtype=jnp.int32)[:, None]
-        X = jnp.arange(W, dtype=jnp.int32)[None, :]
+        # ---- Sample GOAL, STAR, AGENT using free-tile masks ----
+        key, k_goal, k_star, k_agent, dir_key = jax.random.split(key, 5)
 
-        left_room_mask  = (Y > y0) & (Y < y1) & (X > x0) & (X <  midx)   # interior only
-        right_room_mask = (Y > y0) & (Y < y1) & (X > midx) & (X <  x1)   # interior only
-        outside_mask    = jnp.logical_not(left_room_mask | right_room_mask)
-
-        # Which room gets the initial GOAL?
-        goal_in_left = jax.random.bernoulli(k_pick, p=jnp.asarray(0.5, jnp.float32))
-        key, k_goal, k_star, k_agent = jax.random.split(key, 4)
-
-        # 1) Place GOAL (BLUE) inside the chosen room
-        goal_mask = jax.lax.select(goal_in_left, left_room_mask, right_room_mask)
-        goal_yx = sample_coordinates(k_goal, grid, num=1, mask=goal_mask)[0]
+        # (No special masks for initial placement — free tiles only)
+        goal_yx = sample_coordinates(k_goal, grid, num=1)[0]
         grid = self._place(grid, goal_yx, TILES_REGISTRY[Tiles.GOAL, Colors.BLUE])
 
-        # 2) Place STAR (GREEN) strictly OUTSIDE the two rooms (never on walls because of free mask)
-        star_yx = sample_coordinates(k_star, grid, num=1, mask=outside_mask)[0]
+        star_yx = sample_coordinates(k_star, grid, num=1)[0]
         grid = self._place(grid, star_yx, TILES_REGISTRY[Tiles.STAR, Colors.GREEN])
 
-        # 3) Place AGENT in the SAME ROOM as the goal, with a pose that sees the goal
-        # (direction=UP; choose y so goal is within FoV; clamp to that room’s interior)
-        v = params.view_size
-        h = v // 2
+        agent_yx = sample_coordinates(k_agent, grid, num=1)[0]
+        agent = AgentState(position=agent_yx, direction=sample_direction(dir_key))
 
-        gy, gx = goal_yx[0], goal_yx[1]
-        y_min, y_max = y0 + 1, y1 - 1
-        x_min = jax.lax.select(goal_in_left, x0 + 1, midx + 1)
-        x_max = jax.lax.select(goal_in_left, midx - 1, x1 - 1)
+        # In test mode: pick a pose so GOAL is visible; then hide STAR far from agent & goal
+        if isinstance(params, SwapParams) and params.testing:
+            agent = self._agent_pose_to_see_goal(goal_yx=goal_yx, H=params.height, W=params.width, view_size=params.view_size)
+            min_sep = jnp.asarray(params.view_size, jnp.int32)
 
-        ay = jnp.clip(gy + h, y_min, y_max)   # keep goal within [ay - v + 1, ay]
-        ax = jnp.clip(gx,       x_min, x_max) # center x on goal but stay inside the room
+            new_star_yx = self._pick_star_far_and_hidden(
+                key,
+                goal_yx=goal_yx,
+                agent=agent,
+                squares_yx=jnp.zeros((0, 2), dtype=jnp.int32),  # no squares
+                H=params.height,
+                W=params.width,
+                view_size=params.view_size,
+                min_sep=min_sep,
+            )
 
-        agent = AgentState(
-            position=jnp.stack([ay, ax], axis=0),
-            direction=jnp.asarray(0, jnp.int32)  # UP
-        )
-        # # Test mode: reposition agent to see GOAL; move STAR far/hidden
-        # if isinstance(params, SwapParams) and params.testing:
-        #     agent = self._agent_pose_to_see_goal(goal_yx=goal_yx, H=H, W=W, view_size=params.view_size)
-        #     min_sep = jnp.asarray(params.view_size, jnp.int32)
-        #     new_star_yx = self._pick_star_far_and_hidden(
-        #         key, goal_yx=goal_yx, agent=agent,
-        #         squares_yx=jnp.zeros((0, 2), dtype=jnp.int32),
-        #         H=H, W=W, view_size=params.view_size, min_sep=min_sep,
-        #     )
-        #     grid = grid.at[star_yx[0], star_yx[1]].set(empty_tile)
-        #     grid = grid.at[new_star_yx[0], new_star_yx[1]].set(TILES_REGISTRY[Tiles.STAR, Colors.GREEN])
-        #     star_yx = new_star_yx
+            sy = jnp.asarray(star_yx[0], jnp.int32); sx = jnp.asarray(star_yx[1], jnp.int32)
+            grid = grid.at[sy, sx].set(empty_tile)
+            nsy = jnp.asarray(new_star_yx[0], jnp.int32); nsx = jnp.asarray(new_star_yx[1], jnp.int32)
+            grid = grid.at[nsy, nsx].set(TILES_REGISTRY[Tiles.STAR, Colors.GREEN])
+            star_yx = new_star_yx
 
         carry = SwapCarry(
             star_reached=jnp.asarray(False, dtype=jnp.bool_),
@@ -216,10 +216,9 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
             star_yx=star_yx,
             empty_tile=empty_tile,
             p_swap_test=jnp.asarray(params.swap_prob, dtype=jnp.float32),
-            doors_yx=jnp.stack([left_door_yx, right_door_yx], axis=0),  # <— add this
         )
 
-        return State(
+        state = State(
             key=key,
             step_num=jnp.asarray(0, dtype=jnp.int32),
             grid=grid,
@@ -228,15 +227,16 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
             rule_encoding=_rule_encoding,
             carry=carry,
         )
+        return state
 
     # -------------------------
     # STAR removal + Sally–Anne swap hook (call from your step)
     # -------------------------
     def maybe_swap_after_star(self, state: State[SwapCarry], testing: bool) -> State[SwapCarry]:
         """
-        On first star reach: remove STAR immediately.
-        If testing, with prob p_swap_test, MOVE the GOAL to a random free cell in the OTHER room.
-        Always activate the GOAL as GREEN at its final location.
+        On first STAR reach: remove STAR immediately.
+        If testing, with prob p_swap_test, MOVE the GOAL to a random free cell in a room
+        different from the current goal room (one of the other three). Then activate GOAL (GREEN).
         """
         carry = state.carry
 
@@ -247,67 +247,80 @@ class SwapGoalRandom(Environment[EnvParams, SwapCarry]):
             reached_star = self._is_adjacent_and_facing(state.agent, carry.star_yx)
 
             def _apply(_state: State[SwapCarry]) -> State[SwapCarry]:
-                _key, k_move, k_pick = jax.random.split(_state.key, 3)
-                # 1) Remove STAR
-                g0 = _state.grid.at[_state.carry.star_yx[0], _state.carry.star_yx[1]].set(_state.carry.empty_tile)
-                
-                # Force-close both doors now
-                DOOR_CLOSED_PURPLE = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.PURPLE]
-                ldy, ldx = _state.carry.doors_yx[0, 0].astype(jnp.int32), _state.carry.doors_yx[0, 1].astype(jnp.int32)
-                rdy, rdx = _state.carry.doors_yx[1, 0].astype(jnp.int32), _state.carry.doors_yx[1, 1].astype(jnp.int32)
-                g1 = g0.at[ldy, ldx].set(DOOR_CLOSED_PURPLE)
-                g1 = g1.at[rdy, rdx].set(DOOR_CLOSED_PURPLE)
+                _key, k_room, k_pick = jax.random.split(_state.key, 3)
 
-                # 2) Compute room interiors (deterministic)
-                y0, y1, x0, x1, midx = 3, 9, 3, 9, 6
-                ys_in = jnp.arange(y0 + 1, y1, dtype=jnp.int32)
-                xs_left  = jnp.arange(x0 + 1, midx, dtype=jnp.int32)
-                xs_right = jnp.arange(midx + 1, x1, dtype=jnp.int32)
-                YYL, XXL = jnp.meshgrid(ys_in, xs_left,  indexing="ij")
-                YYR, XXR = jnp.meshgrid(ys_in, xs_right, indexing="ij")
-                left_interior  = jnp.stack([YYL.reshape(-1), XXL.reshape(-1)], axis=1)
-                right_interior = jnp.stack([YYR.reshape(-1), XXR.reshape(-1)], axis=1)
+                # 1) Remove STAR now (JAX-safe indices)
+                sy = jnp.asarray(_state.carry.star_yx[0], jnp.int32)
+                sx = jnp.asarray(_state.carry.star_yx[1], jnp.int32)
+                g0 = _state.grid.at[sy, sx].set(_state.carry.empty_tile)
 
-                gy, gx = _state.carry.goal_yx[0], _state.carry.goal_yx[1]
-                in_left = jnp.logical_and(jnp.logical_and(gy >= y0 + 1, gy <= y1 - 1),
-                                        jnp.logical_and(gx >= x0 + 1, gx <= midx - 1))
-                pool_other = jax.lax.select(in_left, right_interior, left_interior)
+                # 2) Build 4 room interior masks from grid size
+                H, W = g0.shape[0], g0.shape[1]
+                roomW, roomH = W // 2, H // 2
+                Y = jnp.arange(H, dtype=jnp.int32)[:, None]
+                X = jnp.arange(W, dtype=jnp.int32)[None, :]
 
-                # If we move, choose a random target in the OTHER room
-                idx_new = jax.random.randint(k_pick, shape=(), minval=0, maxval=pool_other.shape[0])
-                new_yx = pool_other[idx_new]
+                # Interiors (exclude border/central walls): (1..roomH-1) etc.
+                tl = (Y > 0)       & (Y < roomH) & (X > 0)       & (X < roomW)
+                tr = (Y > 0)       & (Y < roomH) & (X > roomW)   & (X < W-1)
+                bl = (Y > roomH)   & (Y < H-1)   & (X > 0)       & (X < roomW)
+                br = (Y > roomH)   & (Y < H-1)   & (X > roomW)   & (X < W-1)
+
+                masks = jnp.stack([tl, tr, bl, br], axis=0)  # [4,H,W]
+
+                # Identify current goal room index
+                gy = _state.carry.goal_yx[0]
+                gx = _state.carry.goal_yx[1]
+                in_tl = (gy > 0) & (gy < roomH) & (gx > 0)     & (gx < roomW)
+                in_tr = (gy > 0) & (gy < roomH) & (gx > roomW) & (gx < W-1)
+                in_bl = (gy > roomH) & (gy < H-1) & (gx > 0)   & (gx < roomW)
+                # default to br if none matched (shouldn't happen)
+                goal_room_idx = jnp.where(in_tl, 0, jnp.where(in_tr, 1, jnp.where(in_bl, 2, 3)))
+
+                # choose one of the other 3 room indices uniformly
+                other_choices = jnp.array([[1,2,3],[0,2,3],[0,1,3],[0,1,2]], dtype=jnp.int32)  # [4,3]
+                pick_col = jax.random.randint(k_room, shape=(), minval=0, maxval=3)
+                other_room_idx = other_choices[goal_room_idx, pick_col]
+                target_mask = masks[other_room_idx]  # [H,W] boolean
+
+                # 3) Random free cell in the chosen other room (JAX-safe via sample_coordinates)
+                new_goal_yx = sample_coordinates(k_pick, g0, num=1, mask=target_mask)[0]
 
                 do_move = jax.lax.select(
                     jnp.asarray(testing),
-                    jax.random.bernoulli(k_move, p=_state.carry.p_swap_test),
+                    jax.random.bernoulli(k_room, p=_state.carry.p_swap_test),
                     jnp.asarray(False, dtype=jnp.bool_),
                 )
 
                 def _move(s: State[SwapCarry]) -> State[SwapCarry]:
-                    gy = jnp.asarray(s.carry.goal_yx[0], jnp.int32)
-                    gx = jnp.asarray(s.carry.goal_yx[1], jnp.int32)
-                    g2 = g1.at[gy, gx].set(s.carry.empty_tile)  # start from g1 (doors closed)
-                    ny = jnp.asarray(new_yx[0], jnp.int32)
-                    nx = jnp.asarray(new_yx[1], jnp.int32)
-                    g2 = g2.at[ny, nx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])
+                    # clear old goal to floor, set new to GOAL/GREEN
+                    ogy = jnp.asarray(s.carry.goal_yx[0], jnp.int32)
+                    ogx = jnp.asarray(s.carry.goal_yx[1], jnp.int32)
+                    g1 = g0.at[ogy, ogx].set(s.carry.empty_tile)
+
+                    ny = jnp.asarray(new_goal_yx[0], jnp.int32)
+                    nx = jnp.asarray(new_goal_yx[1], jnp.int32)
+                    g1 = g1.at[ny, nx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])
+
                     new_carry = dataclasses.replace(
                         s.carry,
                         star_reached=jnp.asarray(True, dtype=jnp.bool_),
                         swap_done=jnp.asarray(True, dtype=jnp.bool_),
-                        goal_yx=new_yx,
+                        goal_yx=new_goal_yx,
                     )
-                    return dataclasses.replace(s, key=_key, grid=g2, carry=new_carry)
+                    return dataclasses.replace(s, key=_key, grid=g1, carry=new_carry)
 
                 def _stay(s: State[SwapCarry]) -> State[SwapCarry]:
-                    gy = jnp.asarray(s.carry.goal_yx[0], jnp.int32)
-                    gx = jnp.asarray(s.carry.goal_yx[1], jnp.int32)
-                    g2 = g1.at[gy, gx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])  # start from g1
+                    ogy = jnp.asarray(s.carry.goal_yx[0], jnp.int32)
+                    ogx = jnp.asarray(s.carry.goal_yx[1], jnp.int32)
+                    g1 = g0.at[ogy, ogx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])
+
                     new_carry = dataclasses.replace(
                         s.carry,
                         star_reached=jnp.asarray(True, dtype=jnp.bool_),
                         swap_done=jnp.asarray(False, dtype=jnp.bool_),
                     )
-                    return dataclasses.replace(s, key=_key, grid=g2, carry=new_carry)
+                    return dataclasses.replace(s, key=_key, grid=g1, carry=new_carry)
 
                 return jax.lax.cond(do_move, _move, _stay, _state)
 
