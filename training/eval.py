@@ -25,7 +25,7 @@ import jax
 import jax, jax.numpy as jnp, optax
 from jax import lax, jit, device_put
 from flax.training.train_state import TrainState
-from flax.serialization import from_bytes, msgpack_restore, from_state_dict
+from flax.serialization import from_bytes, to_bytes, msgpack_restore, from_state_dict
 from flax.core import freeze, unfreeze
 from flax import traverse_util
 

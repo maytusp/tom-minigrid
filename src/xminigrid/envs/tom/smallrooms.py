@@ -120,7 +120,6 @@ class TwoRoomsRandom(Environment[SwapParams2, RandomRoomsCarry]):
         # This is centered: rows/cols 2..10 (9 cells)
         y0, y1 = 2, 10
         x0, x1 = 2, 10
-        grid = rectangle(grid, x0, y0, h=(y1 - y0 + 1), w=(x1 - x0 + 1), tile=WALL)
 
         # ---- Enumerate all 4x4 room top-left positions that are flush to the 9x9 edge ----
         RH, RW = 4, 4

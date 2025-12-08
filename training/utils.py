@@ -5,13 +5,15 @@ import jax.numpy as jnp
 from flax import struct
 from flax.training.train_state import TrainState
 
+from torch.utils.data import Dataset, DataLoader
+
 from xminigrid.environment import Environment, EnvParams
 
 from typing import NamedTuple
 
 import numpy as np
 import os
-
+import glob
 
 # Training stuff
 class Transition(struct.PyTreeNode):
@@ -450,3 +452,120 @@ def write_shard_npz(buffers, out_dir, shard_idx, meta):
     path = os.path.join(out_dir, f"observer_sym_shard_{shard_idx:04d}.npz")
     np.savez_compressed(path, X=X, Y=Y, ep=ep, t=t, meta=meta)
     return path
+
+
+
+DIR_TO_IDX = {"right": 0, "down": 1, "left": 2, "up": 3}
+
+def get_direction_one_hot(dir_str: str) -> np.ndarray:
+    """Returns a [4] float array for the direction."""
+    idx = DIR_TO_IDX.get(dir_str.lower(), 0)
+    one_hot = np.zeros(4, dtype=np.float32)
+    one_hot[idx] = 1.0
+    return one_hot
+
+class NpzEpisodeDataset(Dataset):
+    def __init__(self, data_dir: str, max_files: int = None):
+        self.files = sorted(glob.glob(os.path.join(data_dir, "*.npz")))
+        if max_files:
+            self.files = self.files[:max_files]
+        print(f"[Dataset] Found {len(self.files)} episodes in {data_dir}")
+
+    def __len__(self):
+        return len(self.files)
+
+    def __getitem__(self, idx):
+        path = self.files[idx]
+        try:
+            with np.load(path, allow_pickle=True) as data:
+                # 1. Observation: [T, V, V, C]
+                obs_seq = data['sym'].astype(np.int32)
+                T = obs_seq.shape[0]
+
+                # 2. Meta / Direction
+                meta = data['meta'].item() if data['meta'].shape == () else data['meta']
+                fov_dir = meta.get('fov_dir', 'up')
+                dir_vec = get_direction_one_hot(fov_dir)
+                dir_seq = np.tile(dir_vec, (T, 1))
+
+                # 3. Actions
+                if 'action' in data:
+                    action_seq = data['action'].astype(np.int32)
+                else:
+                    action_seq = np.zeros((T,), dtype=np.int32)
+
+                # 4. Rewards
+                if 'reward' in data:
+                    reward_seq = data['reward'].astype(np.float32)
+                else:
+                    reward_seq = np.zeros((T,), dtype=np.float32)
+
+                # 5. Targets (Next Action)
+                if 'other_action' in data:
+                    next_act = data['other_action'].astype(np.int32)
+                else:
+                    next_act = np.zeros((T,), dtype=np.int32)
+                
+                # 6. Done
+                done_seq = np.zeros((T,), dtype=np.float32)
+                done_seq[-1] = 1.0 
+
+            return {
+                "obs": obs_seq,
+                "dir": dir_seq,
+                "act": action_seq,
+                "rew": reward_seq,
+                "next_act": next_act,
+                "done": done_seq,
+                "length": T,
+                "file_id": os.path.basename(path)
+            }
+        except Exception as e:
+            print(f"Error loading {path}: {e}")
+            return self.__getitem__((idx + 1) % len(self.files))
+
+def pad_collate(batch):
+    """Pads batch to the maximum length and aggregates metadata."""
+    max_len = max(x['length'] for x in batch)
+    B = len(batch)
+    
+    v_obs = batch[0]['obs']
+    _, H, W, C = v_obs.shape
+    
+    out_obs = np.zeros((B, max_len, H, W, C), dtype=np.int32)
+    out_dir = np.zeros((B, max_len, 4), dtype=np.float32)
+    out_act = np.zeros((B, max_len), dtype=np.int32)
+    out_rew = np.zeros((B, max_len), dtype=np.float32)
+    out_next_act = np.zeros((B, max_len), dtype=np.int32)
+    out_done = np.zeros((B, max_len), dtype=np.float32)
+    mask_pad = np.zeros((B, max_len), dtype=np.float32)
+    
+    # New lists for metadata
+    file_ids = [] 
+    lengths = []
+
+    for i, x in enumerate(batch):
+        L = x['length']
+        out_obs[i, :L] = x['obs']
+        out_dir[i, :L] = x['dir']
+        out_act[i, :L] = x['act']
+        out_rew[i, :L] = x['rew']
+        out_next_act[i, :L] = x['next_act']
+        out_done[i, :L] = x['done']
+        mask_pad[i, :L] = 1.0
+        
+        # Collect metadata
+        file_ids.append(x['file_id']) 
+        lengths.append(L)             
+        
+    return {
+        "obs": out_obs,
+        "dir": out_dir,
+        "act": out_act,
+        "rew": out_rew,
+        "next_act": out_next_act,
+        "done": out_done,
+        "mask_pad": mask_pad,
+        "file_ids": file_ids,         
+        "length": np.array(lengths),
+    }

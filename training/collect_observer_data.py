@@ -103,6 +103,7 @@ def record_with_rollout_jax(
     *,
     episodes: int = 1,
     max_steps: int = 1000,
+    num_record_videos = 20,
     seed: int = 0,
     out_dir: str = "trajs",
     enable_bf16: bool = False,
@@ -170,8 +171,9 @@ def record_with_rollout_jax(
         out_obs_sym_npz = os.path.join(out_dir, f"ep_{ep:03d}_observer_sym.npz")
 
         # write videos
-        imageio.mimsave(out_world_mp4, world_np, fps=10)
-        imageio.mimsave(out_obs_rgb_mp4, obs_rgb_np, fps=10)
+        if ep < num_record_videos:
+            imageio.mimsave(out_world_mp4, world_np, fps=10)
+            imageio.mimsave(out_obs_rgb_mp4, obs_rgb_np, fps=10)
 
         # write raw arrays
         np.savez_compressed(
@@ -194,9 +196,9 @@ def record_with_rollout_jax(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToMTestNoSwap-13x13-ppo_final.msgpack")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-ToMTestNoSwap-13x13")
-    parser.add_argument("--traj_out_dir", type=str, default="../data/trajs/MiniGrid-ToMTestNoSwap-13x13")
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-13x13-ppo_final.msgpack")
+    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsNoSwap-13x13")
+    parser.add_argument("--traj_out_dir", type=str, default="../data/trajs/MiniGrid-ToM-TwoRoomsNoSwap-13x13")
     parser.add_argument("--episodes", type=int, default=1000)
     parser.add_argument("--seed", type=int, default=1)
     parser.add_argument("--img_obs", action="store_true", help="Use image observations (must match training)")
@@ -249,7 +251,7 @@ def main():
 
     record_with_rollout_jax(
         env, env_params, net, params,
-        episodes=10, max_steps=1000, seed=0,
+        episodes=1000, max_steps=1000, seed=0,
         out_dir=args.traj_out_dir, enable_bf16=args.enable_bf16,
         observer_r=args.observer_r,
         observer_c=args.observer_c,

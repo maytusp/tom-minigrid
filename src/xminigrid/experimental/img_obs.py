@@ -83,7 +83,37 @@ def _render_obs(obs: jax.Array) -> jax.Array:
 
     return rendered_obs
 
+def _render_obs_tom(obs: jax.Array) -> jax.Array:
+    """
+    Corrected version of _render_obs that handles the 5D agent cache properly.
+    """
+    view_size = obs.shape[0]
 
+    obs_flat_idxs = obs[:, :, 0] * NUM_COLORS + obs[:, :, 1]
+    
+    # 1. Render all tiles (Background)
+    # Shape: [View, View, 32, 32, 3]
+    rendered_obs = jnp.take(TILE_CACHE, obs_flat_idxs, axis=0)
+
+    # 2. Add agent tile
+    # We find the tile ID at the agent's position (bottom-center)
+    agent_pos_idx = obs_flat_idxs[view_size - 1, view_size // 2]
+    
+    # FIX IS HERE: TILE_W_AGENT_CACHE has shape [4, NumTiles, 32, 32, 3].
+    # We need to select a specific direction index [0-3]. 
+    # In egocentric views, the agent is conceptually facing "Up" relative to the crop.
+    # We use index 3 (Up) to get the correct agent sprite overlay.
+    agent_tile = TILE_W_AGENT_CACHE[3, agent_pos_idx]
+    
+    # Place the agent tile onto the rendered grid
+    rendered_obs = rendered_obs.at[view_size - 1, view_size // 2].set(agent_tile)
+    
+    # 3. Reshape into final image
+    # [View, View, Tile, Tile, 3] -> [View*Tile, View*Tile, 3]
+    rendered_obs = rendered_obs.transpose((0, 2, 1, 3, 4)).reshape(view_size * TILE_SIZE, view_size * TILE_SIZE, 3)
+
+    return rendered_obs
+    
 def render_grid_allocentric(
     grid: jax.Array,        # [H, W, 2]  (type, color)
     agent_state: jax.Array, # [3]        (row, col, dir) for THIS timestep
