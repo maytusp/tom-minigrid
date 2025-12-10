@@ -420,20 +420,20 @@ register(
 
 
 register(
-    id="MiniGrid-ToM-FourRoomsNoSwap-13x13",
+    id="MiniGrid-ToM-FourRoomsNoSwap-19x19",
     entry_point="xminigrid.envs.tom.fourrooms:FourRooms",
-    height=13,
-    width=13,
-    view_size=7,
+    height=19,
+    width=19,
+    view_size=13,
     testing=False,
 )
 
 register(
-    id="MiniGrid-ToM-FourRoomsSwap-13x13",
+    id="MiniGrid-ToM-FourRoomsSwap-19x19",
     entry_point="xminigrid.envs.tom.fourrooms:FourRooms",
-    height=13,
-    width=13,
-    view_size=7,
+    height=19,
+    width=19,
+    view_size=13,
     testing=True,
 )
 
@@ -455,20 +455,12 @@ register(
     testing=True,
 )
 
-register(
-    id="MiniGrid-ToM-SmallRoomsNoSwap-13x13",
-    entry_point="xminigrid.envs.tom.smallrooms:TwoRoomsRandom",
-    height=13,
-    width=13,
-    view_size=7,
-    testing=False,
-)
 
 register(
-    id="MiniGrid-ToM-SmallRoomsSwap-13x13",
-    entry_point="xminigrid.envs.tom.smallrooms:TwoRoomsRandom",
-    height=13,
-    width=13,
+    id="MiniGrid-Protagonist-ProcGen",
+    entry_point="xminigrid.envs.tom.protagonist_procgen:SallyAnneRooms",
+    height=9,
+    width=9,
     view_size=7,
-    testing=False,
+    testing=True,
 )

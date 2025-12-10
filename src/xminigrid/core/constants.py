@@ -5,7 +5,7 @@ NUM_ACTIONS = 6
 
 # GRID: [tile, color]
 NUM_LAYERS = 2
-NUM_TILES = 13
+NUM_TILES = 17
 NUM_COLORS = 12
 
 
@@ -24,6 +24,10 @@ class Tiles(struct.PyTreeNode):
     DOOR_OPEN: int = struct.field(pytree_node=False, default=10)
     HEX: int = struct.field(pytree_node=False, default=11)
     STAR: int = struct.field(pytree_node=False, default=12)
+    AGENT_UP: int = struct.field(pytree_node=False, default=13)
+    AGENT_RIGHT: int = struct.field(pytree_node=False, default=14)
+    AGENT_DOWN: int = struct.field(pytree_node=False, default=15)
+    AGENT_LEFT: int = struct.field(pytree_node=False, default=16)
 
 
 class Colors(struct.PyTreeNode):

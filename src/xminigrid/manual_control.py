@@ -120,7 +120,7 @@ class ManualControl:
             f"StepType: {self.timestep.step_type} | ",
             f"Discount: {self.timestep.discount} | ",
             f"Reward: {self.timestep.reward}",
-            f"Ego Obs: {self.timestep.observation[:,:,0]}",
+            f"Ego Obs:\n {self.timestep.observation[:,:,0]}",
         )
         self.render()
 
@@ -134,10 +134,11 @@ class ManualControl:
         self.timestep = self._reset(self.env_params, reset_key)
         self.render()
         print(
-            f"Step: {self.timestep.state.step_num} |",
-            f"StepType: {self.timestep.step_type} |",
-            f"Discount: {self.timestep.discount} |",
+            f"Step: {self.timestep.state.step_num} | ",
+            f"StepType: {self.timestep.step_type} | ",
+            f"Discount: {self.timestep.discount} | ",
             f"Reward: {self.timestep.reward}",
+            f"Ego Obs:\n {self.timestep.observation[:,:,0]}",
         )
 
     def key_handler(self, event: Event) -> None:
@@ -182,12 +183,13 @@ class ManualControl:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--env-id", type=str, default="MiniGrid-Empty-5x5", choices=xminigrid.registered_environments())
+    parser.add_argument("--env-id", type=str, default="MiniGrid-Protagonist-ProcGen", choices=xminigrid.registered_environments())
+    # parser.add_argument("--env-id", type=str, default="MiniGrid-ToM-FourRoomsSwap-19x19", choices=xminigrid.registered_environments())
     parser.add_argument("--benchmark-id", type=str, default="trivial-1m", choices=xminigrid.registered_benchmarks())
     parser.add_argument("--ruleset-id", type=int, default=0)
     parser.add_argument("--agent-view", action="store_true")
     parser.add_argument("--save-video", action="store_true")
-    parser.add_argument("--video-path", type=str, default=".")
+    parser.add_argument("--video-path", type=str, default="./debug_videos")
     parser.add_argument("--video-format", type=str, default=".mp4", choices=(".mp4", ".gif"))
     parser.add_argument("--video-fps", type=int, default=5)
 

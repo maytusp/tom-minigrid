@@ -173,6 +173,47 @@ def sample_coordinates(key: jax.Array, grid: GridState, num: int, mask: jax.Arra
     coords = jnp.concatenate((coords[0].reshape(-1, 1), coords[1].reshape(-1, 1)), axis=-1)
     return coords
 
+def sample_door_coordinates(key: jax.Array, grid: GridState, num: int, mask: jax.Array) -> jax.Array:
+    """
+    Samples door coordinates from a wall mask, ensuring doors are not placed 
+    at the endpoints (corners) of the wall to prevent blocking the agent.
+    """
+    
+    # Shift mask to check neighbors (Up, Down, Left, Right)
+    # We pad with False so boundaries are treated as "no wall neighbor"
+    mask_u = jnp.pad(mask, ((1, 0), (0, 0)), constant_values=False)[:-1, :] # Shift Down to check Up
+    mask_d = jnp.pad(mask, ((0, 1), (0, 0)), constant_values=False)[1:, :]  # Shift Up to check Down
+    mask_l = jnp.pad(mask, ((0, 0), (1, 0)), constant_values=False)[:, :-1] # Shift Right to check Left
+    mask_r = jnp.pad(mask, ((0, 0), (0, 1)), constant_values=False)[:, 1:]  # Shift Left to check Right
+
+    # Identify "Middle" segments
+    # A spot is safe if it has neighbors above AND below (Vertical middle)
+    # OR neighbors left AND right (Horizontal middle)
+    is_vertical_middle = mask & mask_u & mask_d
+    is_horizontal_middle = mask & mask_l & mask_r
+    
+    # Combine to find all valid non-corner spots
+    safe_mask = is_vertical_middle | is_horizontal_middle
+    
+    # Fallback Safety
+    # If a wall is too short (length < 3), safe_mask will be empty. 
+    # In that case, we revert to the original mask to avoid errors.
+    safe_mask = jax.lax.select(safe_mask.sum() > 0, safe_mask, mask)
+
+    # 4. Sample from the refined mask
+    p = safe_mask.flatten()
+
+    coords = jax.random.choice(
+        key=key,
+        shape=(num,),
+        a=jnp.arange(grid.shape[0] * grid.shape[1]),
+        replace=False,
+        p=p,
+    )
+    
+    coords = jnp.divmod(coords, grid.shape[1])
+    coords = jnp.concatenate((coords[0].reshape(-1, 1), coords[1].reshape(-1, 1)), axis=-1)
+    return coords
 
 def sample_direction(key: jax.Array) -> jax.Array:
     return jax.random.randint(key, shape=(), minval=0, maxval=4)

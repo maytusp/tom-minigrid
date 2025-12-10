@@ -2,9 +2,8 @@ import jax
 import jax.numpy as jnp
 
 from ..types import AgentState, GridState
-from .constants import Tiles
+from .constants import Tiles, TILES_REGISTRY, Colors
 from .grid import align_with_up, check_see_behind
-
 
 def crop_field_of_view(grid: GridState, agent: AgentState, height: int, width: int) -> jax.Array:
     # TODO: assert height and width are odd and >= 3
@@ -34,8 +33,8 @@ def crop_field_of_view(grid: GridState, agent: AgentState, height: int, width: i
 
 
 def transparent_field_of_view(grid: GridState, agent: AgentState, height: int, width: int) -> jax.Array:
-    fov_grid = crop_field_of_view(grid, agent, height, width)
-    fov_grid = align_with_up(fov_grid, agent.direction)
+    fov_grid = crop_field_of_view(grid, agent, height, width) # crop from the entire grid
+    fov_grid = align_with_up(fov_grid, agent.direction) # rotate the cropped symbolic image
 
     # TODO: should we even do this? Agent with good memory can remember what he picked up.
     # WARN: this can overwrite tile the agent is on, GOAL for example.
@@ -122,3 +121,24 @@ def minigrid_field_of_view(grid: GridState, agent: AgentState, height: int, widt
     # fov_grid = fov_grid.at[height - 1, width // 2].set(agent.pocket)
 
     return fov_grid
+
+def get_agent_layer(agent: AgentState, grid: GridState) -> jnp.ndarray:
+    """Creates a separate grid containing only the agent tile."""
+    # Start with an empty grid
+    # We use '0' (Tiles.EMPTY) for empty space
+    layer = jnp.zeros_like(grid)
+    
+    # Maps direction integers to the specific AGENT tile from the registry.
+    # MiniGrid Standard: 0=Up, 1=Right, 2=Down, 3=Left
+    # We assume Colors.RED is the standard agent color.
+    agent_tile = jnp.array([
+        TILES_REGISTRY[Tiles.AGENT_UP, Colors.RED],
+        TILES_REGISTRY[Tiles.AGENT_RIGHT, Colors.RED],
+        TILES_REGISTRY[Tiles.AGENT_DOWN,  Colors.RED],
+        TILES_REGISTRY[Tiles.AGENT_LEFT,  Colors.RED],
+    ])[agent.direction]
+
+    # Place the agent on the layer
+    layer = layer.at[agent.position[0], agent.position[1]].set(agent_tile)
+    
+    return layer
