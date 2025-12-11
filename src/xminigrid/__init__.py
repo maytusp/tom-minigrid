@@ -462,5 +462,5 @@ register(
     height=9,
     width=9,
     view_size=7,
-    testing=True,
+    testing=False,
 )

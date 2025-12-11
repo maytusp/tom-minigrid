@@ -49,7 +49,7 @@ class LayoutInfo:
 class SwapParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
-    min_num_rooms: int = struct.field(pytree_node=False, default=2)
+    min_num_rooms: int = struct.field(pytree_node=False, default=3)
     max_num_rooms: int = struct.field(pytree_node=False, default=4)
 
 # -------------------------------------------------------------------------
