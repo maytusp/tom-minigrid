@@ -89,7 +89,7 @@ def load_params(checkpoint_path: str, net, env, env_params, cfg):
     return freeze({"params": loaded_params})  # <-- return variables dict
 
 
-def record_with_rollout_jax(
+def collect_obs(
     env,
     env_params,
     net,
@@ -269,7 +269,7 @@ def main():
     print(f"Loaded params from: {args.checkpoint}")
 
 
-    record_with_rollout_jax(env, env_params, net, params,
+    collect_obs(env, env_params, net, params,
                         episodes=args.episodes, max_steps=1000, seed=0,
                         out_dir=args.vid_out_dir)
     # eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed)
