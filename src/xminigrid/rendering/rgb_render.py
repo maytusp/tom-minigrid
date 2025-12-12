@@ -16,6 +16,7 @@ from .utils import (
     point_in_triangle,
     rotate_fn,
 )
+from functools import partial
 
 COLORS_MAP = {
     Colors.EMPTY: np.array((255, 255, 255)),  # just a placeholder
@@ -163,6 +164,7 @@ def _render_player(img: np.ndarray, direction: int):
     fill_coords(img, tri_fn, COLORS_MAP[Colors.RED])
 
 
+
 TILES_FN_MAP = {
     Tiles.FLOOR: _render_floor,
     Tiles.WALL: _render_wall,
@@ -214,10 +216,11 @@ def render_tile(
     TILES_FN_MAP[tile[0]](img, tile[1])
     # draw agent if on this tile
     if agent_direction is not None:
+        print(f"agent tile {tile[0]}")
         _render_player(img, agent_direction)
 
     if highlight:
-        highlight_img(img, alpha=0.2)
+        highlight_img(img, alpha=0.1)
 
     # downsample the image to perform supersampling/anti-aliasing
     img = downsample(img, subdivs)

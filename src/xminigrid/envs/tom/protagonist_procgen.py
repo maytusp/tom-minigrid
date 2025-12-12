@@ -355,6 +355,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
             reward=jnp.asarray(0.0),
             discount=jnp.asarray(1.0),
             observation=obs,
+            allocentric_obs=visual_grid,
         )
 
     def step(
@@ -393,6 +394,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
             new_state.grid
         )
 
+
         # C. Generate Observation from the Combined Visual Grid
         # The agent 'sees' the combined version, but the logic operates on the clean version.
         new_obs = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
@@ -406,6 +408,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
         step_type = jax.lax.select(terminated | truncated, StepType.LAST, StepType.MID)
         discount = jax.lax.select(terminated, jnp.asarray(0.0), jnp.asarray(1.0))
 
+
         if not(params.use_color):
             new_obs = new_obs[:, :, 0]
 
@@ -415,6 +418,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
             reward=reward,
             discount=discount,
             observation=new_obs,
+            allocentric_obs=visual_grid,
         )
     def observation_shape(self, params: EnvParamsT) -> tuple[int, int, int] | dict[str, Any]:
         if not(params.use_color):

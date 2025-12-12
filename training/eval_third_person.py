@@ -1,4 +1,4 @@
-# Record Third-Person Observation
+# Record Third-Person Observation (Not used anymore because we will use observer with 9x9 and it matches the environment size)
 # Input: Observer row,column, FOV size and FOV direction
 # The observer sees the protagonist plays.
 #!/usr/bin/env python3

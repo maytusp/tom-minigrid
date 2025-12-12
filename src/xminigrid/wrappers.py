@@ -117,6 +117,49 @@ class DirectionObservationWrapper(Wrapper):
         return timestep
 
 
+class AllocentricObservationWrapper(Wrapper):
+    def observation_shape(self, params):
+        base_shape = self._env.observation_shape(params)
+        if isinstance(base_shape, dict):
+            assert "img" in base_shape
+            obs_shape = {**base_shape, **{"direction": 4}}
+        else:
+            obs_shape = {
+                "img": self._env.observation_shape(params),
+                "direction": 4,
+            }
+        return obs_shape
+
+    def __extend_obs(self, timestep):
+        direction = jax.nn.one_hot(timestep.state.agent.direction, num_classes=4)
+        if isinstance(timestep.observation, dict):
+            assert "img" in timestep.observation
+            extended_obs = {
+                **timestep.observation,
+                **{"direction": direction},
+            }
+        else:
+            extended_obs = {
+                "img": timestep.observation,
+                "allo_img": timestep.allocentric_obs,
+                "direction": direction,
+            }
+
+        timestep = timestep.replace(observation=extended_obs)
+        return timestep
+
+    def reset(self, params, key):
+        timestep = self._env.reset(params, key)
+        timestep = self.__extend_obs(timestep)
+        return timestep
+
+    def step(self, params, timestep, action):
+        timestep = self._env.step(params, timestep, action)
+        timestep = self.__extend_obs(timestep)
+        return timestep
+
+
+
 class RulesAndGoalsObservationWrapper(Wrapper):
     def observation_shape(self, params):
         base_shape = self._env.observation_shape(params)

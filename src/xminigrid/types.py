@@ -57,6 +57,7 @@ class TimeStep(struct.PyTreeNode, Generic[EnvCarryT]):
     reward: jax.Array
     discount: jax.Array
     observation: jax.Array | dict[str, jax.Array]
+    allocentric_obs: jax.Array | dict[str, jax.Array] | None
 
     def first(self):
         return self.step_type == StepType.FIRST

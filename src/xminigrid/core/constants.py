@@ -5,7 +5,8 @@ NUM_ACTIONS = 6
 
 # GRID: [tile, color]
 NUM_LAYERS = 2
-NUM_TILES = 17
+NUM_TILES = 13
+NUM_AGENT_TILES = 4
 NUM_COLORS = 12
 
 
@@ -24,6 +25,8 @@ class Tiles(struct.PyTreeNode):
     DOOR_OPEN: int = struct.field(pytree_node=False, default=10)
     HEX: int = struct.field(pytree_node=False, default=11)
     STAR: int = struct.field(pytree_node=False, default=12)
+
+class AgentTiles(struct.PyTreeNode):
     AGENT_UP: int = struct.field(pytree_node=False, default=13)
     AGENT_RIGHT: int = struct.field(pytree_node=False, default=14)
     AGENT_DOWN: int = struct.field(pytree_node=False, default=15)
@@ -46,12 +49,16 @@ class Colors(struct.PyTreeNode):
 
 
 # Only ~100 combinations so far, better to preallocate them
-TILES_REGISTRY = []
-for tile_id in range(NUM_TILES):
-    for color_id in range(NUM_COLORS):
-        TILES_REGISTRY.append((tile_id, color_id))
-TILES_REGISTRY = jnp.array(TILES_REGISTRY, dtype=jnp.uint8).reshape(NUM_TILES, NUM_COLORS, -1)
+def get_tile_registry(num_tiles, num_colors):
+    registry_out = []
+    for tile_id in range(NUM_TILES):
+        for color_id in range(NUM_COLORS):
+            registry_out.append((tile_id, color_id))
+    registry_out = jnp.array(registry_out, dtype=jnp.uint8).reshape(NUM_TILES, NUM_COLORS, -1)
+    return registry_out
 
+TILES_REGISTRY = get_tile_registry(NUM_TILES, NUM_COLORS)
+AGENT_TILES_REGISTRY = get_tile_registry(NUM_AGENT_TILES, NUM_COLORS)
 
 DIRECTIONS = jnp.array(
     (

@@ -2,7 +2,7 @@ import jax
 import jax.numpy as jnp
 
 from ..types import AgentState, GridState
-from .constants import Tiles, TILES_REGISTRY, Colors
+from .constants import Tiles, AgentTiles, TILES_REGISTRY, AGENT_TILES_REGISTRY, Colors
 from .grid import align_with_up, check_see_behind
 
 def crop_field_of_view(grid: GridState, agent: AgentState, height: int, width: int) -> jax.Array:
@@ -132,10 +132,10 @@ def get_agent_layer(agent: AgentState, grid: GridState) -> jnp.ndarray:
     # MiniGrid Standard: 0=Up, 1=Right, 2=Down, 3=Left
     # We assume Colors.RED is the standard agent color.
     agent_tile = jnp.array([
-        TILES_REGISTRY[Tiles.AGENT_UP, Colors.RED],
-        TILES_REGISTRY[Tiles.AGENT_RIGHT, Colors.RED],
-        TILES_REGISTRY[Tiles.AGENT_DOWN,  Colors.RED],
-        TILES_REGISTRY[Tiles.AGENT_LEFT,  Colors.RED],
+        AGENT_TILES_REGISTRY[AgentTiles.AGENT_UP, Colors.RED],
+        AGENT_TILES_REGISTRY[AgentTiles.AGENT_RIGHT, Colors.RED],
+        AGENT_TILES_REGISTRY[AgentTiles.AGENT_DOWN,  Colors.RED],
+        AGENT_TILES_REGISTRY[AgentTiles.AGENT_LEFT,  Colors.RED],
     ])[agent.direction]
 
     # Place the agent on the layer

@@ -12,7 +12,7 @@ from flax.linen.dtypes import promote_dtype
 from flax.linen.initializers import glorot_normal, orthogonal, zeros_init
 from flax.typing import Dtype
 
-from xminigrid.core.constants import NUM_COLORS, NUM_TILES
+from xminigrid.core.constants import NUM_COLORS, NUM_TILES, NUM_AGENT_TILES
 
 
 class GRU(nn.Module):
@@ -80,7 +80,7 @@ class EmbeddingEncoder(nn.Module):
 
     @nn.compact
     def __call__(self, img):
-        entity_emb = nn.Embed(NUM_TILES, self.emb_dim, self.dtype, self.param_dtype)
+        entity_emb = nn.Embed(NUM_TILES+NUM_AGENT_TILES, self.emb_dim, self.dtype, self.param_dtype)
         if self.use_color:
             color_emb = nn.Embed(NUM_COLORS, self.emb_dim, self.dtype, self.param_dtype)
 
@@ -112,7 +112,7 @@ class ActorCriticRNN(nn.Module):
     rnn_num_layers: int = 1
     head_hidden_dim: int = 64
     img_obs: bool = False
-    use_color: bool = False
+    use_color: bool = True
     direction_obs: bool = False
     dtype: Optional[Dtype] = None
     param_dtype: Dtype = jnp.float32

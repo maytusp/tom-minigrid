@@ -10,7 +10,7 @@ from jax import lax
 import numpy as np
 
 from ..benchmarks import load_bz2_pickle, save_bz2_pickle
-from ..core.constants import NUM_COLORS, NUM_LAYERS, TILES_REGISTRY
+from ..core.constants import NUM_COLORS, NUM_LAYERS, TILES_REGISTRY, AGENT_TILES_REGISTRY
 from ..rendering.rgb_render import render_tile
 from ..wrappers import Wrapper
 
@@ -24,6 +24,9 @@ def build_cache(tiles: np.ndarray, tile_size: int = 32) -> tuple[np.ndarray, np.
       cache:        [Ty, Tx, ts, ts, 3]          (no agent)
       agent_cache:  [4, Ty, Tx, ts, ts, 3]       (agent overlaid, 4 directions)
     """
+    # print(f"tiles shape {tiles.shape}")
+    # print(f"agent_tiles shape {agent_tiles.shape}")
+    # print(f"tile_size {tile_size}")
     Ty, Tx = tiles.shape[:2]
     cache = np.zeros((Ty, Tx, tile_size, tile_size, 3), dtype=np.uint8)
     agent_cache = np.zeros((4, Ty, Tx, tile_size, tile_size, 3), dtype=np.uint8)
@@ -41,7 +44,7 @@ def build_cache(tiles: np.ndarray, tile_size: int = 32) -> tuple[np.ndarray, np.
             for d in range(4):
                 with_agent = render_tile(
                     tile=tuple(tiles[y, x]),
-                    agent_direction=d,       # <-- render 4 orientations
+                    agent_direction=d,       #TODO <-- render 4 orientations
                     highlight=False,
                     tile_size=int(tile_size),
                 )
