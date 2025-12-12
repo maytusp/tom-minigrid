@@ -74,22 +74,26 @@ BatchedRNNModel = flax.linen.vmap(
 
 class EmbeddingEncoder(nn.Module):
     emb_dim: int = 16
+    use_color: bool = True
     dtype: Optional[Dtype] = None
     param_dtype: Dtype = jnp.float32
 
     @nn.compact
     def __call__(self, img):
         entity_emb = nn.Embed(NUM_TILES, self.emb_dim, self.dtype, self.param_dtype)
-        color_emb = nn.Embed(NUM_COLORS, self.emb_dim, self.dtype, self.param_dtype)
+        if self.use_color:
+            color_emb = nn.Embed(NUM_COLORS, self.emb_dim, self.dtype, self.param_dtype)
 
-        # [..., channels]
-        img_emb = jnp.concatenate(
-            [
-                entity_emb(img[..., 0]),
-                color_emb(img[..., 1]),
-            ],
-            axis=-1,
-        )
+            # [..., channels]
+            img_emb = jnp.concatenate(
+                [
+                    entity_emb(img[..., 0]),
+                    color_emb(img[..., 1]),
+                ],
+                axis=-1,
+            )
+        else:
+            img_emb = entity_emb(img)
         return img_emb
 
 
@@ -108,6 +112,8 @@ class ActorCriticRNN(nn.Module):
     rnn_num_layers: int = 1
     head_hidden_dim: int = 64
     img_obs: bool = False
+    use_color: bool = False
+    direction_obs: bool = False
     dtype: Optional[Dtype] = None
     param_dtype: Dtype = jnp.float32
 
@@ -164,7 +170,7 @@ class ActorCriticRNN(nn.Module):
             img_encoder = nn.Sequential(
                 [
                     # For small dims nn.Embed is extremely slow in bf16, so we leave everything in default dtypes
-                    EmbeddingEncoder(emb_dim=self.obs_emb_dim),
+                    EmbeddingEncoder(emb_dim=self.obs_emb_dim, use_color=self.use_color),
                     nn.Conv(
                         16,
                         (2, 2),
@@ -195,7 +201,6 @@ class ActorCriticRNN(nn.Module):
                 ]
             )
         action_encoder = nn.Embed(self.num_actions, self.action_emb_dim)
-        direction_encoder = nn.Dense(self.action_emb_dim, dtype=self.dtype, param_dtype=self.param_dtype)
 
         rnn_core = BatchedRNNModel(
             self.rnn_hidden_dim, self.rnn_num_layers, dtype=self.dtype, param_dtype=self.param_dtype
@@ -220,14 +225,19 @@ class ActorCriticRNN(nn.Module):
                 nn.Dense(1, kernel_init=orthogonal(1.0), dtype=self.dtype, param_dtype=self.param_dtype),
             ]
         )
+        obs_img = inputs["obs_img"]
 
         # [batch_size, seq_len, ...]
         obs_emb = img_encoder(inputs["obs_img"].astype(jnp.int32)).reshape(B, S, -1)
-        dir_emb = direction_encoder(inputs["obs_dir"])
         act_emb = action_encoder(inputs["prev_action"])
 
-        # [batch_size, seq_len, hidden_dim + 2 * act_emb_dim + 1]
-        out = jnp.concatenate([obs_emb, dir_emb, act_emb, inputs["prev_reward"][..., None]], axis=-1)
+        if self.direction_obs:
+            direction_encoder = nn.Dense(self.action_emb_dim, dtype=self.dtype, param_dtype=self.param_dtype)
+            dir_emb = direction_encoder(inputs["obs_dir"])
+            # [batch_size, seq_len, hidden_dim + 2 * act_emb_dim + 1]
+            out = jnp.concatenate([obs_emb, dir_emb, act_emb, inputs["prev_reward"][..., None]], axis=-1)
+        else:
+            out = jnp.concatenate([obs_emb, act_emb, inputs["prev_reward"][..., None]], axis=-1)
 
         # core networks
         out, new_hidden = rnn_core(out, hidden)

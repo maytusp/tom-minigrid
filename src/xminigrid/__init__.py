@@ -457,10 +457,21 @@ register(
 
 
 register(
-    id="MiniGrid-Protagonist-ProcGen",
+    id="MiniGrid-Protagonist-ProcGen-9x9vs9",
     entry_point="xminigrid.envs.tom.protagonist_procgen:SallyAnneRooms",
     height=9,
     width=9,
-    view_size=7,
+    view_size=9,
     testing=False,
+    use_color=True,
+)
+
+register(
+    id="MiniGrid-Protagonist-ProcGen-9x9vs9-swap",
+    entry_point="xminigrid.envs.tom.protagonist_procgen:SallyAnneRooms",
+    height=9,
+    width=9,
+    view_size=9,
+    testing=True,
+    use_color=True,
 )

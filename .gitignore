@@ -179,6 +179,9 @@ scripts/eval_example.py
 
 
 # files
+wandb
+logs
+checkpoints
 training/checkpoints
 training/videos
 data

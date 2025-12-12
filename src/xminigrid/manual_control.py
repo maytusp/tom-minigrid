@@ -120,7 +120,7 @@ class ManualControl:
             f"StepType: {self.timestep.step_type} | ",
             f"Discount: {self.timestep.discount} | ",
             f"Reward: {self.timestep.reward}",
-            f"Ego Obs:\n {self.timestep.observation[:,:,0]}",
+            f"Ego Obs:\n {self.timestep.observation}",
         )
         self.render()
 
@@ -138,7 +138,7 @@ class ManualControl:
             f"StepType: {self.timestep.step_type} | ",
             f"Discount: {self.timestep.discount} | ",
             f"Reward: {self.timestep.reward}",
-            f"Ego Obs:\n {self.timestep.observation[:,:,0]}",
+            f"Ego Obs:\n {self.timestep.observation}",
         )
 
     def key_handler(self, event: Event) -> None:

@@ -1,0 +1,11 @@
+Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
+wandb: Currently logged in as: maytusp to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.21.1
+wandb: Run data is saved locally in /net/scratch/n70579mp/tom-minigrid/wandb/run-20251212_061208-yb0qefdg
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run MiniGrid-Protagonist-ProcGen-9x9vs9-ppo
+wandb: ⭐️ View project at https://wandb.ai/maytusp/tomminigrid
+wandb: 🚀 View run at https://wandb.ai/maytusp/tomminigrid/runs/yb0qefdg
+2025-12-12 06:12:29.269844: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2025-12-12 06:12:29.270291: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+[2025-12-12T06:24:40.163] error: *** JOB 9617508 ON node876 CANCELLED AT 2025-12-12T06:24:40 DUE to SIGNAL Terminated ***

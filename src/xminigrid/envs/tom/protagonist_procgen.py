@@ -9,7 +9,7 @@ from typing import Tuple, Optional
 # -------------------------------------------------------------------------
 # ASSUMED IMPORTS
 # -------------------------------------------------------------------------
-from ...core.constants import TILES_REGISTRY, Colors, Tiles
+from ...core.constants import TILES_REGISTRY, Colors, Tiles, NUM_LAYERS
 from ...core.goals import AgentOnTileGoal, check_goal
 from ...core.grid import sample_coordinates, sample_door_coordinates, sample_direction
 from ...core.rules import EmptyRule, check_rule
@@ -46,11 +46,12 @@ class LayoutInfo:
     num_rooms: jnp.ndarray
     wall_mask: jnp.ndarray     # Boolean mask of valid wall locations
 
-class SwapParams(EnvParams):
+class ToMEnvParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
     min_num_rooms: int = struct.field(pytree_node=False, default=3)
     max_num_rooms: int = struct.field(pytree_node=False, default=4)
+    use_color: bool = struct.field(pytree_node=False, default=True)
 
 # -------------------------------------------------------------------------
 # GENERATOR LOGIC
@@ -160,11 +161,11 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
     def num_actions(self, params: EnvParamsT) -> int:
         return 6
 
-    def default_params(self, **kwargs) -> SwapParams:
-        params = SwapParams(height=7, width=7)
+    def default_params(self, **kwargs) -> ToMEnvParams:
+        params = ToMEnvParams(height=7, width=7)
         params = params.replace(**{k: v for k, v in kwargs.items() if hasattr(params, k)})
         if params.max_steps is None:
-            default_max = (params.height * params.width) // 2
+            default_max = 4 * (params.height * params.width)
             params = params.replace(max_steps=default_max)
         return params
         
@@ -186,7 +187,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
         )
         return jnp.logical_and(adjacent, facing)
 
-    def _generate_problem(self, params: SwapParams, key: jax.Array) -> State[SwapCarry]:
+    def _generate_problem(self, params: ToMEnvParams, key: jax.Array) -> State[SwapCarry]:
         key, k_rooms, k_gen, k_doors, k_star, k_goal, k_agent, k_dir = jax.random.split(key, 8)
         
         target_rooms = jax.random.randint(k_rooms, shape=(), minval=params.min_num_rooms, maxval=params.max_num_rooms + 1)
@@ -345,6 +346,9 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
         # The first observation now correctly sees the agent
         obs = transparent_field_of_view(visual_grid, state.agent, params.view_size, params.view_size)
 
+        if not(params.use_color):
+            obs = obs[:, :, 0]
+
         return TimeStep(
             state=state,
             step_type=StepType.FIRST,
@@ -402,6 +406,9 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
         step_type = jax.lax.select(terminated | truncated, StepType.LAST, StepType.MID)
         discount = jax.lax.select(terminated, jnp.asarray(0.0), jnp.asarray(1.0))
 
+        if not(params.use_color):
+            new_obs = new_obs[:, :, 0]
+
         return TimeStep(
             state=new_state,
             step_type=step_type,
@@ -409,3 +416,8 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
             discount=discount,
             observation=new_obs,
         )
+    def observation_shape(self, params: EnvParamsT) -> tuple[int, int, int] | dict[str, Any]:
+        if not(params.use_color):
+            return params.view_size, params.view_size
+        else:
+            return params.view_size, params.view_size, NUM_LAYERS

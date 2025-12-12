@@ -1,0 +1,47 @@
+Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
+wandb: Currently logged in as: maytusp to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.21.1
+wandb: Run data is saved locally in /net/scratch/n70579mp/tom-minigrid/wandb/run-20251211_131527-9803jl8h
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run MiniGrid-Protagonist-ProcGen-9x9vs9-ppo
+wandb: ⭐️ View project at https://wandb.ai/maytusp/tomminigrid
+wandb: 🚀 View run at https://wandb.ai/maytusp/tomminigrid/runs/9803jl8h
+2025-12-11 13:15:50.744075: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2025-12-11 13:15:50.745117: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+wandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:   actor_loss ▅▆▇▇▇▇▂▇▆▇▄▃▂▁▄▄▅▆▅▅▄▆▆▇▆▇▇▇▇▇▇▇▇▇▇▇▇▇▇█
+wandb:      entropy ██▇▇▇▇▇▇▆▆▆▆▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▅▄▄▃▃▃▂▂▂▁▁
+wandb: eval/lengths ██████████████████████████████▇█▇█▆▆▃▅▂▁
+wandb: eval/returns ▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▁▁▁▁▁▂▁▁▂▂▂▂▁▂▁▁▁▁▂▃▄▅█
+wandb:           lr █████▇▇▇▇▇▇▇▇▇▇▅▅▅▅▅▅▄▄▄▄▄▄▄▃▃▃▃▃▃▂▂▂▂▁▁
+wandb:     progress ▁▁▁▁▂▂▂▂▂▂▂▃▃▃▃▄▄▄▄▄▄▅▅▅▅▆▆▆▆▆▆▇▇▇▇▇▇███
+wandb:   total_loss ▃▄▃▅▅▅▅▆▁▁▃▄▂▂▄▃▄▅▆▆▆▅▆▆▆▆▆▆▆▆▆▆▆▆▆▆▇▇██
+wandb:  transitions ▁▁▁▁▁▁▂▂▂▂▂▂▂▃▃▃▃▃▄▄▄▅▅▆▆▆▆▆▆▆▇▇▇▇▇▇▇███
+wandb:   value_loss ▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▂▂▂▂▃▂▄▄▃▄█
+wandb: 
+wandb: Run summary:
+wandb:       actor_loss -0.00158
+wandb:          entropy 0.66883
+wandb:     eval/lengths 116.925
+wandb:     eval/returns 0.29292
+wandb:               lr 0.0
+wandb:         progress 0.99606
+wandb: steps_per_second 64182.06972
+wandb:       total_loss -0.00611
+wandb:    training_time 1558.06755
+wandb:      transitions 99614720
+wandb:       value_loss 0.00431
+wandb: 
+wandb: 🚀 View run MiniGrid-Protagonist-ProcGen-9x9vs9-ppo at: https://wandb.ai/maytusp/tomminigrid/runs/9803jl8h
+wandb: ⭐️ View project at: https://wandb.ai/maytusp/tomminigrid
+wandb: Synced 7 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20251211_131527-9803jl8h/logs
+Num devices: 1, Num updates: 762
+NUM ACTIONS: 6
+Compiling...
+Compilation Complete.
+Starting training for 762 updates (76 logging chunks)...
+Training finished in 1558.07s
+Final model saved to ./checkpoints/MiniGrid-Protagonist-ProcGen-9x9vs9/MiniGrid-Protagonist-ProcGen-9x9vs9-ppo_final.msgpack
