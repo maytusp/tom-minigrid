@@ -1,3 +1,0 @@
-Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
-/var/spool/slurmd/job9617675/slurm_script: line 19: activate: No such file or directory
-[2025-12-12T06:44:58.682] error: *** JOB 9617675 ON node876 CANCELLED AT 2025-12-12T06:44:58 DUE to SIGNAL Terminated ***
