@@ -9,13 +9,13 @@ from flax.training import train_state
 from torch.utils.data import DataLoader
 # python eval_tomnet.py --data_dir ../data/trajs/MiniGrid-ToM-TwoRoomsNoSwap-13x13 --checkpoint ./checkpoints/tomnets/checkpoint_49.msgpack
 # --- Imports ---
-from tom_nn import (
+from .tom_nn import (
     AuxiliaryPredictorRNN, 
     build_passive_batch_from_sequences
 )
 from xminigrid.experimental.img_obs import _render_obs_tom
 
-from utils import (
+from .utils import (
     NpzEpisodeDataset,
     pad_collate,
 )
@@ -130,8 +130,9 @@ def visualize_episode(model, params, batch, idx, output_dir):
         # --- A. Extract Data ---
         gt_next_frame = obs_raw[0, t+1] 
         pred_frame = pred_ids[0, t] 
-        print("GT: \n", gt_next_frame[:,:,0])
-        print("predicted: \n", pred_frame)
+        print(f"pred_ids {pred_ids.shape}")
+        # print("GT: \n", gt_next_frame[:,:,0])
+        # print("predicted: \n", pred_frame)
         # Borrow GT colors for visualization
         gt_color_id = gt_next_frame[:, :, 1]
         pred_frame = jnp.stack([pred_frame, gt_color_id], axis=-1)
@@ -150,7 +151,7 @@ def visualize_episode(model, params, batch, idx, output_dir):
         
         # --- D. Collect Frames ---
         # 1. Comparison Frame (Left: GT, Right: Prediction)
-        combined_img = pred_img # np.concatenate([gt_img, pred_img], axis=1)
+        combined_img = np.concatenate([gt_img, pred_img], axis=1)
         
         frames_gt.append(gt_img)
         frames_comp.append(combined_img)
@@ -164,15 +165,15 @@ def visualize_episode(model, params, batch, idx, output_dir):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, required=True)
-    parser.add_argument("--checkpoint", type=str, required=True)
-    parser.add_argument("--output_dir", type=str, default="./eval_vis")
+    parser.add_argument("--data_dir", type=str, default="./logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9")
+    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/static/checkpoint_49.msgpack")
+    parser.add_argument("--output_dir", type=str, default="./logs/observer_eval/static")
     
     # Model Args (Must match training)
-    parser.add_argument("--fov_size", type=int, default=7)
-    parser.add_argument("--num_actions", type=int, default=7) 
+    parser.add_argument("--fov_size", type=int, default=9)
+    parser.add_argument("--num_actions", type=int, default=6) 
     parser.add_argument("--obs_emb_dim", type=int, default=16)
-    parser.add_argument("--rnn_hidden_dim", type=int, default=1024)
+    parser.add_argument("--rnn_hidden_dim", type=int, default=256)
     
     args = parser.parse_args()
     os.makedirs(args.output_dir, exist_ok=True)

@@ -15,14 +15,14 @@ from flax.serialization import to_bytes
 
 import wandb
 
-from tom_nn import (
+from .tom_nn import (
     AuxiliaryPredictorRNN, 
     passive_update, 
     build_passive_batch_from_sequences,
     PassiveTargets
 )
 
-from utils import (
+from .utils import (
     DIR_TO_IDX,
     get_direction_one_hot,
     NpzEpisodeDataset,
@@ -79,18 +79,18 @@ def create_train_state(rng, config):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str,  default="../data/trajs/MiniGrid-ToM-TwoRoomsNoSwap-13x13")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/")
+    parser.add_argument("--data_dir", type=str,  default="./logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=3e-4)
-    parser.add_argument("--fov_size", type=int, default=7)
-    parser.add_argument("--num_actions", type=int, default=7) 
+    parser.add_argument("--fov_size", type=int, default=9)
+    parser.add_argument("--num_actions", type=int, default=6) 
     parser.add_argument("--obs_emb_dim", type=int, default=16)
-    parser.add_argument("--rnn_hidden_dim", type=int, default=1024)
+    parser.add_argument("--rnn_hidden_dim", type=int, default=256)
     # WandB specific args
     parser.add_argument("--track", type=bool, default=True) # use wandb or not
-    parser.add_argument("--wandb_project", type=str, default="aux-predictor-rnn")
+    parser.add_argument("--wandb_project", type=str, default="tom_observer_training")
     parser.add_argument("--wandb_entity", type=str, default=None, help="Your wandb username/org")
     # save
     parser.add_argument("--save_every", type=int, default=10)
@@ -122,7 +122,7 @@ def main():
     config = vars(args)
     state = create_train_state(init_rng, config)
     
-    ckpt_dir = os.path.abspath(os.path.join(args.work_dir, "tomnets"))
+    ckpt_dir = os.path.abspath(os.path.join(args.work_dir, "static"))
     os.makedirs(ckpt_dir, exist_ok=True)
     
     @jax.jit

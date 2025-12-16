@@ -16,7 +16,7 @@ from ...core.grid import room, sample_coordinates, sample_direction, horizontal_
 from ...core.rules import EmptyRule, check_rule
 from ...core.actions import take_action
 from ...core.observation import minigrid_field_of_view as transparent_field_of_view
-
+from ...core.observation import get_agent_layer
 from ...environment import Environment, EnvParams
 from ...types import AgentState, State, TimeStep, StepType, IntOrArray
 
@@ -36,9 +36,10 @@ class SwapCarry:
     p_swap_test: jnp.ndarray             # float32[] scalar
     doors_yx: jnp.ndarray                # int32[2,2] -> [left_door_yx, right_door_yx]
     
-class SwapParams(EnvParams):
+class ToMEnvParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
+    use_color: bool = struct.field(pytree_node=False, default=True)
 
 
 
@@ -51,8 +52,8 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
     def num_actions(self, params: EnvParamsT) -> int:
         return 6
 
-    def default_params(self, **kwargs) -> SwapParams:
-        params = SwapParams(height=13, width=13)
+    def default_params(self, **kwargs) -> ToMEnvParams:
+        params = ToMEnvParams(height=13, width=13)
         params = params.replace(**{k: v for k, v in kwargs.items() if k in {
             "height","width","view_size","max_steps","render_mode","testing","swap_prob"}})
         if params.max_steps is None:
@@ -111,7 +112,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
     # -------------------------
     def _generate_problem(self, params: EnvParams, key: jax.Array) -> State[SwapCarry]:
         H, W = params.height, params.width
-        assert (H, W) == (13, 13), "This layout assumes a 13x13 grid."
+        # assert (H, W) == (13, 13), "This layout assumes a 13x13 grid."
 
         # Base world with perimeter walls
         grid = room(H, W)
@@ -121,9 +122,9 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         DOOR = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.PURPLE]  # closed door, as you set
 
         # Central 7x7 bounds (inclusive) and vertical split
-        y0, y1 = 3, 9
-        x0, x1 = 3, 9
-        midx = 6
+        y0, y1 = 2, 6
+        x0, x1 = 2, 6
+        midx = 4
 
         # 7x7 ring + vertical separator
         grid = rectangle(grid, x0, y0, h=(y1 - y0 + 1), w=(x1 - x0 + 1), tile=WALL)
@@ -197,7 +198,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             direction=jnp.asarray(0, jnp.int32)  # UP
         )
         # # Test mode: reposition agent to see GOAL; move STAR far/hidden
-        # if isinstance(params, SwapParams) and params.testing:
+        # if isinstance(params, ToMEnvParams) and params.testing:
         #     agent = self._agent_pose_to_see_goal(goal_yx=goal_yx, H=H, W=W, view_size=params.view_size)
         #     min_sep = jnp.asarray(params.view_size, jnp.int32)
         #     new_star_yx = self._pick_star_far_and_hidden(
@@ -411,16 +412,45 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         idx = jax.lax.select(has_valid, idx_valid, idx_backup)
 
         return all_yx[idx]
+    def reset(self, params: EnvParams, key: jax.Array) -> TimeStep[EnvCarryT]:
+        # Generate the Clean State
+        state = self._generate_problem(params, key)
 
+        # Create the Visual Grid
+        agent_layer = get_agent_layer(state.agent, state.grid)
+        
+        visual_grid = jnp.where(
+            agent_layer != TILES_REGISTRY[Tiles.EMPTY, Colors.EMPTY], 
+            agent_layer, 
+            state.grid
+        )
+
+        # Generate Observation
+        # The first observation now correctly sees the agent
+        obs = transparent_field_of_view(visual_grid, state.agent, params.view_size, params.view_size)
+
+        if not(params.use_color):
+            obs = obs[:, :, 0]
+
+        return TimeStep(
+            state=state,
+            step_type=StepType.FIRST,
+            reward=jnp.asarray(0.0),
+            discount=jnp.asarray(1.0),
+            observation=obs,
+            allocentric_obs=visual_grid,
+        )
     def step(
         self,
         params: EnvParams,
         timestep: TimeStep[SwapCarry],
         action: IntOrArray,
     ) -> TimeStep[SwapCarry]:
-        # 1) Transition (same as base)
-        new_grid, new_agent, changed_position = take_action(timestep.state.grid, timestep.state.agent, action)
-        new_grid, new_agent = check_rule(timestep.state.rule_encoding, new_grid, new_agent, action, changed_position)
+        
+        # 1. Physics & Logic (performed on the CLEAN grid)
+        # We do NOT remove or paint the agent here. The grid stays static regarding the agent.
+        new_grid, new_agent, changed_pos = take_action(timestep.state.grid, timestep.state.agent, action)
+        new_grid, new_agent = check_rule(timestep.state.rule_encoding, new_grid, new_agent, action, changed_pos)
 
         new_state = timestep.state.replace(
             grid=new_grid,
@@ -428,30 +458,52 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             step_num=timestep.state.step_num + 1,
         )
 
-        # 2) STAR removal + optional Sally–Anne swap/goal activation
-        #    If you have no testing flag, this defaults to False.
+        # 2. Swap Logic (Goal/Star mechanics)
         testing = getattr(params, "testing", False)
         new_state = self.maybe_swap_after_star(new_state, testing=testing)
 
-        # 3) Observation after possible grid changes
-        new_observation = transparent_field_of_view(new_state.grid, new_state.agent, params.view_size, params.view_size)
+        # --- 3. COMPOSITION (The "Separate Grid" Logic) ---
+        
+        # A. Generate the separate agent layer
+        agent_layer = get_agent_layer(new_state.agent, new_grid)
+        
+        # B. Combine for the Camera (Overlay)
+        # Logic: If the agent layer has something (is not EMPTY/0), show the Agent.
+        #        Otherwise, show the Environment Grid.
+        visual_grid = jnp.where(
+            agent_layer != TILES_REGISTRY[Tiles.EMPTY, Colors.EMPTY], 
+            agent_layer, 
+            new_state.grid
+        )
 
-        # 4) Termination/truncation and reward
-        #    Because we only activate GOAL/GREEN after the star, the base goal check enforces star-first completion.
-        terminated = check_goal(new_state.goal_encoding, new_state.grid, new_state.agent, action, changed_position)
 
-        assert params.max_steps is not None
+        # C. Generate Observation from the Combined Visual Grid
+        # The agent 'sees' the combined version, but the logic operates on the clean version.
+        new_obs = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
+
+        # --- 4. Rewards & Termination ---
+        terminated = check_goal(new_state.goal_encoding, new_state.grid, new_state.agent, action, changed_pos)
+        
         truncated = jnp.equal(new_state.step_num, params.max_steps)
-
         reward = jax.lax.select(terminated, 1.0 - 0.9 * (new_state.step_num / params.max_steps), 0.0)
-
+        
         step_type = jax.lax.select(terminated | truncated, StepType.LAST, StepType.MID)
         discount = jax.lax.select(terminated, jnp.asarray(0.0), jnp.asarray(1.0))
+
+
+        if not(params.use_color):
+            new_obs = new_obs[:, :, 0]
 
         return TimeStep(
             state=new_state,
             step_type=step_type,
             reward=reward,
             discount=discount,
-            observation=new_observation,
+            observation=new_obs,
+            allocentric_obs=visual_grid,
         )
+    def observation_shape(self, params: EnvParamsT) -> tuple[int, int, int] | dict[str, Any]:
+        if not(params.use_color):
+            return params.view_size, params.view_size
+        else:
+            return params.view_size, params.view_size, NUM_LAYERS

@@ -439,19 +439,19 @@ register(
 
 
 register(
-    id="MiniGrid-ToM-TwoRoomsNoSwap-13x13",
+    id="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9",
     entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
-    height=13,
-    width=13,
-    view_size=7,
+    height=9,
+    width=9,
+    view_size=9,
     testing=False,
 )
 register(
-    id="MiniGrid-ToM-TwoRoomsSwap-13x13",
+    id="MiniGrid-ToM-TwoRoomsSwap-9x9vs9",
     entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
-    height=13,
-    width=13,
-    view_size=7,
+    height=9,
+    width=9,
+    view_size=9,
     testing=True,
 )
 

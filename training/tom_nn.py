@@ -17,22 +17,22 @@ from typing import Optional, TypedDict
 
 import distrax
 
-from xminigrid.core.constants import NUM_COLORS, NUM_TILES
-from nn import BatchedRNNModel, ActorCriticInput, EmbeddingEncoder
+from xminigrid.core.constants import NUM_COLORS, NUM_TILES, NUM_AGENT_TILES
+from .nn import BatchedRNNModel, ActorCriticInput, EmbeddingEncoder
 
-
+TOTAL_TILES = NUM_TILES + NUM_AGENT_TILES
 class AuxiliaryPredictorRNN(nn.Module):
     #TODO Add the version that can get action and direction of an agent as inputs
     """
     Same encoders and RNN core as ActorCriticRNN, but with heads for:
-      - next-frame prediction: per-cell Categorical over NUM_TILES
+      - next-frame prediction: per-cell Categorical over TOTAL_TILES
       - other-agent next-action prediction: Categorical over num_actions
     You can turn either head on or off via `predict_frame` / `predict_action`.
 
     Returns:
       outputs: Dict with (present if enabled)
         - "action_dist": distrax.Categorical over other agent actions, shape [B, S, num_actions]
-        - "frame_logits": jnp.float32 logits with shape [B, S, view_size, view_size, NUM_TILES]
+        - "frame_logits": jnp.float32 logits with shape [B, S, view_size, view_size, TOTAL_TILES]
       new_hidden: jnp.ndarray, the new RNN hidden state (same shape as ActorCriticRNN)
     """
     num_actions: int
@@ -131,14 +131,14 @@ class AuxiliaryPredictorRNN(nn.Module):
             )
 
         # Next-frame head: decode RNN features to per-cell tile logits.
-        # We keep it simple with MLP -> Dense to view_size*view_size*NUM_TILES and reshape.
+        # We keep it simple with MLP -> Dense to view_size*view_size*TOTAL_TILES and reshape.
         if self.predict_frame:
             frame_head = nn.Sequential(
                 [
                     nn.Dense(self.head_hidden_dim, kernel_init=orthogonal(2.0),
                              dtype=self.dtype, param_dtype=self.param_dtype),
                     nn.tanh,
-                    nn.Dense(self.view_size * self.view_size * NUM_TILES,
+                    nn.Dense(self.view_size * self.view_size * TOTAL_TILES,
                              kernel_init=orthogonal(0.01),
                              dtype=self.dtype, param_dtype=self.param_dtype),
                 ]
@@ -169,8 +169,8 @@ class AuxiliaryPredictorRNN(nn.Module):
             outputs["action_dist"] = distrax.Categorical(logits=logits)
 
         if self.predict_frame:
-            raw = frame_head(rnn_out).astype(jnp.float32)  # [B, S, V*V*NUM_TILES]
-            frame_logits = raw.reshape(B, S, self.view_size, self.view_size, NUM_TILES)
+            raw = frame_head(rnn_out).astype(jnp.float32)  # [B, S, V*V*TOTAL_TILES]
+            frame_logits = raw.reshape(B, S, self.view_size, self.view_size, TOTAL_TILES)
             outputs["frame_logits"] = frame_logits  # Per-cell tile logits
 
         return outputs, new_hidden
@@ -180,7 +180,7 @@ class AuxiliaryPredictorRNN(nn.Module):
 
 class PassiveTargets(struct.PyTreeNode):
     """
-    next_frame: [B, S, V, V] int32   (tile ids in [0, NUM_TILES))
+    next_frame: [B, S, V, V] int32   (tile ids in [0, TOTAL_TILES))
     next_action: [B, S] int32        (other agent action ids)
     mask: [B, S] float32             (1.0 for valid steps, 0.0 for padding/terminal)
     """
@@ -207,7 +207,7 @@ def passive_update(
     The model must be AuxiliaryPredictorRNN or any module that returns:
         outputs, new_hidden = apply_fn(params, inputs, init_hstate)
         where outputs may contain:
-          - "frame_logits": [B,S,V,V,NUM_TILES]
+          - "frame_logits": [B,S,V,V,TOTAL_TILES]
           - "action_dist": distrax.Categorical over [B,S,num_actions]
     """
 
@@ -221,9 +221,9 @@ def passive_update(
         total_loss = 0.0
         aux = {}
 
-        # ---- Next-frame loss (per-cell CE over NUM_TILES) ----
+        # ---- Next-frame loss (per-cell CE over TOTAL_TILES) ----
         if predict_frame:
-            # logits: [B,S,V,V,NUM_TILES], labels: [B,S,V,V]
+            # logits: [B,S,V,V,TOTAL_TILES], labels: [B,S,V,V]
             frame_logits = outputs["frame_logits"].astype(jnp.float32)
             frame_labels = targets.next_frame.astype(jnp.int32)
 
