@@ -17,10 +17,10 @@ from typing import Optional, TypedDict
 
 import distrax
 
-from xminigrid.core.constants import NUM_COLORS, NUM_TILES, NUM_AGENT_TILES
+from xminigrid.core.constants import NUM_COLORS, NUM_TILES
 from .nn import BatchedRNNModel, ActorCriticInput, EmbeddingEncoder
 
-TOTAL_TILES = NUM_TILES + NUM_AGENT_TILES
+TOTAL_TILES = NUM_TILES + 4
 class AuxiliaryPredictorRNN(nn.Module):
     #TODO Add the version that can get action and direction of an agent as inputs
     """
