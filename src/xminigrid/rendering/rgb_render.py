@@ -216,7 +216,7 @@ def render_tile(
     TILES_FN_MAP[tile[0]](img, tile[1])
     # draw agent if on this tile
     if agent_direction is not None:
-        print(f"agent tile {tile[0]}")
+        # print(f"agent tile {tile[0]}")
         _render_player(img, agent_direction)
 
     if highlight:

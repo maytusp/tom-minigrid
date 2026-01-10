@@ -6,7 +6,6 @@ NUM_ACTIONS = 6
 # GRID: [tile, color]
 NUM_LAYERS = 2
 NUM_TILES = 13
-NUM_AGENT_TILES = 4
 NUM_COLORS = 12
 
 
@@ -51,15 +50,14 @@ class Colors(struct.PyTreeNode):
 # Only ~100 combinations so far, better to preallocate them
 def get_tile_registry(num_tiles, num_colors):
     registry_out = []
-    for tile_id in range(NUM_TILES):
-        for color_id in range(NUM_COLORS):
+    for tile_id in range(num_tiles):
+        for color_id in range(num_colors):
             registry_out.append((tile_id, color_id))
-    registry_out = jnp.array(registry_out, dtype=jnp.uint8).reshape(NUM_TILES, NUM_COLORS, -1)
+    registry_out = jnp.array(registry_out, dtype=jnp.uint8).reshape(num_tiles, num_colors, -1)
     return registry_out
 
 TILES_REGISTRY = get_tile_registry(NUM_TILES, NUM_COLORS)
-AGENT_TILES_REGISTRY = get_tile_registry(NUM_AGENT_TILES, NUM_COLORS)
-
+AGENT_TILES_REGISTRY = get_tile_registry(NUM_TILES+4, NUM_COLORS)
 DIRECTIONS = jnp.array(
     (
         (-1, 0),  # Up

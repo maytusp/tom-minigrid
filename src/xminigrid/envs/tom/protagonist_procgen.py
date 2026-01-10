@@ -191,18 +191,38 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
         key, k_rooms, k_gen, k_doors, k_star, k_goal, k_agent, k_dir = jax.random.split(key, 8)
         
         target_rooms = jax.random.randint(k_rooms, shape=(), minval=params.min_num_rooms, maxval=params.max_num_rooms + 1)
-        layout = generate_corridor_layout(k_gen, params.height, params.width, target_rooms)
+        actual_height = params.height + 2
+        actual_width = params.width + 2
+        # --- 1. Generate Inner Layout (Smaller than params by 2) ---
+        inner_h = params.height
+        inner_w = params.width
+        layout = generate_corridor_layout(k_gen, inner_h, inner_w, target_rooms)
         
-        grid = layout.grid
-        labels = layout.room_labels
-        wall_mask = layout.wall_mask
+        # --- 2. Create Outer Wall Padding ---
+        # Initialize full grid with Walls
+        wall_tile = TILES_REGISTRY[Tiles.WALL, Colors.GREY]
+        full_grid = jnp.tile(wall_tile[None, None, :], (actual_height, actual_width, 1))
         
-        # --- Place Doors ---
+        # Inject the inner layout into the center
+        grid = full_grid.at[1:actual_height-1, 1:actual_width-1].set(layout.grid)
+        
+        # Pad Room Labels (use -1 for outer walls)
+        full_labels = jnp.full((actual_height, actual_width), ID_UNDEFINED, dtype=jnp.int32)
+        labels = full_labels.at[1:actual_height-1, 1:actual_width-1].set(layout.room_labels)
+        
+        # Pad Wall Mask (Keep outer border as False for door candidacy, as we don't want doors on the border)
+        full_wall_mask = jnp.zeros((actual_height, actual_width), dtype=jnp.bool_)
+        wall_mask = full_wall_mask.at[1:actual_height-1, 1:actual_width-1].set(layout.wall_mask)
+        
+        # --- 3. Place Doors (Operates on the Padded Grid) ---
         door_tile = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.GREEN]
         
         def _place_door(curr_grid, i):
             room_exists = (i <= layout.num_rooms)
+            # wall_mask is 0 on the border, so doors will only spawn on inner walls
             candidates = wall_mask & (labels == i) & room_exists
+            
+            # Ensure we don't accidentally pick coordinate (0,0) if mask is empty
             candidates = candidates.at[0, 0].set(False)
             
             k_d = jax.random.fold_in(k_doors, i)
@@ -216,30 +236,26 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
 
         grid = jax.lax.fori_loop(1, 5, lambda i, g: _place_door(g, i), grid)
 
-        # --- Place Objects ---
+        # --- 4. Place Objects (Operates on the Padded Grid) ---
+        # Star goes in Corridor (ID 0)
         star_mask = (labels == ID_CORRIDOR)
         star_yx = sample_coordinates(k_star, grid, num=1, mask=star_mask)[0]
         grid = grid.at[star_yx[0], star_yx[1]].set(TILES_REGISTRY[Tiles.STAR, Colors.GREEN])
         
+        # Goal goes in a Room (ID > 0)
         goal_mask = (labels > 0)
         goal_yx = sample_coordinates(k_goal, grid, num=1, mask=goal_mask)[0]
         grid = grid.at[goal_yx[0], goal_yx[1]].set(TILES_REGISTRY[Tiles.GOAL, Colors.BLUE])
         
-        # --- Place Agent (Same Room as Goal) ---
+        # --- 5. Place Agent (Same Room as Goal) ---
         floor_tile = TILES_REGISTRY[Tiles.FLOOR, Colors.GREY]
         is_floor = (grid == floor_tile).all(axis=-1)
         
-        # 1. Identify the Room ID where the Goal was placed
         gy, gx = goal_yx[0], goal_yx[1]
         goal_room_id = labels[gy, gx]
         
-        # 2. Create mask for that specific room
         same_room_mask = (labels == goal_room_id)
-        
-        # 3. Combine with valid floor locations (Empty tiles only)
         target_mask = is_floor & same_room_mask
-        
-        # 4. Fallback: If the room is somehow full, use global floor mask
         final_mask = jax.lax.select(jnp.any(target_mask), target_mask, is_floor)
 
         agent_yx = sample_coordinates(k_agent, grid, num=1, mask=final_mask)[0]
@@ -384,7 +400,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
         
         # A. Generate the separate agent layer
         agent_layer = get_agent_layer(new_state.agent, new_grid)
-        
+        # jax.debug.print("agent_layer: {x}", x=agent_layer.shape)
         # B. Combine for the Camera (Overlay)
         # Logic: If the agent layer has something (is not EMPTY/0), show the Agent.
         #        Otherwise, show the Environment Grid.
@@ -393,8 +409,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
             agent_layer, 
             new_state.grid
         )
-
-
+    
         # C. Generate Observation from the Combined Visual Grid
         # The agent 'sees' the combined version, but the logic operates on the clean version.
         new_obs = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
