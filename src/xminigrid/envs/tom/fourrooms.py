@@ -10,12 +10,13 @@ from typing import Tuple
 
 from flax import struct  # <-- make carry a JAX pytree
 
-from ...core.constants import TILES_REGISTRY, Colors, Tiles
+from ...core.constants import TILES_REGISTRY, Colors, Tiles, NUM_LAYERS
 from ...core.goals import AgentOnTileGoal, check_goal
 from ...core.grid import four_rooms, sample_coordinates, sample_direction, cartesian_product_1d
 from ...core.rules import EmptyRule, check_rule
 from ...core.actions import take_action
 from ...core.observation import minigrid_field_of_view as transparent_field_of_view
+from ...core.observation import get_agent_layer
 
 from ...environment import Environment, EnvParams
 from ...types import AgentState, State, TimeStep, StepType, IntOrArray
@@ -425,15 +426,46 @@ class FourRooms(Environment[EnvParams, SwapCarry]):
 
         return all_yx[idx]
 
+    def reset(self, params: EnvParams, key: jax.Array) -> TimeStep[EnvCarryT]:
+        # Generate the Clean State
+        state = self._generate_problem(params, key)
+
+        # Create the Visual Grid
+        agent_layer = get_agent_layer(state.agent, state.grid)
+        
+        visual_grid = jnp.where(
+            agent_layer != TILES_REGISTRY[Tiles.EMPTY, Colors.EMPTY], 
+            agent_layer, 
+            state.grid
+        )
+
+        # Generate Observation
+        # The first observation now correctly sees the agent
+        obs = transparent_field_of_view(visual_grid, state.agent, params.view_size, params.view_size)
+
+        if not(params.use_color):
+            obs = obs[:, :, 0]
+
+        return TimeStep(
+            state=state,
+            step_type=StepType.FIRST,
+            reward=jnp.asarray(0.0),
+            discount=jnp.asarray(1.0),
+            observation=obs,
+            allocentric_obs=visual_grid,
+        )
+
     def step(
         self,
         params: EnvParams,
         timestep: TimeStep[SwapCarry],
         action: IntOrArray,
     ) -> TimeStep[SwapCarry]:
-        # 1) Transition (same as base)
-        new_grid, new_agent, changed_position = take_action(timestep.state.grid, timestep.state.agent, action)
-        new_grid, new_agent = check_rule(timestep.state.rule_encoding, new_grid, new_agent, action, changed_position)
+        
+        # 1. Physics & Logic (performed on the CLEAN grid)
+        # We do NOT remove or paint the agent here. The grid stays static regarding the agent.
+        new_grid, new_agent, changed_pos = take_action(timestep.state.grid, timestep.state.agent, action)
+        new_grid, new_agent = check_rule(timestep.state.rule_encoding, new_grid, new_agent, action, changed_pos)
 
         new_state = timestep.state.replace(
             grid=new_grid,
@@ -441,30 +473,52 @@ class FourRooms(Environment[EnvParams, SwapCarry]):
             step_num=timestep.state.step_num + 1,
         )
 
-        # 2) STAR removal + optional Sally–Anne swap/goal activation
-        #    If you have no testing flag, this defaults to False.
+        # 2. Swap Logic (Goal/Star mechanics)
         testing = getattr(params, "testing", False)
         new_state = self.maybe_swap_after_star(new_state, testing=testing)
 
-        # 3) Observation after possible grid changes
-        new_observation = transparent_field_of_view(new_state.grid, new_state.agent, params.view_size, params.view_size)
+        # --- 3. COMPOSITION (The "Separate Grid" Logic) ---
+        
+        # A. Generate the separate agent layer
+        agent_layer = get_agent_layer(new_state.agent, new_grid)
+        # jax.debug.print("agent_layer: {x}", x=agent_layer.shape)
+        # B. Combine for the Camera (Overlay)
+        # Logic: If the agent layer has something (is not EMPTY/0), show the Agent.
+        #        Otherwise, show the Environment Grid.
+        visual_grid = jnp.where(
+            agent_layer != TILES_REGISTRY[Tiles.EMPTY, Colors.EMPTY], 
+            agent_layer, 
+            new_state.grid
+        )
+    
+        # C. Generate Observation from the Combined Visual Grid
+        # The agent 'sees' the combined version, but the logic operates on the clean version.
+        new_obs = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
 
-        # 4) Termination/truncation and reward
-        #    Because we only activate GOAL/GREEN after the star, the base goal check enforces star-first completion.
-        terminated = check_goal(new_state.goal_encoding, new_state.grid, new_state.agent, action, changed_position)
-
-        assert params.max_steps is not None
+        # --- 4. Rewards & Termination ---
+        terminated = check_goal(new_state.goal_encoding, new_state.grid, new_state.agent, action, changed_pos)
+        
         truncated = jnp.equal(new_state.step_num, params.max_steps)
-
         reward = jax.lax.select(terminated, 1.0 - 0.9 * (new_state.step_num / params.max_steps), 0.0)
-
+        
         step_type = jax.lax.select(terminated | truncated, StepType.LAST, StepType.MID)
         discount = jax.lax.select(terminated, jnp.asarray(0.0), jnp.asarray(1.0))
+
+
+        if not(params.use_color):
+            new_obs = new_obs[:, :, 0]
 
         return TimeStep(
             state=new_state,
             step_type=step_type,
             reward=reward,
             discount=discount,
-            observation=new_observation,
+            observation=new_obs,
+            allocentric_obs=visual_grid,
         )
+
+    def observation_shape(self, params: EnvParamsT) -> tuple[int, int, int] | dict[str, Any]:
+        if not(params.use_color):
+            return params.view_size, params.view_size
+        else:
+            return params.view_size, params.view_size, NUM_LAYERS

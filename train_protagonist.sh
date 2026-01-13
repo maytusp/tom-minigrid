@@ -1,5 +1,5 @@
 #!/bin/bash --login
-#SBATCH -p gpuL               # A100 GPUs
+#SBATCH -p gpuA               # A100 GPUs
 #SBATCH -G 1                  # 1 GPU
 #SBATCH -t 1-0                # Wallclock limit (1-0 is 1 day, 4-0 is the max permitted)
 #SBATCH -n 1                  # One Slurm task

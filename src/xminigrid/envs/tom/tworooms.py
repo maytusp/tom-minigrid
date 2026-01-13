@@ -10,7 +10,7 @@ from typing import Tuple
 
 from flax import struct  # <-- make carry a JAX pytree
 
-from ...core.constants import TILES_REGISTRY, Colors, Tiles
+from ...core.constants import TILES_REGISTRY, Colors, Tiles, NUM_LAYERS
 from ...core.goals import AgentOnTileGoal, check_goal
 from ...core.grid import room, sample_coordinates, sample_direction, horizontal_line, vertical_line, rectangle
 from ...core.rules import EmptyRule, check_rule
@@ -119,7 +119,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         empty_tile = grid[1, 1]
 
         WALL = TILES_REGISTRY[Tiles.WALL, Colors.GREY]
-        DOOR = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.PURPLE]  # closed door, as you set
+        DOOR = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.GREEN]  # closed door, as you set
 
         # Central 7x7 bounds (inclusive) and vertical split
         y0, y1 = 2, 6
@@ -253,11 +253,11 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
                 g0 = _state.grid.at[_state.carry.star_yx[0], _state.carry.star_yx[1]].set(_state.carry.empty_tile)
                 
                 # Force-close both doors now
-                DOOR_CLOSED_PURPLE = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.PURPLE]
+                DOOR_CLOSED_OBJECT = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.GREEN]
                 ldy, ldx = _state.carry.doors_yx[0, 0].astype(jnp.int32), _state.carry.doors_yx[0, 1].astype(jnp.int32)
                 rdy, rdx = _state.carry.doors_yx[1, 0].astype(jnp.int32), _state.carry.doors_yx[1, 1].astype(jnp.int32)
-                g1 = g0.at[ldy, ldx].set(DOOR_CLOSED_PURPLE)
-                g1 = g1.at[rdy, rdx].set(DOOR_CLOSED_PURPLE)
+                g1 = g0.at[ldy, ldx].set(DOOR_CLOSED_OBJECT)
+                g1 = g1.at[rdy, rdx].set(DOOR_CLOSED_OBJECT)
 
                 # 2) Compute room interiors (deterministic)
                 y0, y1, x0, x1, midx = 3, 9, 3, 9, 6
