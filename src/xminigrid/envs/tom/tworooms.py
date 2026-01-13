@@ -115,10 +115,10 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         h_room = H // 2
         w_room = W // 2
         
-        y0 = (H - h_room) // 2
-        y1 = y0 + h_room - 1
-        x0 = (W - w_room) // 2
-        x1 = x0 + w_room - 1
+        y0 = (H - h_room) // 2 - 1
+        y1 = y0 + h_room + 1
+        x0 = (W - w_room) // 2 - 1
+        x1 = x0 + w_room + 1
         
         midx = (x0 + x1) // 2
         
