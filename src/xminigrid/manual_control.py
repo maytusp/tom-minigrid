@@ -183,8 +183,8 @@ class ManualControl:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    # parser.add_argument("--env-id", type=str, default="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9", choices=xminigrid.registered_environments())
-    parser.add_argument("--env-id", type=str, default="MiniGrid-Protagonist-ProcGen-9x9vs9", choices=xminigrid.registered_environments())
+    parser.add_argument("--env-id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9", choices=xminigrid.registered_environments())
+    # parser.add_argument("--env-id", type=str, default="MiniGrid-Protagonist-ProcGen-9x9vs9", choices=xminigrid.registered_environments())
     parser.add_argument("--benchmark-id", type=str, default="trivial-1m", choices=xminigrid.registered_benchmarks())
     parser.add_argument("--ruleset-id", type=int, default=0)
     parser.add_argument("--agent-view", action="store_true")
