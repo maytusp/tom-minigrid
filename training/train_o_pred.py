@@ -1,5 +1,4 @@
 import os
-
 import time
 import argparse
 from typing import Dict, Any
@@ -10,7 +9,7 @@ from torch.utils.data import Dataset, DataLoader
 import jax
 import jax.numpy as jnp
 import optax
-from flax.training import train_state, checkpoints
+from flax.training import train_state
 from flax.serialization import to_bytes
 
 import wandb
@@ -23,16 +22,11 @@ from .tom_nn import (
 )
 
 from .utils import (
-    DIR_TO_IDX,
-    get_direction_one_hot,
     NpzEpisodeDataset,
     pad_collate,
+    crop_fov_from_allocentric_rgb,
+    crop_fov_symbolic_allocentric,
 )
-
-
-# ==========================================
-# 2. TRAINING SETUP (JAX/FLAX)
-# ==========================================
 
 class TrainState(train_state.TrainState):
     pass
@@ -73,26 +67,30 @@ def create_train_state(rng, config):
         tx=tx
     )
 
-# ==========================================
-# 3. MAIN LOOP
-# ==========================================
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str,  default="./logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/train-env-MiniGrid-Protagonist-ProcGen-9x9vs9/staticeight_mask")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--fov_size", type=int, default=9)
+    parser.add_argument("--observer_r", type=int, default=5) # observer row position
+    parser.add_argument("--observer_c", type=int, default=9) # observer column position
+    parser.add_argument("--observer_d", type=int, default=0) # observer direction
+
     parser.add_argument("--num_actions", type=int, default=6) 
     parser.add_argument("--obs_emb_dim", type=int, default=16)
     parser.add_argument("--rnn_hidden_dim", type=int, default=256)
+    
+    # Loss weighting args
+    parser.add_argument("--static_weight", type=float, default=0.1, 
+                        help="Weight for static pixels. 1.0 = standard, 0.0 = strict mask, 0.1 = balanced.")
+
     # WandB specific args
-    parser.add_argument("--track", type=bool, default=True) # use wandb or not
+    parser.add_argument("--track", type=bool, default=True) 
     parser.add_argument("--wandb_project", type=str, default="tom_observer_training")
-    parser.add_argument("--wandb_entity", type=str, default=None, help="Your wandb username/org")
-    # save
+    parser.add_argument("--wandb_entity", type=str, default=None)
     parser.add_argument("--save_every", type=int, default=10)
     
     args = parser.parse_args()
@@ -125,6 +123,7 @@ def main():
     ckpt_dir = os.path.abspath(os.path.join(args.work_dir, "static"))
     os.makedirs(ckpt_dir, exist_ok=True)
     
+    # JIT the update step, baking in the static_weight
     @jax.jit
     def train_step(state, batch_inputs, batch_targets, init_hstate):
         return passive_update(
@@ -134,68 +133,99 @@ def main():
             targets=batch_targets,
             view_size=args.fov_size,
             predict_frame=True,
-            predict_action=False
+            predict_action=False,
+            static_pixel_weight=args.static_weight  # <--- Passed here
         )
 
-    # 3. Training Loop
+    @jax.jit
+    def batch_crop_fov(allo_obs):
+        return jax.vmap(jax.vmap(
+            lambda o: crop_fov_symbolic_allocentric(
+                grid_sym=o, 
+                r=args.observer_r,
+                c=args.observer_c, 
+                view_size=args.fov_size, 
+                dir_id=args.observer_d # up
+            )
+        ))(allo_obs)
+        
+    # Training Loop
     global_step = 0
     for epoch in range(args.epochs):
         epoch_losses = []
         start_time = time.time()
         
         for i, batch in enumerate(dataloader):
-            obs_raw = jnp.array(batch['obs'])
+            # Load raw allocentric data [B, T, 11, 11, 2]
+            obs_raw = jnp.array(batch['obs']) 
+
+            # --- 1. CROP FRAMES ---
+            # Convert 11x11 Allocentric -> 9x9 Egocentric
+            obs_cropped = batch_crop_fov(obs_raw)
             
-            # Combine pad mask with done seq
-            # mask_pad: 1=valid, 0=padded (Wait, logic in collate was: mask_pad=1 for valid)
-            # done_seq: 1=episode ended.
-            # build_passive_batch expects 'done_seq' where 1 means INVALID/TERMINAL.
-            # So we treat padding (where mask_pad==0) as done.
-            is_padded = 1.0 - jnp.array(batch['mask_pad'])
-            eff_done = jnp.maximum(jnp.array(batch['done']), is_padded)
+            # --- 2. PREPARE INPUTS (Use Cropped Data) ---
+            # Input: Time t
+            obs_inputs = obs_cropped[:, :-1]
+            
+
+            
+            act_inputs = jnp.array(batch['act'])[:, :-1]
+            rew_inputs = jnp.array(batch['rew'])[:, :-1]
+            
+            # --- 3. PREPARE TARGETS (Use Cropped Data) ---
+            # Target: Time t+1
+            # We only need the Tile ID channel (0) for labels
+            obs_targets_labels = obs_cropped[:, 1:, ..., 0] 
+            next_act_targets = jnp.array(batch['next_act'])[:, :-1]
+
+            # --- 4. CALCULATE CHANGE MASK ---
+            # Detect changes in the *Cropped* view
+            # If a pixel changed in the world but is outside the 9x9 view, we don't care.
+            is_diff = (obs_cropped[:, 1:] != obs_cropped[:, :-1])
+            change_mask = jnp.any(is_diff, axis=-1).astype(jnp.float32)
+
+            # --- 5. HANDLE DONE / PADDING ---
+            mask_pad = jnp.array(batch['mask_pad'])[:, :-1]
+            is_padded = 1.0 - mask_pad
+            done_seq = jnp.array(batch['done'])[:, :-1]
+            eff_done = jnp.maximum(done_seq, is_padded)
 
             inputs_jax, targets_jax = build_passive_batch_from_sequences(
-                obs_seq=obs_raw,
-                dir_seq=jnp.array(batch['dir']),
-                prev_action_seq=jnp.array(batch['act']),
-                prev_reward_seq=jnp.array(batch['rew']),
-                next_frame_seq=obs_raw[..., 0], # Channel 0 for tile IDs
-                next_other_action_seq=jnp.array(batch['next_act']),
-                done_seq=eff_done
+                obs_seq=obs_inputs,
+                prev_action_seq=act_inputs,
+                prev_reward_seq=rew_inputs,
+                next_frame_seq=obs_targets_labels, 
+                next_other_action_seq=next_act_targets,
+                done_seq=eff_done,
+                spatial_mask_seq=change_mask 
             )
             
             init_h = jnp.zeros((args.batch_size, 1, args.rnn_hidden_dim))
             
-            # Update
             state, logs = train_step(state, inputs_jax, targets_jax, init_h)
             
-            # Logging
+            # ... (Logging logic) ...
             loss_val = logs['total_loss'].item()
             epoch_losses.append(loss_val)
             global_step += 1
             
-            # --- [ADDED] WandB Logging ---
             if i % 10 == 0 and args.track:
-                # Convert JAX scalars to Python floats for WandB
                 wandb_log_dict = {
                     "train/total_loss": loss_val,
                     "train/epoch": epoch,
                     "train/global_step": global_step,
                 }
-                # Add specific losses if they exist (frame_loss, action_loss)
                 if 'frame_loss' in logs:
                     wandb_log_dict["train/frame_loss"] = logs['frame_loss'].item()
                 if 'action_loss' in logs:
                     wandb_log_dict["train/action_loss"] = logs['action_loss'].item()
                 
                 wandb.log(wandb_log_dict)
-                
                 print(f"Ep {epoch} | It {i} | Loss: {loss_val:.4f}", end="\r")
         
         avg_loss = np.mean(epoch_losses)
         print(f"\nEpoch {epoch} Finished | Avg Loss: {avg_loss:.4f} | Time: {time.time()-start_time:.2f}s")
 
-        # Save Checkpoint
         if epoch % args.save_every == 0 or epoch == args.epochs - 1:
             ckpt_name = f"checkpoint_{epoch}.msgpack"
             save_path = os.path.join(ckpt_dir, ckpt_name)

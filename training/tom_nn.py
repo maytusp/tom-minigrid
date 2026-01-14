@@ -117,7 +117,6 @@ class AuxiliaryPredictorRNN(nn.Module):
             self.rnn_hidden_dim, self.rnn_num_layers, dtype=self.dtype, param_dtype=self.param_dtype
         )
 
-        # === Heads (new) ===
         # Other-agent action head (same shape/init style as your actor).
         if self.predict_action:
             other_actor_head = nn.Sequential(
@@ -147,9 +146,7 @@ class AuxiliaryPredictorRNN(nn.Module):
         # === Build sequence inputs (identical concat) ===
         # [B, S, ...] -> flatten spatial after conv/emb
         obs_emb = img_encoder(inputs["obs_img"].astype(jnp.int32)).reshape(B, S, -1)
-        if self.use_dir:
-            dir_emb = direction_encoder(inputs["obs_dir"])
-        
+
         if self.use_action:
             act_emb = action_encoder(inputs["prev_action"])
 
@@ -183,105 +180,104 @@ class PassiveTargets(struct.PyTreeNode):
     next_frame: [B, S, V, V] int32   (tile ids in [0, TOTAL_TILES))
     next_action: [B, S] int32        (other agent action ids)
     mask: [B, S] float32             (1.0 for valid steps, 0.0 for padding/terminal)
+    spatial_mask: [B, S, V, V] float32 (change detection mask)
     """
     next_frame: Optional[jax.Array] = None
     next_action: Optional[jax.Array] = None
     mask: Optional[jax.Array] = None
-
+    spatial_mask: Optional[jax.Array] = None
 
 def passive_update(
     train_state: TrainState,
     init_hstate: jax.Array,
     *,
-    inputs: Dict[str, jax.Array],       # keys: "obs_img", "obs_dir", "prev_action", "prev_reward"; shapes [B,S,...]
-    targets: PassiveTargets,            # see struct above
+    inputs: Dict[str, jax.Array],
+    targets: PassiveTargets,
     view_size: int,
     predict_frame: bool = True,
     predict_action: bool = False,
     frame_weight: float = 1.0,
     action_weight: float = 1.0,
+    static_pixel_weight: float = 0.1, 
 ):
-    """
-    One optimization step for the passive predictor.
-
-    The model must be AuxiliaryPredictorRNN or any module that returns:
-        outputs, new_hidden = apply_fn(params, inputs, init_hstate)
-        where outputs may contain:
-          - "frame_logits": [B,S,V,V,TOTAL_TILES]
-          - "action_dist": distrax.Categorical over [B,S,num_actions]
-    """
-
     B, S = inputs["obs_img"].shape[:2]
     V = view_size
-    mask = targets.mask if targets.mask is not None else jnp.ones((B, S), jnp.float32)
+    seq_mask = targets.mask if targets.mask is not None else jnp.ones((B, S), jnp.float32)
 
     def _loss_fn(params):
         outputs, _ = train_state.apply_fn({'params': params}, inputs, init_hstate)
-
         total_loss = 0.0
         aux = {}
 
-        # ---- Next-frame loss (per-cell CE over TOTAL_TILES) ----
         if predict_frame:
-            # logits: [B,S,V,V,TOTAL_TILES], labels: [B,S,V,V]
             frame_logits = outputs["frame_logits"].astype(jnp.float32)
             frame_labels = targets.next_frame.astype(jnp.int32)
 
-            # Flatten cells but keep [B,S] to apply a per-step mask
-            logits_flat = frame_logits.reshape(B, S, V * V, frame_logits.shape[-1])  # [B,S, VV, C]
-            labels_flat = frame_labels.reshape(B, S, V * V)                          # [B,S, VV]
+            # Flatten
+            logits_flat = frame_logits.reshape(B, S, V * V, frame_logits.shape[-1])
+            labels_flat = frame_labels.reshape(B, S, V * V)
 
-            # Cross-entropy per cell
-            ce_cells = optax.softmax_cross_entropy_with_integer_labels(
-                logits_flat, labels_flat
-            )  # [B,S, VV]
+            # 1. Cross Entropy per cell
+            ce_cells = optax.softmax_cross_entropy_with_integer_labels(logits_flat, labels_flat)
 
-            # Mask per step (broadcast to cells), then average only over valid cells
-            step_mask = mask[..., None]                       # [B,S,1]
-            ce_masked = ce_cells * step_mask                  # [B,S,VV]
-            denom = jnp.maximum(step_mask.sum() * (V * V), 1.0)
-            frame_loss = ce_masked.sum() / denom
+            # 2. Calculate Spatial Weights
+            # Start with the sequence mask (B, S, 1)
+            valid_step_mask = seq_mask[..., None] 
+
+            if targets.spatial_mask is not None:
+                # targets.spatial_mask is 1.0 for CHANGE, 0.0 for STATIC
+                change_mask_flat = targets.spatial_mask.reshape(B, S, V * V)
+                
+                # Apply the mixing formula:
+                # If Change: 1.0 * 1.0 = 1.0
+                # If Static: 1.0 * static_pixel_weight
+                spatial_weights = change_mask_flat + (1.0 - change_mask_flat) * static_pixel_weight
+                
+                # Combine sequence validity with spatial weights
+                final_mask = valid_step_mask * spatial_weights
+            else:
+                final_mask = valid_step_mask
+
+            # 3. Apply Weighted Mask
+            ce_weighted = ce_cells * final_mask
+            
+            # 4. Normalize
+            # Important: Normalize by the sum of weights, not just count of pixels
+            # This ensures the gradient magnitude stays stable regardless of scene activity
+            denom = jnp.maximum(final_mask.sum(), 1.0)
+            frame_loss = ce_weighted.sum() / denom
 
             aux["frame_loss"] = frame_loss
             total_loss = total_loss + frame_weight * frame_loss
 
-        # ---- Next-action loss (CE over num_actions) ----
+        # ... (Action loss remains the same) ...
         if predict_action:
-            dist = outputs["action_dist"]                     # distrax.Categorical
-            # Negative log-likelihood of the true next action
-            nll = -dist.log_prob(targets.next_action)         # [B,S]
-            nll_masked = nll * mask
-            denom = jnp.maximum(mask.sum(), 1.0)
+            dist = outputs["action_dist"]
+            nll = -dist.log_prob(targets.next_action)
+            nll_masked = nll * seq_mask
+            denom = jnp.maximum(seq_mask.sum(), 1.0)
             action_loss = nll_masked.sum() / denom
-
             aux["action_loss"] = action_loss
             total_loss = total_loss + action_weight * action_loss
 
         return total_loss, aux
 
     (loss, aux), grads = jax.value_and_grad(_loss_fn, has_aux=True)(train_state.params)
-    # (loss, grads) = jax.lax.pmean((loss, grads), axis_name="devices")
     train_state = train_state.apply_gradients(grads=grads)
-
-    # 4. Logs
     logs = {"total_loss": loss}
-    if "frame_loss" in aux:
-        logs["frame_loss"] = aux["frame_loss"]
-    if "action_loss" in aux:
-        logs["action_loss"] = aux["action_loss"]
-
+    logs.update(aux)
     return train_state, logs
 
 
 def build_passive_batch_from_sequences(
     *,
     obs_seq: jax.Array,          # [B,S, H, W, 2] or your packed symbolic obs
-    dir_seq: jax.Array,          # [B,S, dir_dim]
     prev_action_seq: jax.Array,  # [B,S] (your own previous action)
     prev_reward_seq: jax.Array,  # [B,S]
     next_frame_seq: Optional[jax.Array],   # [B,S, V, V] (tile ids)  OR None
     next_other_action_seq: Optional[jax.Array],  # [B,S]            OR None
     done_seq: jax.Array,         # [B,S] 1.0 when episode ended *at* t (i.e., obs_{t+1} is invalid)
+    spatial_mask_seq: Optional[jax.Array] = None,
 ):
     """
     Prepares teacher-forcing inputs at time t and supervision at t+1.
@@ -292,7 +288,6 @@ def build_passive_batch_from_sequences(
     # Inputs are taken at t = 0..S-2; we keep shapes [B,S,...] by shifting targets and masking the last step.
     inputs = {
         "obs_img": obs_seq,              # [B,S,...] as your model expects
-        "obs_dir": dir_seq,
         "prev_action": prev_action_seq,
         "prev_reward": prev_reward_seq,
     }
@@ -308,6 +303,7 @@ def build_passive_batch_from_sequences(
         next_frame=next_frame_seq,
         next_action=next_other_action_seq,
         mask=valid_steps,
+        spatial_mask=spatial_mask_seq,
     )
 
     return inputs, targets
