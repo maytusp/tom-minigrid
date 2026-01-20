@@ -104,15 +104,16 @@ def _render_star(img: np.ndarray, color: int):
 
 
 def _render_goal(img: np.ndarray, color: int):
-    # draw the grid lines (top and left edges)
-    fill_coords(img, point_in_rect(0, 0.031, 0, 1), (100, 100, 100))
-    fill_coords(img, point_in_rect(0, 1, 0, 0.031), (100, 100, 100))
-    # draw tile
-    fill_coords(img, point_in_rect(0.031, 1, 0.031, 1), COLORS_MAP[color])
-
-    # # other grid lines (was used for paper visualizations)
-    # fill_coords(img, point_in_rect(1 - 0.031, 1, 0, 1), (100, 100, 100))
-    # fill_coords(img, point_in_rect(0, 1, 1 - 0.031, 1), (100, 100, 100))
+    _render_floor(img, Colors.BLACK)
+    
+    # Outer Square
+    fill_coords(img, point_in_rect(0.1, 0.9, 0.1, 0.9), COLORS_MAP[color])
+    
+    # Middle Gap (Black)
+    fill_coords(img, point_in_rect(0.3, 0.7, 0.3, 0.7), (0, 0, 0))
+    
+    # Inner Square (Color)
+    fill_coords(img, point_in_rect(0.45, 0.55, 0.45, 0.55), COLORS_MAP[color])
 
 
 def _render_key(img: np.ndarray, color: int):
