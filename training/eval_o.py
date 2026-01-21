@@ -13,11 +13,12 @@ from .tom_nn import (
     AuxiliaryPredictorRNN, 
     build_passive_batch_from_sequences
 )
-from xminigrid.experimental.img_obs import _render_obs_tom
+from xminigrid.experimental.render_from_symbolic import _render
 
 from .utils import (
     NpzEpisodeDataset,
     pad_collate,
+    crop_fov_symbolic_allocentric,
 )
 
 # Scale up the video output so it isn't tiny (e.g., 56x56 pixels)
@@ -87,18 +88,20 @@ def save_video(frames, path, fps=5):
     except Exception as e:
         print(f"Error saving video {path}: {e}")
 
-def visualize_episode(model, params, batch, idx, output_dir):
+
+    
+def visualize_episode(model, params, batch, idx, output_dir, crop_fn):
     """
     Runs inference on a single batch item and saves MP4 videos.
     """
     # 1. Prepare Inputs for ONE episode
     obs_raw = jnp.array(batch['obs'][idx:idx+1])
+    obs_raw = jax.vmap(crop_fn)(obs_raw[0])[None, ...] # [1, T, 9, 9, 2]
     is_padded = 1.0 - jnp.array(batch['mask_pad'][idx:idx+1])
     eff_done = jnp.maximum(jnp.array(batch['done'][idx:idx+1]), is_padded)
     
     inputs_jax, _ = build_passive_batch_from_sequences(
         obs_seq=obs_raw,
-        dir_seq=jnp.array(batch['dir'][idx:idx+1]),
         prev_action_seq=jnp.array(batch['act'][idx:idx+1]),
         prev_reward_seq=jnp.array(batch['rew'][idx:idx+1]),
         next_frame_seq=obs_raw[..., 0], 
@@ -126,20 +129,26 @@ def visualize_episode(model, params, batch, idx, output_dir):
     for t in range(T_valid):
         if t + 1 >= T_valid:
             break
-            
+
+
         # --- A. Extract Data ---
         gt_next_frame = obs_raw[0, t+1] 
         pred_frame = pred_ids[0, t] 
-        print(f"pred_ids {pred_ids.shape}")
+        
+
         # print("GT: \n", gt_next_frame[:,:,0])
         # print("predicted: \n", pred_frame)
         # Borrow GT colors for visualization
         gt_color_id = gt_next_frame[:, :, 1]
-        pred_frame = jnp.stack([pred_frame, gt_color_id], axis=-1)
-        
+        zero_color_id = jnp.zeros_like(pred_frame, dtype=jnp.int32)
+        pred_frame = jnp.stack([pred_frame, zero_color_id], axis=-1)
+        print(f"gt_next_frame \n {gt_next_frame[:,:,0]}")
+        print(f"pred_frame \n {pred_frame[:,:,0]}")
         # --- B. Render Pixels ---
-        gt_pixels = _render_obs_tom(gt_next_frame) 
-        pred_pixels = _render_obs_tom(pred_frame) 
+        gt_pixels = _render(gt_next_frame) 
+        pred_pixels = _render(pred_frame) 
+
+
         
         gt_img = np.array(gt_pixels, dtype=np.uint8)
         pred_img = np.array(pred_pixels, dtype=np.uint8)
@@ -165,19 +174,26 @@ def visualize_episode(model, params, batch, idx, output_dir):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="./logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9")
-    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/static/checkpoint_49.msgpack")
-    parser.add_argument("--output_dir", type=str, default="./logs/observer_eval/static")
-    
+    parser.add_argument("--data_dir", type=str, default="./logs/trajs/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9")
+    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/train-env-MiniGrid-Protagonist-ProcGen-9x9vs9/staticWeight_mask/checkpoint_199.msgpack")
+    parser.add_argument("--output_dir", type=str, default="./logs/observer_eval/eval_scene_fb")
+
     # Model Args (Must match training)
     parser.add_argument("--fov_size", type=int, default=9)
+    parser.add_argument("--observer_r", type=int, default=9) # observer row position
+    parser.add_argument("--observer_c", type=int, default=5) # observer column position
+    parser.add_argument("--observer_d", type=int, default=0) # observer direction
     parser.add_argument("--num_actions", type=int, default=6) 
     parser.add_argument("--obs_emb_dim", type=int, default=16)
     parser.add_argument("--rnn_hidden_dim", type=int, default=256)
     
     args = parser.parse_args()
     os.makedirs(args.output_dir, exist_ok=True)
-    
+    crop_fn = lambda o: crop_fov_symbolic_allocentric(
+            grid_sym=o, 
+            r=args.observer_r, c=args.observer_c, 
+            view_size=args.fov_size, dir_id=args.observer_d
+        )
     # 1. Setup Data
     dataset = NpzEpisodeDataset(args.data_dir, max_files=10)
     dataloader = DataLoader(dataset, batch_size=1, shuffle=False, collate_fn=pad_collate)
@@ -189,7 +205,7 @@ def main():
     
     # 3. Visualize
     for i, batch in enumerate(dataloader):
-        visualize_episode(model, params, batch, 0, args.output_dir)
+        visualize_episode(model, params, batch, 0, args.output_dir, crop_fn)
 
 if __name__ == "__main__":
     main()

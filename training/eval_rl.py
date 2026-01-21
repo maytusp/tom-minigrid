@@ -195,7 +195,7 @@ def collect_obs(
         )
 
         # print(f"[record] {out_world_mp4}         frames={T_int} size={world_np.shape[1]}x{world_np.shape[2]}")
-        # print(f"[record] {out_obs_rgb_mp4}      frames={T_int} size={obs_rgb_np.shape[1]}x{obs_rgb_np.shape[2]}")
+        print(f"[record] {out_obs_rgb_mp4}      frames={T_int} size={obs_rgb_np.shape[1]}x{obs_rgb_np.shape[2]}")
         print(f"[record] {out_obs_sym_npz}      saved raw symbolic crops")
 
 
@@ -237,9 +237,9 @@ def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, en
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-Protagonist-ProcGen-9x9vs9/MiniGrid-Protagonist-ProcGen-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-Protagonist-ProcGen-9x9vs9") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
-    parser.add_argument("--vid_out_dir", type=str, default="logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9")
-    parser.add_argument("--episodes", type=int, default=5000)
+    parser.add_argument("--env_id", type=str, default="MiniGrid-Protagonist-ProcGen-9x9vs9-swap") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
+    parser.add_argument("--vid_out_dir", type=str, default="logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9-swap")
+    parser.add_argument("--episodes", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
 
     args = parser.parse_args()

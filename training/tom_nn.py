@@ -240,7 +240,10 @@ def passive_update(
 
             # 3. Apply Weighted Mask
             ce_weighted = ce_cells * final_mask
-            
+
+            loss_dynamic_term = (ce_cells * change_mask_flat * valid_step_mask).sum() / (change_mask_flat.sum())
+            loss_static_term = (ce_cells * (1-change_mask_flat) * valid_step_mask).sum() / ((1-change_mask_flat).sum())
+
             # 4. Normalize
             # Important: Normalize by the sum of weights, not just count of pixels
             # This ensures the gradient magnitude stays stable regardless of scene activity
@@ -248,6 +251,8 @@ def passive_update(
             frame_loss = ce_weighted.sum() / denom
 
             aux["frame_loss"] = frame_loss
+            aux["frame_loss_dynamic"] = loss_dynamic_term
+            aux["frame_loss_static"] = loss_static_term
             total_loss = total_loss + frame_weight * frame_loss
 
         # ... (Action loss remains the same) ...

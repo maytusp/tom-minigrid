@@ -70,13 +70,13 @@ def create_train_state(rng, config):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str,  default="./logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/train-env-MiniGrid-Protagonist-ProcGen-9x9vs9/staticeight_mask")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/train-env-MiniGrid-Protagonist-ProcGen-9x9vs9/staticWeight_mask")
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--epochs", type=int, default=50)
+    parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--fov_size", type=int, default=9)
-    parser.add_argument("--observer_r", type=int, default=5) # observer row position
-    parser.add_argument("--observer_c", type=int, default=9) # observer column position
+    parser.add_argument("--observer_r", type=int, default=9) # observer row position
+    parser.add_argument("--observer_c", type=int, default=5) # observer column position
     parser.add_argument("--observer_d", type=int, default=0) # observer direction
 
     parser.add_argument("--num_actions", type=int, default=6) 
@@ -84,7 +84,7 @@ def main():
     parser.add_argument("--rnn_hidden_dim", type=int, default=256)
     
     # Loss weighting args
-    parser.add_argument("--static_weight", type=float, default=0.1, 
+    parser.add_argument("--static_weight", type=float, default=0.01, 
                         help="Weight for static pixels. 1.0 = standard, 0.0 = strict mask, 0.1 = balanced.")
 
     # WandB specific args
@@ -120,7 +120,7 @@ def main():
     config = vars(args)
     state = create_train_state(init_rng, config)
     
-    ckpt_dir = os.path.abspath(os.path.join(args.work_dir, "static"))
+    ckpt_dir = args.work_dir
     os.makedirs(ckpt_dir, exist_ok=True)
     
     # JIT the update step, baking in the static_weight
@@ -217,6 +217,8 @@ def main():
                 }
                 if 'frame_loss' in logs:
                     wandb_log_dict["train/frame_loss"] = logs['frame_loss'].item()
+                    wandb_log_dict["train/frame_loss_dynamic"] = logs['frame_loss_dynamic'].item()
+                    wandb_log_dict["train/frame_loss_static"] = logs['frame_loss_static'].item()
                 if 'action_loss' in logs:
                     wandb_log_dict["train/action_loss"] = logs['action_loss'].item()
                 

@@ -116,7 +116,9 @@ def _render_obs_tom(obs: jax.Array) -> jax.Array:
     rendered_obs = rendered_obs.transpose((0, 2, 1, 3, 4)).reshape(view_size * TILE_SIZE, view_size * TILE_SIZE, 3)
 
     return rendered_obs
-    
+
+
+
 def render_grid_allocentric(
     grid: jax.Array,        # [H, W, 2]  (type, color)
     agent_state: jax.Array, # [3]        (row, col, dir) for THIS timestep
@@ -124,6 +126,9 @@ def render_grid_allocentric(
     fov_alpha: float = 0.20,
     highlight_rgb: jnp.ndarray | None = None,
 ) -> jax.Array:
+    '''
+    God's eye view
+    '''
     H, W = grid.shape[:2]
     ts = TILE_SIZE
     vs = int(view_size)
