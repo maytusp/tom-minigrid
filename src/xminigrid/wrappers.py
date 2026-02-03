@@ -125,7 +125,7 @@ class AllocentricObservationWrapper(Wrapper):
             obs_shape = {**base_shape, **{"direction": 4}}
         else:
             obs_shape = {
-                "img": self._env.observation_shape(params),
+                "p_img": self._env.observation_shape(params),
                 "direction": 4,
             }
         return obs_shape
@@ -133,7 +133,7 @@ class AllocentricObservationWrapper(Wrapper):
     def __extend_obs(self, timestep):
         direction = jax.nn.one_hot(timestep.state.agent.direction, num_classes=4)
         if isinstance(timestep.observation, dict):
-            assert "img" in timestep.observation
+            assert "p_img" in timestep.observation
             extended_obs = {
                 **timestep.observation,
                 **{"direction": direction},
@@ -141,8 +141,8 @@ class AllocentricObservationWrapper(Wrapper):
         else:
             extended_obs = {
                 # "img": timestep.observation, # old code
-                "p_img": timestep.observation["protagonist_obs"], # protagonist observation
-                "o_img": timestep.observation["observer_obs"], # observer observation
+                "p_img": timestep.observation["p_img"], # protagonist observation
+                "o_img": timestep.observation["o_img"], # observer observation
                 "allo_img": timestep.allocentric_obs,
                 "direction": direction,
             }

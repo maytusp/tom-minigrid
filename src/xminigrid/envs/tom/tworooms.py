@@ -362,8 +362,8 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         obs_main = transparent_field_of_view(visual_grid, state.agent, params.view_size, params.view_size)
         obs_observer = self._get_observer_view(visual_grid, params.view_size)
         combined_obs = {}
-        combined_obs["protagonist_obs"] = obs_main
-        combined_obs["observer_obs"] = obs_observer
+        combined_obs["p_img"] = obs_main
+        combined_obs["o_img"] = obs_observer
         return TimeStep(
             state=state,
             step_type=StepType.FIRST,
@@ -410,8 +410,8 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         obs_main = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
         obs_observer = self._get_observer_view(visual_grid, params.view_size)
         combined_obs = {}
-        combined_obs["protagonist_obs"] = obs_main
-        combined_obs["observer_obs"] = obs_observer
+        combined_obs["p_img"] = obs_main
+        combined_obs["o_img"] = obs_observer
 
         terminated = check_goal(new_state.goal_encoding, new_state.grid, new_state.agent, action, changed_pos)
         

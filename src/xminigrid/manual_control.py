@@ -115,8 +115,8 @@ class ManualControl:
 
     def step(self, action: int) -> None:
         self.timestep = self._step(self.env_params, self.timestep, action)
-        p_obs = self.timestep.observation["protagonist_obs"][:,:,0]
-        o_obs = self.timestep.observation["observer_obs"][:,:,0]
+        p_obs = self.timestep.observation["p_img"][:,:,0]
+        o_obs = self.timestep.observation["o_img"][:,:,0]
         print(
             f"Step: {self.timestep.state.step_num} | ",
             f"StepType: {self.timestep.step_type} | ",

@@ -27,6 +27,7 @@ import xminigrid
 from xminigrid.environment import EnvParams
 from xminigrid.wrappers import AllocentricObservationWrapper, GymAutoResetWrapper
 from xminigrid.experimental.img_obs import RGBImgObservationWrapper, _render_obs, render_grid_allocentric
+from xminigrid.experimental.render_from_symbolic import _render
 
 from pathlib import Path
 from typing import Optional
@@ -101,9 +102,9 @@ def collect_obs(
     seed: int = 0,
     out_dir: str = "trajs",
     enable_bf16: bool = False,
-    use_observer_frame: bool = False, # Observer frame is used if environment is bigger than observer FOV
-    observer_r: int = None,
-    observer_c: int = None,
+    use_observer_frame: bool = True, # Observer frame is used if environment is bigger than observer FOV
+    observer_r: int = 8,
+    observer_c: int = 5,
     fov_size: int = 9,
     fov_dir: str = "up",
 ):
@@ -121,7 +122,8 @@ def collect_obs(
         out = rollout_with_obs(rng, env, env_params, ts, h0, max_steps=max_steps)
         # world RGB (allocentric)
         '''Render function get grid state (without agent) and agent state (position + direction), not agent observation which includes itself'''
-        world_frames = jax.vmap(render_grid_allocentric)(out.grid_seq, out.agent_seq)  # [T,Hpx,Wpx,3] uint8
+        # world_frames = jax.vmap(render_grid_allocentric)(out.grid_seq, out.agent_seq)  # [T,Hpx,Wpx,3] uint8
+        world_frames = jax.vmap(_render)(out.o_obs_seq)  # [T,Hpx,Wpx,3] uint8
 
         # observer RGB crop
         def _crop_rgb(frame_rgb, grid_symbolic):
@@ -236,9 +238,9 @@ def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, en
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-Protagonist-ProcGen-9x9vs9/MiniGrid-Protagonist-ProcGen-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-Protagonist-ProcGen-9x9vs9-swap") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
-    parser.add_argument("--vid_out_dir", type=str, default="logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9-swap")
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9//MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
+    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
+    parser.add_argument("--vid_out_dir", type=str, default="logs/training_trajs/MiniGrid-Protagonist-TwoRoomsNoSwap-9x9vs9-swap")
     parser.add_argument("--episodes", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
 
