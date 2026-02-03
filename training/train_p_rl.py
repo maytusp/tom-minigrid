@@ -128,7 +128,7 @@ def make_states(config: TrainConfig):
     shapes = env.observation_shape(env_params)
 
     init_obs = {
-        "obs_img": jnp.zeros((config.num_envs_per_device, 1, *shapes["img"])),
+        "obs_img": jnp.zeros((config.num_envs_per_device, 1, *shapes["p_img"])),
         "obs_dir": jnp.zeros((config.num_envs_per_device, 1, shapes["direction"])),
         "prev_action": jnp.zeros((config.num_envs_per_device, 1), dtype=jnp.int32),
         "prev_reward": jnp.zeros((config.num_envs_per_device, 1)),
@@ -173,7 +173,7 @@ def make_train_funcs(
                 train_state.params,
                 {
                     # [batch_size, seq_len=1, ...]
-                    "obs_img": prev_timestep.observation["img"][:, None],
+                    "obs_img": prev_timestep.observation["p_img"][:, None],
                     "obs_dir": prev_timestep.observation["direction"][:, None],
                     "prev_action": prev_action[:, None],
                     "prev_reward": prev_reward[:, None],
@@ -192,7 +192,7 @@ def make_train_funcs(
                 value=value,
                 reward=timestep.reward,
                 log_prob=log_prob,
-                obs=prev_timestep.observation["img"],
+                obs=prev_timestep.observation["p_img"],
                 dir=prev_timestep.observation["direction"],
                 prev_action=prev_action,
                 prev_reward=prev_reward,
@@ -210,7 +210,7 @@ def make_train_funcs(
         _, last_val, _ = train_state.apply_fn(
             train_state.params,
             {
-                "obs_img": timestep.observation["img"][:, None],
+                "obs_img": timestep.observation["p_img"][:, None],
                 "obs_dir": timestep.observation["direction"][:, None],
                 "prev_action": prev_action[:, None],
                 "prev_reward": prev_reward[:, None],

@@ -140,7 +140,9 @@ class AllocentricObservationWrapper(Wrapper):
             }
         else:
             extended_obs = {
-                "img": timestep.observation,
+                # "img": timestep.observation, # old code
+                "p_img": timestep.observation["protagonist_obs"], # protagonist observation
+                "o_img": timestep.observation["observer_obs"], # observer observation
                 "allo_img": timestep.allocentric_obs,
                 "direction": direction,
             }

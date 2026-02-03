@@ -69,7 +69,7 @@ def load_params(checkpoint_path: str, net, env, env_params, cfg):
     # build target variables & params collection for shape checking
     shapes = env.observation_shape(env_params)
     init_obs = {
-        "obs_img": jnp.zeros((1, 1, *shapes["img"])),
+        "obs_img": jnp.zeros((1, 1, *shapes["p_img"])),
         "obs_dir": jnp.zeros((1, 1, shapes["direction"])),
         "prev_action": jnp.zeros((1, 1), dtype=jnp.int32),
         "prev_reward": jnp.zeros((1, 1)),
@@ -138,17 +138,17 @@ def collect_obs(
             )
         
         if use_observer_frame:
-            obs_rgb_frames = jax.vmap(_crop_rgb)(world_frames, out.allo_obs_seq)  # [T, fpx, fpx, 3]
+            obs_rgb_frames = jax.vmap(_crop_rgb)(world_frames, out.o_obs_seq)  # [T, fpx, fpx, 3]
             # observer SYMBOLIC crop (cell space), then simple colorization for MP4
             obs_sym_patches = jax.vmap(
                 lambda grid_sym: crop_fov_symbolic_allocentric(
                     grid_sym=grid_sym, r=observer_r, c=observer_c, view_size=fov_size, dir_id=dir_id
                 )
-            )(out.allo_obs_seq)  # [T, V, V, C]
+            )(out.o_obs_seq)  # [T, V, V, C]
 
             return world_frames, obs_rgb_frames, obs_sym_patches, out.length - 1
         else:
-            return world_frames, out.allo_obs_seq, out.length - 1
+            return world_frames, out.o_obs_seq, out.length - 1
 
     rng = jax.random.key(seed)
     for ep in range(episodes):

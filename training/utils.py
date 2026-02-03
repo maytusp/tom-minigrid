@@ -139,7 +139,7 @@ def rollout(
         dist, _, hstate = train_state.apply_fn(
             train_state.params,
             {
-                "obs_img": timestep.observation["img"][None, None, ...],
+                "obs_img": timestep.observation["p_img"][None, None, ...],
                 "obs_dir": timestep.observation["direction"][None, None, ...],
                 "prev_action": prev_action[None, None, ...],
                 "prev_reward": prev_reward[None, None, ...],
@@ -169,9 +169,9 @@ def rollout(
 class RolloutWithObs(NamedTuple):
     stats: RolloutStats
     obs_seq: jax.Array    # [T_max, *obs_img_shape], symbolic grid per step
-    allo_obs_seq: jax.Array # [T_max, *allo_obs_img_shape], symbolic grid per step
+    o_obs_seq: jax.Array # [T_max, *o_obs_img_shape], symbolic grid per step
     agent_seq: jax.Array # [T_max, 2+1] agent's position + direction
-    grid_seq: jax.Array  # Grid state, similar to allo_obs but exclude agent from it
+    grid_seq: jax.Array  # Grid state, similar to o_obs but exclude agent from it
     length: jax.Array     # scalar int32, actual T (<= T_max)
 
 def rollout_with_obs(
@@ -186,7 +186,7 @@ def rollout_with_obs(
     """
     WARNING: Allocentric observation from state.grid does not contain agent. Only state.observation has agent.
     Runs a SINGLE episode fully in JAX (lax.while_loop), collecting the symbolic
-    obs["img"] at each step into a preallocated buffer of length max_steps.
+    obs["p_img"] at each step into a preallocated buffer of length max_steps.
 
     Returns:
       - stats: same fields as your RolloutStats (reward, length, episodes)
@@ -197,14 +197,14 @@ def rollout_with_obs(
     timestep0 = env.reset(env_params, rng)
 
     # Shapes/dtypes for the obs buffer
-    obs_img0 = timestep0.observation["img"]
-    allo_img0 = timestep0.observation["allo_img"]
+    obs_img0 = timestep0.observation["p_img"]
+    allo_img0 = timestep0.observation["o_img"]
     grid0 = timestep0.state.grid
     agent_pos0 = timestep0.state.agent.position
     agent_dir0 = timestep0.state.agent.direction
     
     obs_buf0 = jnp.zeros((max_steps, *obs_img0.shape), obs_img0.dtype)
-    allo_obs_buf0 = jnp.zeros((max_steps, *allo_img0.shape), allo_img0.dtype)
+    o_obs_buf0 = jnp.zeros((max_steps, *allo_img0.shape), allo_img0.dtype)
     agent_buf0 = jnp.zeros((max_steps, agent_pos0.shape[0]+1), agent_pos0.dtype)
     grid_buf0 = jnp.zeros((max_steps, *grid0.shape), grid0.dtype)
 
@@ -217,25 +217,25 @@ def rollout_with_obs(
 
     # Write the very first frame (pre-step) at index 0
     obs_buf0 = obs_buf0.at[0].set(obs_img0)
-    allo_obs_buf0 = allo_obs_buf0.at[0].set(allo_img0)
+    o_obs_buf0 = o_obs_buf0.at[0].set(allo_img0)
     agent_buf0 = agent_buf0.at[0].set(jnp.concatenate([agent_pos0, agent_dir0[None]], axis=0))
     grid_buf0 = grid_buf0.at[0].set(grid0)
 
     def cond_fn(carry):
-        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, allo_obs_buf, agent_buf, grid_buf, step = carry
+        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, o_obs_buf, agent_buf, grid_buf, step = carry
         # Continue while not done with episode (episodes<1) AND under max_steps-1
         # We allow writing index 0..length, so we stop when the *next* write would overflow.
         return jnp.logical_and(stats.episodes < 1, step < max_steps - 1)
 
     def body_fn(carry):
-        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, allo_obs_buf, agent_buf, grid_buf, step = carry
+        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, o_obs_buf, agent_buf, grid_buf, step = carry
 
         rng, _rng = jax.random.split(rng)
         # Forward policy on symbolic obs
         dist, _, h = train_state.apply_fn(
             train_state.params,
             {
-                "obs_img": timestep.observation["img"][None, None, ...],
+                "obs_img": timestep.observation["p_img"][None, None, ...],
                 "obs_dir": timestep.observation["direction"][None, None, ...],
                 "prev_action": prev_action[None, None, ...],
                 "prev_reward": prev_reward[None, None, ...],
@@ -255,8 +255,8 @@ def rollout_with_obs(
 
         # Write the next pre-step frame (the observation we’ll act on next)
         # i.e., store obs for timestep_next at index (step+1)
-        obs_buf = obs_buf.at[step + 1].set(timestep_next.observation["img"])
-        allo_obs_buf = allo_obs_buf.at[step + 1].set(timestep_next.observation["allo_img"])
+        obs_buf = obs_buf.at[step + 1].set(timestep_next.observation["p_img"])
+        o_obs_buf = o_obs_buf.at[step + 1].set(timestep_next.observation["o_img"])
         pos = timestep_next.state.agent.position        # shape (2,)
         direction = jnp.asarray(timestep_next.state.agent.direction)  # shape ()
         agent_buf = agent_buf.at[step + 1].set(
@@ -271,7 +271,7 @@ def rollout_with_obs(
             timestep_next.reward,
             h,
             obs_buf,
-            allo_obs_buf,
+            o_obs_buf,
             agent_buf,
             grid_buf,
             step + 1,
@@ -280,10 +280,10 @@ def rollout_with_obs(
     final = lax.while_loop(
         cond_fn,
         body_fn,
-        (rng, stats0, timestep0, prev_action0, prev_reward0, h0, obs_buf0, allo_obs_buf0, agent_buf0, grid_buf0, step0),
+        (rng, stats0, timestep0, prev_action0, prev_reward0, h0, obs_buf0, o_obs_buf0, agent_buf0, grid_buf0, step0),
     )
 
-    _, stats_f, _, _, _, _, obs_buf_f, allo_obs_buf_f, agent_buf_f, grid_buf_f, step_f = final
+    _, stats_f, _, _, _, _, obs_buf_f, o_obs_buf_f, agent_buf_f, grid_buf_f, step_f = final
 
     # The actual usable frames run from [0 .. stats_f.length] inclusive of the first frame,
     # but since we wrote one frame per step (including the last post-step obs at index=length),
@@ -294,7 +294,7 @@ def rollout_with_obs(
     return RolloutWithObs(
         stats=stats_f,
         obs_seq=obs_buf_f,
-        allo_obs_seq=allo_obs_buf_f,
+        o_obs_seq=o_obs_buf_f,
         agent_seq=agent_buf_f,
         grid_seq=grid_buf_f,
         length=length_plus_one,

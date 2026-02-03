@@ -53,17 +53,14 @@ class ToMEnvParams(EnvParams):
     max_num_rooms: int = struct.field(pytree_node=False, default=4)
     use_color: bool = struct.field(pytree_node=False, default=True)
 
-# -------------------------------------------------------------------------
-# GENERATOR LOGIC
-# -------------------------------------------------------------------------
 
 def generate_corridor_layout(key: jax.Array, height: int, width: int, target_num_rooms: int) -> LayoutInfo:
-    # 1. Initialize
+    # Initialize
     floor_tile = TILES_REGISTRY[Tiles.FLOOR, Colors.GREY] 
     grid = jnp.tile(floor_tile[None, None, :], (height, width, 1)) 
     room_labels = jnp.full((height, width), 1, dtype=jnp.int32)
 
-    # 2. Split Logic (Standard BSP)
+    # Split Logic (Standard BSP)
     def _perform_split(state, _):
         key, labels, current_count = state
         should_split = current_count < target_num_rooms
@@ -132,7 +129,7 @@ def generate_corridor_layout(key: jax.Array, height: int, width: int, target_num
     init_state = (key, room_labels, jnp.array(1, dtype=jnp.int32))
     (key, room_labels, final_count), _ = jax.lax.scan(_perform_split, init_state, None, length=3)
     
-    # 3. Calculate Wall Mask (Ground Truth)
+    # Calculate Wall Mask (Ground Truth)
     p = room_labels
     room_mask = p > 0
     Y, X = jnp.indices((height, width))
@@ -152,10 +149,6 @@ def generate_corridor_layout(key: jax.Array, height: int, width: int, target_num
     
     return LayoutInfo(grid=grid, room_labels=room_labels, num_rooms=final_count, wall_mask=wall_mask)
 
-
-# -------------------------------------------------------------------------
-# ENVIRONMENT CLASS (Fixed Door Placement)
-# -------------------------------------------------------------------------
 
 class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
     def num_actions(self, params: EnvParamsT) -> int:
@@ -280,7 +273,7 @@ class SallyAnneRooms(Environment[EnvParams, SwapCarry]):
             rule_encoding=_rule_encoding,
             carry=carry,
         )
-    # ... (maybe_swap_after_star and step remain unchanged) ...
+
     def maybe_swap_after_star(self, state: State[SwapCarry], testing: bool) -> State[SwapCarry]:
         carry = state.carry
         already_done = jnp.logical_or(carry.star_reached, carry.swap_done)

@@ -342,34 +342,37 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         new_state = jax.lax.cond(close_door, _process_door, lambda s: s, operand=new_state)
         return new_state
 
-    def reset(self, params: EnvParams, key: jax.Array) -> TimeStep[EnvCarryT]:
-        # Generate the Clean State
-        state = self._generate_problem(params, key)
+    def _get_observer_view(self, grid: jnp.ndarray, view_size: int) -> jnp.ndarray:
+        """Generates the view for the fixed observer at (9,5) facing up."""
+        observer_state = AgentState(
+            position=jnp.array([9, 5], dtype=jnp.int32),
+            direction=jnp.array(0, dtype=jnp.int32)  # 0 = UP
+        )
+        return transparent_field_of_view(grid, observer_state, view_size, view_size)
 
-        # Create the Visual Grid
+    def reset(self, params: EnvParams, key: jax.Array) -> TimeStep[SwapCarry]:
+        state = self._generate_problem(params, key)
         agent_layer = get_agent_layer(state.agent, state.grid)
-        
         visual_grid = jnp.where(
             agent_layer != TILES_REGISTRY[Tiles.EMPTY, Colors.EMPTY], 
             agent_layer, 
             state.grid
         )
 
-        # Generate Observation
-        # The first observation now correctly sees the agent
-        obs = transparent_field_of_view(visual_grid, state.agent, params.view_size, params.view_size)
-
-        if not(params.use_color):
-            obs = obs[:, :, 0]
-
+        obs_main = transparent_field_of_view(visual_grid, state.agent, params.view_size, params.view_size)
+        obs_observer = self._get_observer_view(visual_grid, params.view_size)
+        combined_obs = {}
+        combined_obs["protagonist_obs"] = obs_main
+        combined_obs["observer_obs"] = obs_observer
         return TimeStep(
             state=state,
             step_type=StepType.FIRST,
             reward=jnp.asarray(0.0),
             discount=jnp.asarray(1.0),
-            observation=obs,
+            observation=combined_obs,
             allocentric_obs=visual_grid,
         )
+
     def step(
         self,
         params: EnvParams,
@@ -388,16 +391,14 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             step_num=timestep.state.step_num + 1,
         )
 
-        # 2. Swap Logic (Goal/Star mechanics)
+        # swap tiles
         testing = getattr(params, "testing", False)
         new_state = self.handle_star_reach(new_state, testing=testing)
 
-        # --- 3. COMPOSITION (The "Separate Grid" Logic) ---
-        
-        # A. Generate the separate agent layer
+        # Generate the separate agent layer
         agent_layer = get_agent_layer(new_state.agent, new_grid)
         
-        # B. Combine for the Camera (Overlay)
+        # combine for the Camera (Overlay)
         # Logic: If the agent layer has something (is not EMPTY/0), show the Agent.
         #        Otherwise, show the Environment Grid.
         visual_grid = jnp.where(
@@ -406,12 +407,12 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             new_state.grid
         )
 
+        obs_main = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
+        obs_observer = self._get_observer_view(visual_grid, params.view_size)
+        combined_obs = {}
+        combined_obs["protagonist_obs"] = obs_main
+        combined_obs["observer_obs"] = obs_observer
 
-        # C. Generate Observation from the Combined Visual Grid
-        # The agent 'sees' the combined version, but the logic operates on the clean version.
-        new_obs = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
-
-        # --- 4. Rewards & Termination ---
         terminated = check_goal(new_state.goal_encoding, new_state.grid, new_state.agent, action, changed_pos)
         
         truncated = jnp.equal(new_state.step_num, params.max_steps)
@@ -420,16 +421,12 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         step_type = jax.lax.select(terminated | truncated, StepType.LAST, StepType.MID)
         discount = jax.lax.select(terminated, jnp.asarray(0.0), jnp.asarray(1.0))
 
-
-        if not(params.use_color):
-            new_obs = new_obs[:, :, 0]
-
         return TimeStep(
             state=new_state,
             step_type=step_type,
             reward=reward,
             discount=discount,
-            observation=new_obs,
+            observation=combined_obs,
             allocentric_obs=visual_grid,
         )
     def observation_shape(self, params: EnvParamsT) -> tuple[int, int, int] | dict[str, Any]:

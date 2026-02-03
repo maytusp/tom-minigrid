@@ -115,12 +115,15 @@ class ManualControl:
 
     def step(self, action: int) -> None:
         self.timestep = self._step(self.env_params, self.timestep, action)
+        p_obs = self.timestep.observation["protagonist_obs"][:,:,0]
+        o_obs = self.timestep.observation["observer_obs"][:,:,0]
         print(
             f"Step: {self.timestep.state.step_num} | ",
             f"StepType: {self.timestep.step_type} | ",
             f"Discount: {self.timestep.discount} | ",
             f"Reward: {self.timestep.reward}",
-            f"Ego Obs:\n {self.timestep.observation[:,:,0]}",
+            f"P Obs:\n {p_obs} \n",
+            f"O Obs:\n {o_obs}",
         )
         self.render()
 
@@ -133,13 +136,6 @@ class ManualControl:
 
         self.timestep = self._reset(self.env_params, reset_key)
         self.render()
-        print(
-            f"Step: {self.timestep.state.step_num} | ",
-            f"StepType: {self.timestep.step_type} | ",
-            f"Discount: {self.timestep.discount} | ",
-            f"Reward: {self.timestep.reward}",
-            f"Ego Obs:\n {self.timestep.observation}",
-        )
 
     def key_handler(self, event: Event) -> None:
         key: str = event.key
