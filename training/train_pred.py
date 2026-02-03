@@ -69,7 +69,7 @@ def create_train_state(rng, config):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str,  default="./logs/trajs/MiniGrid-Protagonist-ProcGen-9x9vs9")
+    parser.add_argument("--data_dir", type=str,  default="./home/maytus/tom/tom-minigrid/logs/train_trajs/MiniGrid-Protagonist-TwoRoomsNoSwap-9x9vs9-swap")
     parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/train-env-MiniGrid-Protagonist-ProcGen-9x9vs9/staticWeight_mask")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=200)

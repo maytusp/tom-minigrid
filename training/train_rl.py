@@ -38,6 +38,7 @@ class TrainConfig:
     project: str = "tomminigrid"
     group: str = "default"
     env_id: str = "MiniGrid-Protagonist-ProcGen-9x9vs9" # 9x9 grid with view_size (receptive field) = 9
+    # env_id: str = "MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9"
     name: str = f"{env_id}-ppo"
     benchmark_id: Optional[str] = None
     ruleset_id: Optional[int] = None

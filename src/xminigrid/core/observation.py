@@ -48,20 +48,20 @@ def transparent_field_of_view(grid: GridState, agent: AgentState, height: int, w
 
 def generate_viz_mask_minigrid(grid: GridState) -> jax.Array:
     """
-    Generates a visibility mask using a Flood Fill (Propagation) approach.
+    We want invisible area to be the area that is surrounded/closed by tiles
+    Generates a visibility mask using a flood fill approach.
     
-    Logic:
+    High-level logic
     1. Visibility starts at the agent.
-    2. Visibility spreads to neighbors (Up/Down/Left/Right) ONLY from tiles that are
-       currently Visible AND Transparent.
-    3. Opaque tiles (Walls) become visible when the spread hits them, but they 
+    2. Visibility spreads to neighbors (Up/Down/Left/Right) only from tiles that are
+       currently visible and transparent.
+    3. Opaque tiles become visible when the spread hits them, but they 
        do not propagate the spread further.
     
-    This strictly satisfies: "Invisible area is the area surrounded/closed by tiles".
     """
     H, W = grid.shape[0], grid.shape[1]
     
-    # 1. Precompute Transparency Map
+    # Precompute Transparency Map
     # We need to know which tiles let light pass through.
     # We vmap check_see_behind over the grid coordinates.
     y_coords, x_coords = jnp.meshgrid(jnp.arange(H), jnp.arange(W), indexing='ij')
@@ -73,15 +73,15 @@ def generate_viz_mask_minigrid(grid: GridState) -> jax.Array:
     # (H, W) boolean array: True where light can pass
     transparency_mask = jax.vmap(jax.vmap(_is_transparent))(y_coords, x_coords)
 
-    # 2. Initialize Visibility Mask
+    # Initialize Visibility Mask
     # Agent is always at (H-1, W//2) in the UP-aligned FOV crop
     agent_pos = (H - 1, W // 2)
     viz_mask = jnp.zeros((H, W), dtype=jnp.bool_)
     viz_mask = viz_mask.at[agent_pos].set(True)
 
-    # 3. Propagation Loop (Flood Fill)
+    # Propagation Loop
     # We iterate enough times to cover the grid diameter.
-    # 4-way connectivity (Manhattan) is used to define "closed" areas.
+    # 4-way connectivity is used to define closed areas.
     
     def _propagate_step(mask, _):
         # Only transparent tiles that are already visible can propagate light
@@ -102,7 +102,7 @@ def generate_viz_mask_minigrid(grid: GridState) -> jax.Array:
 
     # Number of iterations: The longest possible Manhattan path is H + W.
     # We run this fixed number of times (compile-time constant).
-    max_steps = H + W
+    max_steps = (H + W)*2
     viz_mask, _ = jax.lax.scan(_propagate_step, viz_mask, None, length=max_steps)
 
     return viz_mask

@@ -80,11 +80,11 @@ class DirectionObservationWrapper(Wrapper):
     def observation_shape(self, params):
         base_shape = self._env.observation_shape(params)
         if isinstance(base_shape, dict):
-            assert "img" in base_shape
+            # assert "img" in base_shape
             obs_shape = {**base_shape, **{"direction": 4}}
         else:
             obs_shape = {
-                "img": self._env.observation_shape(params),
+                "p_img": self._env.observation_shape(params),
                 "direction": 4,
             }
         return obs_shape
@@ -92,14 +92,14 @@ class DirectionObservationWrapper(Wrapper):
     def __extend_obs(self, timestep):
         direction = jax.nn.one_hot(timestep.state.agent.direction, num_classes=4)
         if isinstance(timestep.observation, dict):
-            assert "img" in timestep.observation
+            # assert "img" in timestep.observation
             extended_obs = {
                 **timestep.observation,
                 **{"direction": direction},
             }
         else:
             extended_obs = {
-                "img": timestep.observation,
+                "p_img": timestep.observation,
                 "direction": direction,
             }
 
@@ -121,7 +121,7 @@ class AllocentricObservationWrapper(Wrapper):
     def observation_shape(self, params):
         base_shape = self._env.observation_shape(params)
         if isinstance(base_shape, dict):
-            assert "img" in base_shape
+            # assert "img" in base_shape
             obs_shape = {**base_shape, **{"direction": 4}}
         else:
             obs_shape = {
@@ -133,7 +133,7 @@ class AllocentricObservationWrapper(Wrapper):
     def __extend_obs(self, timestep):
         direction = jax.nn.one_hot(timestep.state.agent.direction, num_classes=4)
         if isinstance(timestep.observation, dict):
-            assert "p_img" in timestep.observation
+            # assert "p_img" in timestep.observation
             extended_obs = {
                 **timestep.observation,
                 **{"direction": direction},
