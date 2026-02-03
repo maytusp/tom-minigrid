@@ -29,12 +29,15 @@ _rule_encoding = EmptyRule().encode()[None, ...]
 @struct.dataclass
 class SwapCarry:
     star_reached: jnp.ndarray            # bool[] scalar
+    star_reached_step: jnp.ndarray       # int32[] scalar (Added: records T_m)
     swap_done: jnp.ndarray               # bool[] scalar
     goal_yx: jnp.ndarray                 # int32[2]
     star_yx: jnp.ndarray                 # int32[2]
     empty_tile: jnp.ndarray              # tile dtype
     p_swap_test: jnp.ndarray             # float32[] scalar
     doors_yx: jnp.ndarray                # int32[2,2] -> [left_door_yx, right_door_yx]
+    saved_agent_pos: jnp.ndarray         # int32[2]
+    saved_agent_dir: jnp.ndarray         # int32 scalar
     
 class ToMEnvParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
@@ -133,7 +136,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         empty_tile = grid[1, 1]
 
         WALL = TILES_REGISTRY[Tiles.WALL, Colors.GREY]
-        DOOR = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.GREEN]  # closed door, as you set
+        DOOR = TILES_REGISTRY[Tiles.DOOR_OPEN, Colors.GREEN]  # closed door, as you set
 
         # Central 7x7 bounds (inclusive) and vertical split
         # y0, y1 = 2, 6
@@ -211,27 +214,18 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             position=jnp.stack([ay, ax], axis=0),
             direction=jnp.asarray(0, jnp.int32)  # UP
         )
-        # # Test mode: reposition agent to see GOAL; move STAR far/hidden
-        # if isinstance(params, ToMEnvParams) and params.testing:
-        #     agent = self._agent_pose_to_see_goal(goal_yx=goal_yx, H=H, W=W, view_size=params.view_size)
-        #     min_sep = jnp.asarray(params.view_size, jnp.int32)
-        #     new_star_yx = self._pick_star_far_and_hidden(
-        #         key, goal_yx=goal_yx, agent=agent,
-        #         squares_yx=jnp.zeros((0, 2), dtype=jnp.int32),
-        #         H=H, W=W, view_size=params.view_size, min_sep=min_sep,
-        #     )
-        #     grid = grid.at[star_yx[0], star_yx[1]].set(empty_tile)
-        #     grid = grid.at[new_star_yx[0], new_star_yx[1]].set(TILES_REGISTRY[Tiles.STAR, Colors.GREEN])
-        #     star_yx = new_star_yx
 
         carry = SwapCarry(
             star_reached=jnp.asarray(False, dtype=jnp.bool_),
+            star_reached_step=jnp.asarray(-1, dtype=jnp.int32),
             swap_done=jnp.asarray(False, dtype=jnp.bool_),
             goal_yx=goal_yx,
             star_yx=star_yx,
             empty_tile=empty_tile,
             p_swap_test=jnp.asarray(params.swap_prob, dtype=jnp.float32),
-            doors_yx=jnp.stack([left_door_yx, right_door_yx], axis=0),  # <— add this
+            doors_yx=jnp.stack([left_door_yx, right_door_yx], axis=0),
+            saved_agent_pos=jnp.zeros((2,), dtype=jnp.int32),
+            saved_agent_dir=jnp.asarray(0, dtype=jnp.int32),
         )
 
         return State(
@@ -244,26 +238,33 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             carry=carry,
         )
 
-    def maybe_swap_after_star(self, state: State[SwapCarry], testing: bool) -> State[SwapCarry]:
+    def handle_star_reach(self, state: State[SwapCarry], testing: bool) -> State[SwapCarry]:
         carry = state.carry
 
         def _no_change(_): return state
 
-        def _process_once(_):
+        def _process_swap(_):
+            carry = state.carry
             reached_star = self._is_adjacent_and_facing(state.agent, carry.star_yx)
+            trigger_tm = reached_star & (~carry.star_reached) # star reached for the first time
 
             def _apply(_state: State[SwapCarry]) -> State[SwapCarry]:
                 _key, k_move, k_pick = jax.random.split(_state.key, 3)
-                
+
+                # Capture current agent state (to restore later)
+                saved_pos = _state.agent.position
+                saved_dir = _state.agent.direction
+                # Create the "Blind" Agent state (At 0,0, facing UP)
+                blind_agent = AgentState(
+                    position=jnp.array([1, 1], dtype=jnp.int32),
+                    direction=jnp.array(0, dtype=jnp.int32)
+                )
+
                 # A. Remove Star & Close Doors
-                g0 = _state.grid.at[_state.carry.star_yx[0], _state.carry.star_yx[1]].set(_state.carry.empty_tile)
-                DOOR_CLOSED = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.GREEN]
-                ldy, ldx = _state.carry.doors_yx[0]
-                rdy, rdx = _state.carry.doors_yx[1]
-                g1 = g0.at[ldy, ldx].set(DOOR_CLOSED).at[rdy, rdx].set(DOOR_CLOSED)
+                g1 = _state.grid.at[_state.carry.star_yx[0], _state.carry.star_yx[1]].set(_state.carry.empty_tile)
 
                 # B. Compute Room Interiors using MASKS (Dynamic Safe)
-                H, W = g1.shape[0], g1.shape[1]
+                H, W = _state.grid.shape[0], _state.grid.shape[1]
                 y0, y1, x0, x1, midx = self._get_building_bounds(H, W)
                 
                 Y, X = jnp.meshgrid(jnp.arange(H), jnp.arange(W), indexing="ij")
@@ -287,127 +288,60 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
                 ny, nx = jnp.divmod(flat_idx, W)
                 new_yx = jnp.stack([ny, nx])
 
-                # D. Apply Move
                 do_move = jax.lax.select(
                     jnp.asarray(testing),
                     jax.random.bernoulli(k_move, p=_state.carry.p_swap_test),
                     jnp.asarray(False, dtype=jnp.bool_)
                 )
 
+                def _update_carry(c, new_g_yx):
+                    return dataclasses.replace(c, 
+                        star_reached=True, 
+                        star_reached_step=_state.step_num, 
+                        swap_done=True, 
+                        goal_yx=new_g_yx,
+                        saved_agent_pos=saved_pos,
+                        saved_agent_dir=saved_dir,
+                    )
+
                 def _move(s):
                     gy, gx = s.carry.goal_yx[0], s.carry.goal_yx[1]
                     g2 = g1.at[gy, gx].set(s.carry.empty_tile)
                     g2 = g2.at[ny, nx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])
-                    new_carry = dataclasses.replace(s.carry, star_reached=True, swap_done=True, goal_yx=new_yx)
-                    return dataclasses.replace(s, key=_key, grid=g2, carry=new_carry)
+                    return dataclasses.replace(s, key=_key, grid=g2, agent=blind_agent, carry=_update_carry(s.carry, new_yx))
 
                 def _stay(s):
                     gy, gx = s.carry.goal_yx[0], s.carry.goal_yx[1]
                     g2 = g1.at[gy, gx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])
-                    new_carry = dataclasses.replace(s.carry, star_reached=True, swap_done=False)
-                    return dataclasses.replace(s, key=_key, grid=g2, carry=new_carry)
+                    return dataclasses.replace(s, key=_key, grid=g2, agent=blind_agent, carry=_update_carry(s.carry, s.carry.goal_yx))
 
                 return jax.lax.cond(do_move, _move, _stay, _state)
 
             return jax.lax.cond(reached_star, _apply, lambda s: s, state)
 
-        already_processed = jnp.logical_or(carry.star_reached, carry.swap_done)
-        return jax.lax.cond(already_processed, _no_change, _process_once, operand=None)
-    # -------------------------
-    # Optional: success checker (star-first then goal)
-    # -------------------------
-    def success_after_goal(self, state: State[SwapCarry]) -> jnp.ndarray:
-        """True if the agent already reached STAR, and is now adjacent & facing GOAL."""
-        return jnp.logical_and(
-            state.carry.star_reached,
-            self._is_adjacent_and_facing(state.agent, state.carry.goal_yx),
-        )
+        def _process_door(s):
+            # Close Doors
+            DOOR_CLOSED = TILES_REGISTRY[Tiles.DOOR_CLOSED, Colors.GREEN]
+            ldy, ldx = s.carry.doors_yx[0]
+            rdy, rdx = s.carry.doors_yx[1]
+            g1 = s.grid.at[ldy, ldx].set(DOOR_CLOSED).at[rdy, rdx].set(DOOR_CLOSED)
+            
+            # Restore Agent from Carry
+            # We explicitly ignore whatever physics happened at (0,0) in the previous step
+            restored_agent = AgentState(
+                position=s.carry.saved_agent_pos,
+                direction=s.carry.saved_agent_dir
+            )
+            
+            return s.replace(grid=g1, agent=restored_agent)
 
-    def _fov_bounds(self, agent: AgentState, view_size: int):
-        """Return inclusive (ymin, ymax, xmin, xmax) for the agent's FoV per your renderer.
-        Directions: 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT."""
-        ay, ax = agent.position[0], agent.position[1]
-        v = view_size
-        h = v // 2
-        def up(_):
-            ymin = ay - v + 1; ymax = ay
-            xmin = ax - h;      xmax = ax + h
-            return ymin, ymax, xmin, xmax
-        def right(_):
-            ymin = ay - h;      ymax = ay + h
-            xmin = ax;          xmax = ax + v - 1
-            return ymin, ymax, xmin, xmax
-        def down(_):
-            ymin = ay;          ymax = ay + v - 1
-            xmin = ax - h;      xmax = ax + h
-            return ymin, ymax, xmin, xmax
-        def left(_):
-            ymin = ay - h;      ymax = ay + h
-            xmin = ax - v + 1;  xmax = ax
-            return ymin, ymax, xmin, xmax
-        return jax.lax.switch(agent.direction, (up, right, down, left), operand=None)
+        swap_done = jnp.logical_or(carry.star_reached, carry.swap_done)
+        new_state = jax.lax.cond(swap_done, _no_change, _process_swap, operand=None)
 
-    def _in_rect(self, yx: jnp.ndarray, rect):
-        ymin, ymax, xmin, xmax = rect
-        y, x = yx[0], yx[1]
-        return jnp.logical_and(
-            jnp.logical_and(y >= ymin, y <= ymax),
-            jnp.logical_and(x >= xmin, x <= xmax),
-        )
+        close_door = (swap_done) & (state.step_num == new_state.carry.star_reached_step + 1)
+        new_state = jax.lax.cond(close_door, _process_door, lambda s: s, operand=new_state)
+        return new_state
 
-    def _agent_pose_to_see_goal(self, goal_yx: jnp.ndarray, H: int, W: int, view_size: int) -> AgentState:
-        """Pick a pose so goal is visible initially. Use dir=UP; center x on goal, y so goal is in view."""
-        v = view_size; h = v // 2
-        gy, gx = goal_yx[0], goal_yx[1]
-        ay = jnp.clip(gy + h, 1, H - 2)  # interior
-        ax = jnp.clip(gx,       1, W - 2)
-        return AgentState(position=jnp.stack([ay, ax], 0), direction=jnp.asarray(0, jnp.int32))  # UP
-
-    def _pick_star_far_and_hidden(
-        self,
-        key: jax.Array,
-        goal_yx: jnp.ndarray,
-        agent: AgentState,
-        squares_yx: jnp.ndarray,
-        H: int,
-        W: int,
-        view_size: int,
-        min_sep: int,
-    ):
-        """Choose a star position outside the agent FoV and at least min_sep (Manhattan) from the goal."""
-        # All interior coords
-        ys = jnp.arange(1, H - 1, dtype=jnp.int32)
-        xs = jnp.arange(1, W - 1, dtype=jnp.int32)
-        YY, XX = jnp.meshgrid(ys, xs, indexing="ij")   # [H-2, W-2]
-        all_yx = jnp.stack([YY.reshape(-1), XX.reshape(-1)], axis=1)  # [N,2]
-
-        # Masks: not at goal, not at agent, not at any square
-        neq_goal = jnp.any(all_yx != goal_yx[None, :], axis=1)
-        neq_agent = jnp.any(all_yx != agent.position[None, :], axis=1)
-        neq_squares = jnp.all(jnp.any(all_yx[:, None, :] != squares_yx[None, :, :], axis=2), axis=1)
-
-        # Outside FoV
-        rect = self._fov_bounds(agent, view_size)
-        outside_fov = jnp.logical_not(self._in_rect(all_yx.T, rect).T)  # vectorize via transpose trick
-
-        # Far from goal
-        gy, gx = goal_yx[0], goal_yx[1]
-        manhattan = jnp.abs(all_yx[:, 0] - gy) + jnp.abs(all_yx[:, 1] - gx)
-        far = manhattan >= jnp.asarray(min_sep, jnp.int32)
-
-        valid = jnp.logical_and(jnp.logical_and(neq_goal, neq_agent), jnp.logical_and(neq_squares, outside_fov))
-        valid = jnp.logical_and(valid, far)
-
-        # Pick the farthest valid cell; if none valid, pick farthest ignoring FoV
-        score_valid   = jnp.where(valid,   manhattan, jnp.full_like(manhattan, -10_000))
-        score_backup  = manhattan  # used if no valid
-        has_valid = jnp.any(valid)
-
-        idx_valid = jnp.argmax(score_valid)
-        idx_backup = jnp.argmax(score_backup)
-        idx = jax.lax.select(has_valid, idx_valid, idx_backup)
-
-        return all_yx[idx]
     def reset(self, params: EnvParams, key: jax.Array) -> TimeStep[EnvCarryT]:
         # Generate the Clean State
         state = self._generate_problem(params, key)
@@ -456,7 +390,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
 
         # 2. Swap Logic (Goal/Star mechanics)
         testing = getattr(params, "testing", False)
-        new_state = self.maybe_swap_after_star(new_state, testing=testing)
+        new_state = self.handle_star_reach(new_state, testing=testing)
 
         # --- 3. COMPOSITION (The "Separate Grid" Logic) ---
         
