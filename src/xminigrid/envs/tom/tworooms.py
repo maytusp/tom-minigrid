@@ -194,7 +194,15 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         grid = self._place(grid, goal_yx, TILES_REGISTRY[Tiles.GOAL, Colors.BLUE])
 
         # 2) Place STAR (GREEN) strictly OUTSIDE the two rooms (never on walls because of free mask)
-        star_yx = sample_coordinates(k_star, grid, num=1, mask=outside_mask)[0]
+        # star_yx = sample_coordinates(k_star, grid, num=1, mask=outside_mask)[0]
+        corner_candidates = jnp.array([
+            [1, 1],                # Top-Left
+            [1, W - 2],            # Top-Right
+            [H - 2, 1],            # Bottom-Left
+            [H - 2, W - 2]         # Bottom-Right
+        ], dtype=jnp.int32)
+        corner_idx = jax.random.randint(k_star, shape=(), minval=0, maxval=4)
+        star_yx = corner_candidates[corner_idx]
         grid = self._place(grid, star_yx, TILES_REGISTRY[Tiles.STAR, Colors.GREEN])
 
         # 3) Place AGENT in the SAME ROOM as the goal, with a pose that sees the goal
@@ -251,15 +259,6 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             def _apply(_state: State[SwapCarry]) -> State[SwapCarry]:
                 _key, k_move, k_pick = jax.random.split(_state.key, 3)
 
-                # Capture current agent state (to restore later)
-                saved_pos = _state.agent.position
-                saved_dir = _state.agent.direction
-                # Create the "Blind" Agent state (At 0,0, facing UP)
-                blind_agent = AgentState(
-                    position=jnp.array([1, 1], dtype=jnp.int32),
-                    direction=jnp.array(0, dtype=jnp.int32)
-                )
-
                 # A. Remove Star & Close Doors
                 g1 = _state.grid.at[_state.carry.star_yx[0], _state.carry.star_yx[1]].set(_state.carry.empty_tile)
 
@@ -299,21 +298,19 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
                         star_reached=True, 
                         star_reached_step=_state.step_num, 
                         swap_done=True, 
-                        goal_yx=new_g_yx,
-                        saved_agent_pos=saved_pos,
-                        saved_agent_dir=saved_dir,
+                        goal_yx=new_g_yx
                     )
 
                 def _move(s):
                     gy, gx = s.carry.goal_yx[0], s.carry.goal_yx[1]
                     g2 = g1.at[gy, gx].set(s.carry.empty_tile)
                     g2 = g2.at[ny, nx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])
-                    return dataclasses.replace(s, key=_key, grid=g2, agent=blind_agent, carry=_update_carry(s.carry, new_yx))
+                    return dataclasses.replace(s, key=_key, grid=g2, carry=_update_carry(s.carry, new_yx))
 
                 def _stay(s):
                     gy, gx = s.carry.goal_yx[0], s.carry.goal_yx[1]
                     g2 = g1.at[gy, gx].set(TILES_REGISTRY[Tiles.GOAL, Colors.GREEN])
-                    return dataclasses.replace(s, key=_key, grid=g2, agent=blind_agent, carry=_update_carry(s.carry, s.carry.goal_yx))
+                    return dataclasses.replace(s, key=_key, grid=g2, carry=_update_carry(s.carry, s.carry.goal_yx))
 
                 return jax.lax.cond(do_move, _move, _stay, _state)
 
@@ -326,14 +323,14 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             rdy, rdx = s.carry.doors_yx[1]
             g1 = s.grid.at[ldy, ldx].set(DOOR_CLOSED).at[rdy, rdx].set(DOOR_CLOSED)
             
-            # Restore Agent from Carry
-            # We explicitly ignore whatever physics happened at (0,0) in the previous step
-            restored_agent = AgentState(
-                position=s.carry.saved_agent_pos,
-                direction=s.carry.saved_agent_dir
-            )
+            # # Restore Agent from Carry
+            # # We explicitly ignore whatever physics happened at (0,0) in the previous step
+            # restored_agent = AgentState(
+            #     position=s.carry.saved_agent_pos,
+            #     direction=s.carry.saved_agent_dir
+            # )
             
-            return s.replace(grid=g1, agent=restored_agent)
+            return s.replace(grid=g1)
 
         swap_done = jnp.logical_or(carry.star_reached, carry.swap_done)
         new_state = jax.lax.cond(swap_done, _no_change, _process_swap, operand=None)
