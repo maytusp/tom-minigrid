@@ -172,6 +172,7 @@ class RolloutWithObs(NamedTuple):
     o_obs_seq: jax.Array # [T_max, *o_obs_img_shape], symbolic grid per step
     agent_seq: jax.Array # [T_max, 2+1] agent's position + direction
     grid_seq: jax.Array  # Grid state, similar to o_obs but exclude agent from it
+    action_seq: jax.Array # [T_max] agent's actions (int32)
     length: jax.Array     # scalar int32, actual T (<= T_max)
 
 def rollout_with_obs(
@@ -207,6 +208,7 @@ def rollout_with_obs(
     o_obs_buf0 = jnp.zeros((max_steps, *allo_img0.shape), allo_img0.dtype)
     agent_buf0 = jnp.zeros((max_steps, agent_pos0.shape[0]+1), agent_pos0.dtype)
     grid_buf0 = jnp.zeros((max_steps, *grid0.shape), grid0.dtype)
+    action_buf0 = jnp.zeros((max_steps,), dtype=jnp.int32)
 
     # Initial prev_* and bookkeeping
     prev_action0 = jnp.asarray(0)
@@ -222,13 +224,13 @@ def rollout_with_obs(
     grid_buf0 = grid_buf0.at[0].set(grid0)
 
     def cond_fn(carry):
-        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, o_obs_buf, agent_buf, grid_buf, step = carry
+        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, o_obs_buf, agent_buf, grid_buf, action_buf, step = carry
         # Continue while not done with episode (episodes<1) AND under max_steps-1
         # We allow writing index 0..length, so we stop when the *next* write would overflow.
         return jnp.logical_and(stats.episodes < 1, step < max_steps - 1)
 
     def body_fn(carry):
-        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, o_obs_buf, agent_buf, grid_buf, step = carry
+        rng, stats, timestep, prev_action, prev_reward, h, obs_buf, o_obs_buf, agent_buf, grid_buf, action_buf, step = carry
 
         rng, _rng = jax.random.split(rng)
         # Forward policy on symbolic obs
@@ -255,6 +257,7 @@ def rollout_with_obs(
 
         # Write the next pre-step frame (the observation we’ll act on next)
         # i.e., store obs for timestep_next at index (step+1)
+        action_buf = action_buf.at[step].set(action)
         obs_buf = obs_buf.at[step + 1].set(timestep_next.observation["p_img"])
         o_obs_buf = o_obs_buf.at[step + 1].set(timestep_next.observation["o_img"])
         pos = timestep_next.state.agent.position        # shape (2,)
@@ -274,16 +277,17 @@ def rollout_with_obs(
             o_obs_buf,
             agent_buf,
             grid_buf,
+            action_buf,
             step + 1,
         )
 
     final = lax.while_loop(
-        cond_fn,
-        body_fn,
-        (rng, stats0, timestep0, prev_action0, prev_reward0, h0, obs_buf0, o_obs_buf0, agent_buf0, grid_buf0, step0),
-    )
+            cond_fn,
+            body_fn,
+            (rng, stats0, timestep0, prev_action0, prev_reward0, h0, obs_buf0, o_obs_buf0, agent_buf0, grid_buf0, action_buf0, step0),
+        )
 
-    _, stats_f, _, _, _, _, obs_buf_f, o_obs_buf_f, agent_buf_f, grid_buf_f, step_f = final
+    _, stats_f, _, _, _, _, obs_buf_f, o_obs_buf_f, agent_buf_f, grid_buf_f, action_buf_f, step_f = final
 
     # The actual usable frames run from [0 .. stats_f.length] inclusive of the first frame,
     # but since we wrote one frame per step (including the last post-step obs at index=length),
@@ -297,6 +301,7 @@ def rollout_with_obs(
         o_obs_seq=o_obs_buf_f,
         agent_seq=agent_buf_f,
         grid_seq=grid_buf_f,
+        action_seq=action_buf_f,
         length=length_plus_one,
     )
 

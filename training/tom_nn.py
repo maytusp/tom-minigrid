@@ -37,8 +37,8 @@ class AuxiliaryPredictorRNN(nn.Module):
     """
     num_actions: int
     view_size: int
-    predict_frame: bool = True
-    predict_action: bool = False
+    predict_frame: bool = False
+    predict_action: bool = True
 
     # encoder/core config
     obs_emb_dim: int = 16
@@ -151,15 +151,11 @@ class AuxiliaryPredictorRNN(nn.Module):
             act_emb = action_encoder(inputs["prev_action"])
 
         # Concatenate: [B, S, hidden_dim + 2*action_emb_dim + 1]
-        # rnn_in = jnp.concatenate([obs_emb, dir_emb, act_emb, inputs["prev_reward"][..., None]], axis=-1)
         rnn_in = obs_emb
-
-        # === Core ===
         rnn_out, new_hidden = rnn_core(rnn_in, hidden)  # rnn_out: [B, S, rnn_hidden_dim]
 
         outputs: Dict[str, Any] = {}
 
-        # === Heads forward ===
         if self.predict_action:
             # Cast to full precision for stable softmax
             logits = other_actor_head(rnn_out).astype(jnp.float32)  # [B, S, num_actions]

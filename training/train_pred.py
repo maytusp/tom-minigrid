@@ -35,8 +35,8 @@ def create_train_state(rng, config):
     model = AuxiliaryPredictorRNN(
         num_actions=config['num_actions'],
         view_size=config['fov_size'],
-        predict_frame=True,
-        predict_action=False,
+        predict_frame=False,
+        predict_action=True,
         obs_emb_dim=config['obs_emb_dim'],
         rnn_hidden_dim=config['rnn_hidden_dim']
     )
@@ -69,16 +69,12 @@ def create_train_state(rng, config):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str,  default="./home/maytus/tom/tom-minigrid/logs/train_trajs/MiniGrid-Protagonist-TwoRoomsNoSwap-9x9vs9-swap")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/train-env-MiniGrid-Protagonist-ProcGen-9x9vs9/staticWeight_mask")
+    parser.add_argument("--data_dir", type=str,  default="./logs/train_trajs/tworoom_noswap")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/")
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--lr", type=float, default=3e-4)
     parser.add_argument("--fov_size", type=int, default=9)
-    parser.add_argument("--observer_r", type=int, default=9) # observer row position
-    parser.add_argument("--observer_c", type=int, default=5) # observer column position
-    parser.add_argument("--observer_d", type=int, default=0) # observer direction
-
     parser.add_argument("--num_actions", type=int, default=6) 
     parser.add_argument("--obs_emb_dim", type=int, default=16)
     parser.add_argument("--rnn_hidden_dim", type=int, default=256)
@@ -132,22 +128,10 @@ def main():
             inputs=batch_inputs,
             targets=batch_targets,
             view_size=args.fov_size,
-            predict_frame=True,
-            predict_action=False,
+            predict_frame=False,
+            predict_action=True,
             static_pixel_weight=args.static_weight  # <--- Passed here
         )
-
-    @jax.jit
-    def batch_crop_fov(allo_obs):
-        return jax.vmap(jax.vmap(
-            lambda o: crop_fov_symbolic_allocentric(
-                grid_sym=o, 
-                r=args.observer_r,
-                c=args.observer_c, 
-                view_size=args.fov_size, 
-                dir_id=args.observer_d # up
-            )
-        ))(allo_obs)
         
     # Training Loop
     global_step = 0
@@ -159,32 +143,22 @@ def main():
             # Load raw allocentric data [B, T, 11, 11, 2]
             obs_raw = jnp.array(batch['obs']) 
 
-            # --- 1. CROP FRAMES ---
-            # Convert 11x11 Allocentric -> 9x9 Egocentric
-            obs_cropped = batch_crop_fov(obs_raw)
-            
-            # --- 2. PREPARE INPUTS (Use Cropped Data) ---
             # Input: Time t
-            obs_inputs = obs_cropped[:, :-1]
-            
-
-            
+            obs_inputs = obs_raw[:, :-1]
             act_inputs = jnp.array(batch['act'])[:, :-1]
             rew_inputs = jnp.array(batch['rew'])[:, :-1]
             
-            # --- 3. PREPARE TARGETS (Use Cropped Data) ---
             # Target: Time t+1
             # We only need the Tile ID channel (0) for labels
-            obs_targets_labels = obs_cropped[:, 1:, ..., 0] 
+            obs_targets_labels = obs_raw[:, 1:, ..., 0] 
             next_act_targets = jnp.array(batch['next_act'])[:, :-1]
 
-            # --- 4. CALCULATE CHANGE MASK ---
-            # Detect changes in the *Cropped* view
+            # Detect changes
             # If a pixel changed in the world but is outside the 9x9 view, we don't care.
-            is_diff = (obs_cropped[:, 1:] != obs_cropped[:, :-1])
+            is_diff = (obs_raw[:, 1:] != obs_raw[:, :-1])
             change_mask = jnp.any(is_diff, axis=-1).astype(jnp.float32)
 
-            # --- 5. HANDLE DONE / PADDING ---
+
             mask_pad = jnp.array(batch['mask_pad'])[:, :-1]
             is_padded = 1.0 - mask_pad
             done_seq = jnp.array(batch['done'])[:, :-1]
@@ -204,7 +178,7 @@ def main():
             
             state, logs = train_step(state, inputs_jax, targets_jax, init_h)
             
-            # ... (Logging logic) ...
+
             loss_val = logs['total_loss'].item()
             epoch_losses.append(loss_val)
             global_step += 1

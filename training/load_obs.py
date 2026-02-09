@@ -2,11 +2,19 @@ import numpy as np
 import os
 
 
-def get_input_output(file_path='logs/trajs/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/ep_000_observer_sym.npz'):
+def get_input_output(file_path, ego_file_path):
     try:
         data = np.load(file_path)
-        raw_obs = data[data.files[0]]
-        observations = raw_obs[:, 1:10, 1:10, 0] # crop the outer wall 
+        raw_obs = data["o_sym"]
+        observations = raw_obs[:, :, :, 0]
+        if ego_file_path:
+            ego_data = np.load(ego_file_path)
+            raw_ego_obs = ego_data["p_sym"]
+            ego_actions = ego_data["action"]
+            ego_observations = raw_ego_obs[:, :, :, 0]
+        else:
+            ego_actions = None
+            ego_observations = None
         
     except FileNotFoundError:
         print(f"Error: File not found at {file_path}")
@@ -31,6 +39,9 @@ def get_input_output(file_path='logs/trajs/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/ep
     first_door_coord = None
     door_open_frame = -1
 
+    # for finding door coordinates
+    first_door_mask = (observations[0] == 10)
+    door_coords = list(zip(*np.where(first_door_mask)))
     # We start searching FROM the moment the star was found
     for i in range(star_idx, len(observations)):
         curr_frame = observations[i]
@@ -51,15 +62,17 @@ def get_input_output(file_path='logs/trajs/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/ep
             # We found a door opening!
             first_door_coord = (rows[0], cols[0])
             door_open_frame = i
-            # print(f"First door opened at Frame {i}")
-            # print(f"        Coordinate: {first_door_coord}")
             break
 
     if first_door_coord is None:
         print("The agent never opened a door after finding the star.")
 
+    if door_open_frame < star_idx:
+        print("Agent close and open a door beofre reaching star. We do not count this.")
+        first_door_coord = None
+
     seg_obs = observations[:star_idx+1]
-    return observations, seg_obs, star_idx, first_door_coord
+    return observations, ego_observations, ego_actions, seg_obs, star_idx, first_door_coord, door_coords
 
 if __name__ == "__main__":
     _, seg_obs, star_idx, first_door_coord = get_input_output()
