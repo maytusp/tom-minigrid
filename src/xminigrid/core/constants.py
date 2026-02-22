@@ -7,7 +7,7 @@ NUM_ACTIONS = 6
 NUM_LAYERS = 2
 NUM_TILES = 13
 NUM_COLORS = 12
-
+AGENT_IDS = [13,14,15,16]
 
 # enums, kinda...
 class Tiles(struct.PyTreeNode):
@@ -30,7 +30,6 @@ class AgentTiles(struct.PyTreeNode):
     AGENT_RIGHT: int = struct.field(pytree_node=False, default=14)
     AGENT_DOWN: int = struct.field(pytree_node=False, default=15)
     AGENT_LEFT: int = struct.field(pytree_node=False, default=16)
-
 
 class Colors(struct.PyTreeNode):
     EMPTY: int = struct.field(pytree_node=False, default=0)

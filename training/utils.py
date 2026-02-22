@@ -493,7 +493,7 @@ class NpzEpisodeDataset(Dataset):
         try:
             with np.load(path, allow_pickle=True) as data:
                 # 1. Observation: [T, V, V, C]
-                obs_seq = data['sym'].astype(np.int32)
+                obs_seq = data['o_sym'].astype(np.int32)
                 T = obs_seq.shape[0]
 
                 # 2. Meta / Direction
@@ -518,14 +518,14 @@ class NpzEpisodeDataset(Dataset):
                 if 'other_action' in data:
                     next_act = data['other_action'].astype(np.int32)
                 else:
-                    next_act = np.zeros((T,), dtype=np.int32)
+                    next_act = np.zeros((T,), dtype=np.int32) - 1
                 
                 # 6. Done
                 done_seq = np.zeros((T,), dtype=np.float32)
                 done_seq[-1] = 1.0 
 
             return {
-                "obs": obs_seq,
+                "o_obs": obs_seq,
                 "dir": dir_seq,
                 "act": action_seq,
                 "rew": reward_seq,
@@ -543,7 +543,7 @@ def pad_collate(batch):
     max_len = max(x['length'] for x in batch)
     B = len(batch)
     
-    v_obs = batch[0]['obs']
+    v_obs = batch[0]['o_obs']
     _, H, W, C = v_obs.shape
     
     out_obs = np.zeros((B, max_len, H, W, C), dtype=np.int32)
@@ -560,7 +560,7 @@ def pad_collate(batch):
 
     for i, x in enumerate(batch):
         L = x['length']
-        out_obs[i, :L] = x['obs']
+        out_obs[i, :L] = x['o_obs']
         out_dir[i, :L] = x['dir']
         out_act[i, :L] = x['act']
         out_rew[i, :L] = x['rew']
@@ -573,7 +573,7 @@ def pad_collate(batch):
         lengths.append(L)             
         
     return {
-        "obs": out_obs,
+        "o_obs": out_obs,
         "dir": out_dir,
         "act": out_act,
         "rew": out_rew,

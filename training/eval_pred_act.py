@@ -20,8 +20,8 @@ import imageio.v2 as imageio
 
 # Import P's network
 from .nn import ActorCriticRNN
-# Import O's network and utils
-from .tom_nn import AuxiliaryPredictorRNN
+# Import O's networks (Standard + Dual) and factory
+from .tom_nn import create_model, DualPerspectivePredictor, ThirdPersonPredictor
 from .utils import _dir_to_id, crop_fov_from_allocentric_rgb
 
 # --- Configs ---
@@ -40,7 +40,7 @@ class PModelCfg:
 
 @dataclass
 class OModelCfg:
-    """Config for Observer (O) - must match training args"""
+    """Config for Observer (O)"""
     obs_emb_dim: int = 16
     rnn_hidden_dim: int = 256
     fov_size: int = 9
@@ -73,34 +73,56 @@ def load_p_params(checkpoint_path: str, net, env, env_params):
         raw = msgpack_restore(f.read())
     
     raw_params = raw["params"] if (isinstance(raw, dict) and "params" in raw) else raw
+    # We use 'target_vars["params"]' as the template structure
     loaded_params = from_state_dict(target_vars["params"], raw_params)
     
     print(f"[P-Loader] Loaded from {checkpoint_path}")
     return freeze({"params": loaded_params})
 
-def load_o_params(checkpoint_path, net, cfg: OModelCfg):
-    """Load Observer (O) Parameters only, robust to optimizer mismatch."""
-    
+def load_o_params(checkpoint_path, net, cfg: OModelCfg, model_type="third_person"):
+    """
+    Load Observer (O) Parameters. 
+    Handles both standard and dual models by using the network's own init structure.
+    """
     rng = jax.random.key(0)
-    dummy_obs = jnp.zeros((1, 1, cfg.fov_size, cfg.fov_size, 2), dtype=jnp.int32)
-    dummy_inputs = {
-        "obs_img": dummy_obs,
+    
+    # Dummy inputs for initialization (valid for both Dual and TP models)
+    dummy_fp = {
+        "obs_img": jnp.zeros((1, 1, 9, 9, 3), dtype=jnp.int32), 
         "obs_dir": jnp.zeros((1, 1, 4)),
         "prev_action": jnp.zeros((1, 1), dtype=jnp.int32),
         "prev_reward": jnp.zeros((1, 1))
     }
-    h0 = net.initialize_carry(batch_size=1)
-    variables = net.init(rng, dummy_inputs, h0)
+    dummy_tp = {"obs_img": jnp.zeros((1, 1, cfg.fov_size, cfg.fov_size, 2), dtype=jnp.int32)}
+    
+    # Dual/TP models usually return 2 hidden states (h_fp, h_tp)
+    h_fp, h_tp = net.initialize_carry(batch_size=1)
+    
+    # Initialize to get correct structure
+    variables = net.init(rng, dummy_fp, h_fp, dummy_tp, h_tp)
     target_params = variables['params']
     
+    # Load raw bytes -> msgpack dict
     with open(checkpoint_path, "rb") as f:
-        raw_state_dict = msgpack_restore(f.read())
-        
-    if 'params' not in raw_state_dict:
-        raise ValueError("Checkpoint does not contain 'params' key")
-        
-    raw_params = raw_state_dict['params']
+        # Check if it's a Flax TrainState (bytes) or just params (msgpack)
+        # Usually training script saves TrainState via to_bytes
+        try:
+            raw_data = msgpack_restore(f.read())
+            # If it was saved with to_bytes(state), msgpack_restore might produce a dict 
+            # with 'params', 'opt_state', etc.
+            if isinstance(raw_data, dict) and 'params' in raw_data:
+                raw_params = raw_data['params']
+            else:
+                # Fallback: maybe just params were saved
+                raw_params = raw_data
+        except:
+            # Re-read and try strict from_bytes if msgpack failed (less likely if using msgpack format)
+            f.seek(0)
+            # This path is complex because we need a dummy TrainState. 
+            # Assuming msgpack_restore works for the dict structure.
+            raw_params = msgpack_restore(f.read())['params']
 
+    # robust restoration
     loaded_params = from_state_dict(target_params, raw_params)
     
     print(f"[O-Loader] Successfully loaded parameters from {checkpoint_path}")
@@ -118,15 +140,22 @@ def run_dual_rollout(
     max_steps: int = 1000,
     seed: int = 0,
     out_dir: str = "trajs_pred",
-    observer_r: int = 8,
-    observer_c: int = 5,
+    # observer_r: int = 8,
+    # observer_c: int = 5,
+    # fov_dir: str = "up",
+    observer_r: int = 5,
+    observer_c: int = 1,
+    fov_dir = "right",
     fov_size: int = 9,
-    fov_dir: str = "up",
+    
 ):
     os.makedirs(out_dir, exist_ok=True)
     
+    # P Init
     h0_p = net_p.initialize_carry(batch_size=1)
-    h0_o = net_o.initialize_carry(batch_size=1)
+    
+    # O Init (Dual model returns 2 states: h_fp, h_tp)
+    h0_o_fp, h0_o_tp = net_o.initialize_carry(batch_size=1)
     
     dir_id = _dir_to_id(fov_dir)
 
@@ -134,26 +163,27 @@ def run_dual_rollout(
     def run_one_episode(rng):
         rng, rng_reset = jax.random.split(rng)
         timestep_act = env.reset(env_params, rng_reset)
-        timestep_pred = timestep_act 
+        timestep_pred = jax.tree_util.tree_map(lambda x: x, timestep_act)
 
         prev_action_act = jnp.asarray(0, dtype=jnp.int32)
         prev_action_pred = jnp.asarray(0, dtype=jnp.int32)
 
         init_carry = (
             timestep_act, timestep_pred, 
-            h0_p, h0_o, 
+            h0_p,           # P's hidden state
+            h0_o_fp, h0_o_tp, # O's hidden states (FP, TP)
             prev_action_act, prev_action_pred, 
             rng
         )
 
         def step_fn(carry, _):
-            ts_act, ts_pred, h_p, h_o, pa_act, pa_pred, _rng = carry
+            ts_act, ts_pred, h_p, h_o_fp, h_o_tp, pa_act, pa_pred, _rng = carry
             
             # --- 1. Observations ---
             obs_p = ts_act.observation["p_img"]
             obs_o = ts_pred.observation["o_img"]
 
-            # --- 2. Protagonist Inference ---
+            # --- 2. Protagonist Inference (Ground Truth) ---
             in_p = {
                 "obs_img": obs_p[None, None, ...],
                 "prev_action": pa_act[None, None],
@@ -163,41 +193,78 @@ def run_dual_rollout(
             
             _rng, rng_p, rng_o_sample = jax.random.split(_rng, 3)
             
-            # FIX 1: Pass 'params_p' directly (it is already {'params': ...})
-            # FIX 2: Unpack 3 values (dist, value, hidden)
+            # P returns 3 values: dist, value, new_hidden (and seq if modified, but standard is 3)
+            # Standard ActorCriticRNN return: (dist, value, new_h)
             dist_p, _, new_h_p = net_p.apply(params_p, in_p, h_p)
-            
-            # FIX 3: Sample directly from dist_p
             action_p = dist_p.sample(seed=rng_p).squeeze()
 
-            # --- 3. Observer Inference ---
-            obs_o_2ch = obs_o[..., :2] 
+            # --- 3. Observer Inference (Prediction) ---
+            # O needs two inputs: 
+            #   inputs_fp (The Protagonist's view/history in the predicted world)
+            #   inputs_tp (The Observer's view)
             
-            in_o = {
-                "obs_img": obs_o_2ch[None, None, ...], 
+            # Prepare FP Input for Observer (using Predicted World state)
+            # Pad P's observation to 3 channels if needed (though obs_o is usually 3 ch in env)
+            # DualPerspective: FP module needs 'p_img' from the PREDICTED world.
+            pred_fp_img = ts_pred.observation["o_img"]
+            
+            in_o_fp = {
+                "obs_img": pred_fp_img[None, None, ...],
+                "obs_dir": jnp.zeros((1, 1, 4)),
                 "prev_action": pa_pred[None, None],
                 "prev_reward": ts_pred.reward[None, None],
-                "obs_dir": jnp.zeros((1, 1, 4))
+            }
+            
+            # Prepare TP Input for Observer
+            # O training usually uses 2 channels (ID, Color), discarding State(2) if present
+            obs_o_2ch = obs_o[..., :2] 
+            in_o_tp = {
+                "obs_img": obs_o_2ch[None, None, ...]
             }
 
-            # NOTE: params_o does NOT have 'params' key wrapper, so we add it here
-            preds_o, new_h_o = net_o.apply({"params": params_o}, in_o, h_o)
-            logits_o = preds_o["action_dist"].logits
+            # Run O
+            # DualPerspectivePredictor.__call__(inputs_fp, hidden_fp, inputs_tp, hidden_tp)
+            # It returns (logits, new_h_fp, new_h_tp)
+            logits_o, new_h_o_fp, new_h_o_tp = net_o.apply(
+                {"params": params_o}, 
+                in_o_fp, h_o_fp, in_o_tp, h_o_tp
+            )
+            # --- DEBUG: Print Entropy and Top Action ---
+            # 1. Calculate Probabilities
+            probs_o = jax.nn.softmax(logits_o)
             
+            # 2. Calculate Entropy (High = Uncertain, Low = Confident/Stuck)
+            entropy = -jnp.sum(probs_o * jnp.log(probs_o + 1e-6))
+            
+            # 3. Get the action O wants to take
             action_o = jax.random.categorical(rng_o_sample, logits_o).squeeze()
+            
+            # 4. Check if we are in the "Predicted" phase (Star is gone)
+            star_visible = jnp.any(obs_o[..., 0] == 12)
+            
+            # 5. Print only when simulating (star gone) to avoid spam
+            # The format string uses {x} where x is the value passed in ordered args
+            jax.debug.print(
+                "Step: Star={x} | Action={y} | Entropy={z:.3f} | Probs={p}",
+                x=star_visible,
+                y=action_o,
+                z=entropy,
+                p=probs_o[0, 0] # Print the probability distribution
+            )
+            
 
             # --- 4. Switching Logic ---
             star_visible = jnp.any(obs_o[..., 0] == 12)
 
             action_for_pred = jnp.where(star_visible, action_p, action_o)
-            
             # --- 5. Environment Step ---
             new_ts_act = env.step(env_params, ts_act, action_p)
             new_ts_pred = env.step(env_params, ts_pred, action_for_pred)
 
             new_carry = (
                 new_ts_act, new_ts_pred, 
-                new_h_p, new_h_o, 
+                new_h_p, 
+                new_h_o_fp, new_h_o_tp,
                 action_p, action_for_pred, 
                 _rng
             )
@@ -267,9 +334,10 @@ def run_dual_rollout(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/tworoom-noswap/checkpoint_199.msgpack")
+    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/tworoom-noswap/tp/checkpoint_49.msgpack", help="Observer checkpoint path")
+    parser.add_argument("--model_type", type=str, default="third_person", choices=["third_person", "dual_perspective"])
     parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9")
-    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action")
+    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/tp")
     parser.add_argument("--episodes", type=int, default=10)
     parser.add_argument("--seed", type=int, default=42)
     
@@ -305,16 +373,19 @@ def main():
         num_actions=env.num_actions(env_params)
     )
     
-    net_o = AuxiliaryPredictorRNN(
-        num_actions=o_cfg.num_actions,
-        view_size=o_cfg.fov_size,
-        predict_frame=False, 
-        predict_action=True,
-        obs_emb_dim=o_cfg.obs_emb_dim,
-        rnn_hidden_dim=o_cfg.rnn_hidden_dim
-    )
+    # Use the factory from tom_nn to select the correct class
+    # Note: we need a minimal config dict
+    config = {
+        'num_actions': o_cfg.num_actions,
+        'fp_emb': 16, 'fp_rnn': 256,
+        'tp_emb': o_cfg.obs_emb_dim, 'tp_rnn': o_cfg.rnn_hidden_dim
+    }
     
-    params_o = load_o_params(args.checkpoint, net_o, o_cfg)
+    rng = jax.random.key(args.seed)
+    net_o, _ = create_model(args.model_type, config, rng)
+    
+    # Load parameters
+    params_o = load_o_params(args.checkpoint, net_o, o_cfg, args.model_type)
 
     # 4. Run
     run_dual_rollout(

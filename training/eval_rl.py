@@ -160,7 +160,7 @@ def collect_obs(
         p_rgb_np = np.asarray(p_rgb_frames[:T_int])
         p_sym_np = np.asarray(p_sym_frames[:T_int])
         action_np = np.asarray(action_seq[:T_int])  # [T_int]
-
+        
         # paths
         out_obs_rgb_mp4 = os.path.join(out_dir, f"ep_{ep:03d}_observer_rgb.mp4")
         out_p_rgb_mp4 = os.path.join(out_dir, f"ep_{ep:03d}_protagonist_rgb.mp4")
@@ -281,7 +281,7 @@ def main():
                         observer_c = 5,
                         fov_size = 9,
                         fov_dir = "up")
-    # eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed)
+    eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed)
 
 if __name__ == "__main__":
     # This flag matches your training script default and will become default in newer JAX versions.
