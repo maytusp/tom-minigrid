@@ -1,0 +1,28 @@
+Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
+wandb: Currently logged in as: maytusp to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: creating run
+wandb: Tracking run with wandb version 0.21.1
+wandb: Run data is saved locally in /net/scratch/n70579mp/tom-minigrid/wandb/run-20260222_075902-o446mqkq
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run fearless-oath-9
+wandb: ⭐️ View project at https://wandb.ai/maytusp/tom_observer_training
+wandb: 🚀 View run at https://wandb.ai/maytusp/tom_observer_training/runs/o446mqkq
+Traceback (most recent call last):
+  File "/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/net/scratch/n70579mp/tom-minigrid/training/train_pred.py", line 316, in <module>
+    main()
+  File "/net/scratch/n70579mp/tom-minigrid/training/train_pred.py", line 139, in main
+    dataloader = DataLoader(
+  File "/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/site-packages/torch/utils/data/dataloader.py", line 388, in __init__
+    sampler = RandomSampler(dataset, generator=generator)  # type: ignore[arg-type]
+  File "/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/site-packages/torch/utils/data/sampler.py", line 162, in __init__
+    raise ValueError(
+ValueError: num_samples should be a positive integer value, but got num_samples=0
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mfearless-oath-9[0m at: [34mhttps://wandb.ai/maytusp/tom_observer_training/runs/o446mqkq[0m
+[1;34mwandb[0m: Find logs at: [1;35m../../../../../../../net/scratch/n70579mp/tom-minigrid/wandb/run-20260222_075902-o446mqkq/logs[0m
+[Dataset] Found 0 episodes in ./logs/train_trajs/tworoom_noswap
+[2026-02-22T07:59:43.153] error: *** JOB 11612250 ON node871 CANCELLED AT 2026-02-22T07:59:43 DUE to SIGNAL Terminated ***

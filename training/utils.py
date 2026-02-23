@@ -492,40 +492,45 @@ class NpzEpisodeDataset(Dataset):
         path = self.files[idx]
         try:
             with np.load(path, allow_pickle=True) as data:
-                # 1. Observation: [T, V, V, C]
+                # Observation: [T, V, V, C]
                 obs_seq = data['o_sym'].astype(np.int32)
                 T = obs_seq.shape[0]
 
-                # 2. Meta / Direction
                 meta = data['meta'].item() if data['meta'].shape == () else data['meta']
                 fov_dir = meta.get('fov_dir', 'up')
                 dir_vec = get_direction_one_hot(fov_dir)
                 dir_seq = np.tile(dir_vec, (T, 1))
 
-                # 3. Actions
+                # Actions
                 if 'action' in data:
                     action_seq = data['action'].astype(np.int32)
                 else:
-                    action_seq = np.zeros((T,), dtype=np.int32)
+                    action_seq = None
 
-                # 4. Rewards
+                # Rewards
                 if 'reward' in data:
                     reward_seq = data['reward'].astype(np.float32)
                 else:
-                    reward_seq = np.zeros((T,), dtype=np.float32)
+                    reward_seq = None
 
-                # 5. Targets (Next Action)
+                # Targets (Next Action)
                 if 'other_action' in data:
                     next_act = data['other_action'].astype(np.int32)
                 else:
                     next_act = np.zeros((T,), dtype=np.int32) - 1
                 
-                # 6. Done
+                # Target SR
+                if 'target_sr' in data:
+                    target_sr = data["target_sr"].astype(np.float32)
+                else:
+                    target_sr = None
+                # Done
                 done_seq = np.zeros((T,), dtype=np.float32)
                 done_seq[-1] = 1.0 
 
             return {
                 "o_obs": obs_seq,
+                "target_sr": target_sr,
                 "dir": dir_seq,
                 "act": action_seq,
                 "rew": reward_seq,
@@ -544,6 +549,15 @@ def pad_collate(batch):
     B = len(batch)
     
     v_obs = batch[0]['o_obs']
+    print(batch[0].keys())
+    out_target_sr = None
+    # use_sr = False
+    # if 'target_sr' in batch[0]:
+    #     use_sr = True
+    #     sr_obs = batch[0]['target_sr']
+    #     _, Ns, Ngamma = sr_obs.shape
+    #     out_target_sr = np.zeros((B, max_len, Ns, Ngamma), dtype=np.float32)
+
     _, H, W, C = v_obs.shape
     
     out_obs = np.zeros((B, max_len, H, W, C), dtype=np.int32)
@@ -560,6 +574,8 @@ def pad_collate(batch):
 
     for i, x in enumerate(batch):
         L = x['length']
+        # if use_sr:
+        #     out_target_sr[i, :L] = x['target_sr']
         out_obs[i, :L] = x['o_obs']
         out_dir[i, :L] = x['dir']
         out_act[i, :L] = x['act']
@@ -574,6 +590,7 @@ def pad_collate(batch):
         
     return {
         "o_obs": out_obs,
+        # "target_sr" : out_target_sr,
         "dir": out_dir,
         "act": out_act,
         "rew": out_rew,

@@ -9,14 +9,7 @@
 
 # Latest version of CUDA
 
-# srun -p gpuL -G 1 -n 1 -t 1-0 --pty bash
-
-
-echo "Job is using $SLURM_GPUS GPU(s) with ID(s) $CUDA_VISIBLE_DEVICES and $SLURM_CPUS_PER_TASK CPU core(s)"
-
-
 
 source activate jax
 
-
-python -m training.train_pred
+python -m training.eval_rl

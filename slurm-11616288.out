@@ -1,0 +1,23 @@
+Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
+wandb: Currently logged in as: maytusp to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.21.1
+wandb: Run data is saved locally in /net/scratch/n70579mp/tom-minigrid/wandb/run-20260222_165712-v0t240s7
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run rare-firebrand-14
+wandb: ⭐️ View project at https://wandb.ai/maytusp/tom_observer_training
+wandb: 🚀 View run at https://wandb.ai/maytusp/tom_observer_training/runs/v0t240s7
+Traceback (most recent call last):
+  File "/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/runpy.py", line 196, in _run_module_as_main
+    return _run_code(code, main_globals, None,
+  File "/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/runpy.py", line 86, in _run_code
+    exec(code, run_globals)
+  File "/net/scratch/n70579mp/tom-minigrid/training/train_pred.py", line 260, in <module>
+    main()
+  File "/net/scratch/n70579mp/tom-minigrid/training/train_pred.py", line 179, in main
+    target_sr_batch = jnp.array(batch['target_sr'])[:, :-1] if args.use_sr else None
+KeyError: 'target_sr'
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mrare-firebrand-14[0m at: [34mhttps://wandb.ai/maytusp/tom_observer_training/runs/v0t240s7[0m
+[1;34mwandb[0m: Find logs at: [1;35m../../../../../../../net/scratch/n70579mp/tom-minigrid/wandb/run-20260222_165712-v0t240s7/logs[0m
+[Dataset] Found 99768 episodes in ./logs/train_trajs/tworoom_noswap_with_sr
+--- Creating Model: third_person ---

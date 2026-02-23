@@ -12,7 +12,7 @@ from flax.serialization import to_bytes
 
 import wandb
 from torch.utils.data import DataLoader
-import functools
+
 # Import your modules
 from .tom_nn import (
     create_model,
@@ -23,16 +23,14 @@ from .utils import (
     NpzEpisodeDataset,
     pad_collate
 )
-from xminigrid.core.constants import AGENT_IDS
 
 class TrainState(train_state.TrainState):
     pass
-import jax.numpy as jnp
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_with_sr")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tp-sr/")
+    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tp/")
     parser.add_argument("--batch_size", type=int, default=64)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=3e-4)
@@ -55,13 +53,7 @@ def main():
     parser.add_argument("--track", action="store_true", default=True) 
     parser.add_argument("--wandb_project", type=str, default="tom_observer_training")
     parser.add_argument("--save_every", type=int, default=10)
-
-    parser.add_argument("--use_sr", action="store_true", default=False, 
-                            help="Enable Successor Representation prediction and loss.")
-    parser.add_argument("--sr_coef", type=float, default=1.0, 
-                        help="Weight multiplier for the SR loss.")
-    parser.add_argument("--num_states", type=int, default=81, 
-                        help="Total number of discrete states for the SR (update based on your grid size).")
+    
     args = parser.parse_args()
 
     if args.track:
@@ -84,60 +76,51 @@ def main():
     tx = optax.adam(args.lr)
     state = TrainState.create(apply_fn=model.apply, params=params['params'], tx=tx)
 
+    # 3. Define Train Step
     @jax.jit
-    def train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets: PassiveTargets, target_sr):
+    def train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets: PassiveTargets):
         print("Compiling train_step... (This should only print ONCE!)")
         def loss_fn(params, *, use_focal_loss: bool = True, focal_gamma: float = 5.0, focal_eps: float = 1e-8):
-            logits, pred_sr, _, _ = state.apply_fn(
+            logits, _, _, _ = state.apply_fn(
                 {'params': params},
                 inputs_fp, h_fp, inputs_tp, h_tp
-            )
+            )  # logits: [B, S, A]
+
             A = logits.shape[-1]
-            log_probs = jax.nn.log_softmax(logits, axis=-1)
-            probs = jnp.exp(log_probs)
-            y = targets.next_action.astype(jnp.int32)
-            y_onehot = jax.nn.one_hot(y, A)
-            
-            pt = jnp.sum(y_onehot * probs, axis=-1)
-            nll = -jnp.sum(y_onehot * log_probs, axis=-1)
 
+            # log_probs + probs
+            log_probs = jax.nn.log_softmax(logits, axis=-1)     # [B,S,A]
+            probs = jnp.exp(log_probs)                          # [B,S,A]
+
+            # true-class log prob and prob
+            y = targets.next_action.astype(jnp.int32)           # [B,S]
+            y_onehot = jax.nn.one_hot(y, A)                     # [B,S,A]
+
+            log_pt = jnp.sum(y_onehot * log_probs, axis=-1)     # [B,S]
+            pt = jnp.sum(y_onehot * probs, axis=-1)             # [B,S]
+
+            nll = -log_pt                                       # [B,S]
+
+            # --- Focal factor ---
             if use_focal_loss:
-                focal_factor = jnp.power(jnp.clip(1.0 - pt, focal_eps, 1.0), focal_gamma)
-                action_loss = nll * focal_factor
+                # (1 - pt)^gamma ; clamp for numerical safety
+                focal_factor = jnp.power(jnp.clip(1.0 - pt, focal_eps, 1.0), focal_gamma)  # [B,S]
+                per_step_loss = nll * focal_factor
             else:
-                action_loss = nll
+                per_step_loss = nll
 
-            total_per_step_loss = action_loss
-            
-            sr_loss = jnp.zeros_like(action_loss)
-            if args.use_sr:
-                log_pred_sr = jnp.log(pred_sr + 1e-8) 
-                sr_ce = -jnp.sum(target_sr * log_pred_sr, axis=2)
-                sr_loss = jnp.sum(sr_ce, axis=-1) 
-                
-                total_per_step_loss = total_per_step_loss + (args.sr_coef * sr_loss)
+            # --- Mask + weights ---
+            weights = targets.mask                     # [B,S]
+            loss = (per_step_loss * weights).sum() / jnp.maximum(weights.sum(), 1.0)
 
-            weights = targets.mask
-            loss = (total_per_step_loss * weights).sum() / jnp.maximum(weights.sum(), 1.0)
-            
-            metrics = {
-                "total_loss": loss,
-                "action_loss": (action_loss * weights).sum() / jnp.maximum(weights.sum(), 1.0),
-                "sr_loss": (sr_loss * weights).sum() / jnp.maximum(weights.sum(), 1.0)
-            }
+            return loss
 
-            return loss, metrics
-
-        grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
-        (loss, metrics), grads = grad_fn(state.params)
+        grad_fn = jax.value_and_grad(loss_fn)
+        loss, grads = grad_fn(state.params)
         state = state.apply_gradients(grads=grads)
-        return state, metrics
+        return state, {"total_loss": loss}
 
-        grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
-        (loss, metrics), grads = grad_fn(state.params)
-        state = state.apply_gradients(grads=grads)
-        return state, metrics
-
+    # 4. Training Loop
     os.makedirs(args.work_dir, exist_ok=True)
     global_step = 0
     
@@ -153,12 +136,6 @@ def main():
             rew_inputs = jnp.array(batch['rew'])[:, :-1]
             
             actions = jnp.array(batch['act'])     # [B, T]
-            target_sr_batch = None
-            # if args.use_sr:
-            #     # np.stack handles converting a list of numpy arrays into a single array before jnp
-            #     sr_array = np.stack(batch['target_sr']) if isinstance(batch['target_sr'], list) else batch['target_sr']
-            #     target_sr_batch = pad_to_fixed_len(jnp.array(sr_array))[:, :-1]
-
             target_action = actions[:, :-1]       # [B, T-1]
             prev_action = jnp.concatenate(
                 [jnp.zeros((actions.shape[0], 1), dtype=actions.dtype), actions[:, :-2]],
@@ -208,8 +185,8 @@ def main():
             h_fp, h_tp = model.initialize_carry(args.batch_size)
 
             # --- C. Update Step ---
-            state, logs = train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets_jax, target_sr_batch)
-
+            state, logs = train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets_jax)
+            
             # Logging
             loss_val = logs['total_loss'].item()
             epoch_losses.append(loss_val)
@@ -219,8 +196,6 @@ def main():
                 print(f"Ep {epoch} | It {i} | Loss: {loss_val:.4f}", end="\r")
                 wandb.log({
                     "train/total_loss": loss_val,
-                    "train/action_loss": logs['action_loss'].item(),
-                    "train/sr_loss": logs['sr_loss'].item(),
                     "train/epoch": epoch,
                     "train/global_step": global_step,
                 })
