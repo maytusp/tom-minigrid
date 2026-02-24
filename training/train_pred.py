@@ -33,10 +33,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_with_sr")
     parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tp-sr/")
-    parser.add_argument("--batch_size", type=int, default=64)
+    parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=50)
-    parser.add_argument("--lr", type=float, default=3e-4)
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--lr", type=float, default=1e-3)
+    parser.add_argument("--seed", type=int, default=1)
     
     # Model Config
     parser.add_argument("--model_type", type=str, default="third_person", 
@@ -56,9 +56,9 @@ def main():
     parser.add_argument("--wandb_project", type=str, default="tom_observer_training")
     parser.add_argument("--save_every", type=int, default=10)
 
-    parser.add_argument("--use_sr", action="store_true", default=False, 
+    parser.add_argument("--use_sr", action="store_true", default=True, 
                             help="Enable Successor Representation prediction and loss.")
-    parser.add_argument("--sr_coef", type=float, default=1.0, 
+    parser.add_argument("--sr_coef", type=float, default=0.1, 
                         help="Weight multiplier for the SR loss.")
     parser.add_argument("--num_states", type=int, default=81, 
                         help="Total number of discrete states for the SR (update based on your grid size).")
@@ -83,61 +83,40 @@ def main():
     
     tx = optax.adam(args.lr)
     state = TrainState.create(apply_fn=model.apply, params=params['params'], tx=tx)
-
+    
     @jax.jit
-    def train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets: PassiveTargets, target_sr):
-        print("Compiling train_step... (This should only print ONCE!)")
-        def loss_fn(params, *, use_focal_loss: bool = True, focal_gamma: float = 5.0, focal_eps: float = 1e-8):
-            logits, pred_sr, _, _ = state.apply_fn(
-                {'params': params},
-                inputs_fp, h_fp, inputs_tp, h_tp
-            )
+    def train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets: PassiveTargets):
+        def loss_fn(params):
+            logits, pred_sr, _, _ = state.apply_fn({'params': params}, inputs_fp, h_fp, inputs_tp, h_tp)
             A = logits.shape[-1]
             log_probs = jax.nn.log_softmax(logits, axis=-1)
             probs = jnp.exp(log_probs)
-            y = targets.next_action.astype(jnp.int32)
-            y_onehot = jax.nn.one_hot(y, A)
+            y_onehot = jax.nn.one_hot(targets.next_action.astype(jnp.int32), A)
             
             pt = jnp.sum(y_onehot * probs, axis=-1)
-            nll = -jnp.sum(y_onehot * log_probs, axis=-1)
-
-            if use_focal_loss:
-                focal_factor = jnp.power(jnp.clip(1.0 - pt, focal_eps, 1.0), focal_gamma)
-                action_loss = nll * focal_factor
-            else:
-                action_loss = nll
-
-            total_per_step_loss = action_loss
+            action_loss = -jnp.sum(y_onehot * log_probs, axis=-1) * jnp.power(jnp.clip(1.0 - pt, 1e-8, 1.0), 3.0)
             
-            sr_loss = jnp.zeros_like(action_loss)
-            if args.use_sr:
+            if args.use_sr and targets.target_sr is not None:
                 log_pred_sr = jnp.log(pred_sr + 1e-8) 
-                sr_ce = -jnp.sum(target_sr * log_pred_sr, axis=2)
-                sr_loss = jnp.sum(sr_ce, axis=-1) 
-                
-                total_per_step_loss = total_per_step_loss + (args.sr_coef * sr_loss)
-
-            weights = targets.mask
-            loss = (total_per_step_loss * weights).sum() / jnp.maximum(weights.sum(), 1.0)
+                sr_loss = jnp.sum(-jnp.sum(targets.target_sr * log_pred_sr, axis=2), axis=-1) 
+            else:
+                sr_loss = jnp.zeros_like(action_loss)
+            
+            total_loss = action_loss + (args.sr_coef * sr_loss)
+            loss = (total_loss * targets.mask).sum() / jnp.maximum(targets.mask.sum(), 1.0)
             
             metrics = {
                 "total_loss": loss,
-                "action_loss": (action_loss * weights).sum() / jnp.maximum(weights.sum(), 1.0),
-                "sr_loss": (sr_loss * weights).sum() / jnp.maximum(weights.sum(), 1.0)
+                "action_loss": (action_loss * targets.mask).sum() / jnp.maximum(targets.mask.sum(), 1.0),
+                "sr_loss": (sr_loss * targets.mask).sum() / jnp.maximum(targets.mask.sum(), 1.0)
             }
-
             return loss, metrics
 
         grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
         (loss, metrics), grads = grad_fn(state.params)
-        state = state.apply_gradients(grads=grads)
-        return state, metrics
+        return state.apply_gradients(grads=grads), metrics
 
-        grad_fn = jax.value_and_grad(loss_fn, has_aux=True)
-        (loss, metrics), grads = grad_fn(state.params)
-        state = state.apply_gradients(grads=grads)
-        return state, metrics
-
+    # 4. Training Loop
     os.makedirs(args.work_dir, exist_ok=True)
     global_step = 0
     
@@ -146,50 +125,41 @@ def main():
         start_time = time.time()
         
         for i, batch in enumerate(dataloader):
-            # --- A. Data Prep ---
-            obs_raw = jnp.array(batch['o_obs']) 
-            # Prepare sequences (t) vs targets (t+1)
-            obs_inputs = obs_raw[:, :-1]
-            rew_inputs = jnp.array(batch['rew'])[:, :-1]
-            
+            obs_raw = jnp.array(batch['o_obs']) # [B, T]
+            obs_inputs = obs_raw
+            rew_inputs = jnp.array(batch['rew'])
             actions = jnp.array(batch['act'])     # [B, T]
-            target_sr_batch = None
-            # if args.use_sr:
-            #     # np.stack handles converting a list of numpy arrays into a single array before jnp
-            #     sr_array = np.stack(batch['target_sr']) if isinstance(batch['target_sr'], list) else batch['target_sr']
-            #     target_sr_batch = pad_to_fixed_len(jnp.array(sr_array))[:, :-1]
-
-            target_action = actions[:, :-1]       # [B, T-1]
+            target_action = actions       # [B, T]
             prev_action = jnp.concatenate(
-                [jnp.zeros((actions.shape[0], 1), dtype=actions.dtype), actions[:, :-2]],
+                [jnp.zeros((actions.shape[0], 1), dtype=actions.dtype), actions[:, :-1]],
                 axis=1
-            )                                     # [B, T-1]
-            prev_reward = jnp.concatenate([jnp.zeros((actions.shape[0],1)), rew_inputs[:, :-2]], axis=1)
+            )                                     # [B, T]
+            prev_reward = jnp.concatenate([jnp.zeros((actions.shape[0],1)), rew_inputs[:, :-1]], axis=1)
 
             
             # Prepare Masks
-            mask_pad = jnp.array(batch['mask_pad'])[:, :-1]
+            mask_pad = jnp.array(batch['mask_pad'])
             is_padded = 1.0 - mask_pad
-            done_seq = jnp.array(batch['done'])[:, :-1]
+            done_seq = jnp.array(batch['done'])
             eff_done = jnp.maximum(done_seq, is_padded)
+
+            target_sr_batch = None
+            if args.use_sr:
+                sr_array = np.stack(batch['target_sr']) if isinstance(batch['target_sr'], list) else batch['target_sr']
+                target_sr_batch = jnp.array(sr_array)
 
             inputs_jax, targets_jax = build_passive_batch_from_sequences(
                 obs_seq=obs_inputs,
                 prev_action_seq=prev_action,
                 prev_reward_seq=prev_reward,
-                next_frame_seq=None, # We are only training action prediction here
+                next_frame_seq=None, 
                 next_other_action_seq=target_action,
-                done_seq=eff_done
+                done_seq=eff_done,
+                target_sr_seq=target_sr_batch,
             )
-
-            # --- B. Input Splitting & Formatting ---
             
-            # 1. TP Input (Observer View): usually 2 channels (ID, Color)
-            # Assuming obs_raw is [B, S, H, W, 2] already.
             inputs_tp = {"obs_img": inputs_jax["obs_img"]}
 
-            # 2. FP Input (Protagonist View): usually 3 channels (ID, Color, State)
-            # If dataset only has 2 channels, we pad the 3rd channel with zeros.
             obs_fp = inputs_jax["obs_img"]
             if obs_fp.shape[-1] == 2:
                 B_dim, S_dim, H_dim, W_dim, _ = obs_fp.shape
@@ -203,14 +173,11 @@ def main():
                 "prev_reward": inputs_jax["prev_reward"]
             }
 
-            # 3. Hidden State Init
             # Use model to get correct shapes for FP and TP
             h_fp, h_tp = model.initialize_carry(args.batch_size)
 
-            # --- C. Update Step ---
-            state, logs = train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets_jax, target_sr_batch)
+            state, logs = train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets_jax)
 
-            # Logging
             loss_val = logs['total_loss'].item()
             epoch_losses.append(loss_val)
             global_step += 1

@@ -56,12 +56,16 @@ def plot_confusion_matrix(y_true, y_pred, action_labels=None, save_path=None):
 def main():
     parser = argparse.ArgumentParser()
     # Path args
-    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap")
-    parser.add_argument("--checkpoint_path", type=str, default="./checkpoints/observers/tworoom-noswap/tp/checkpoint_49.msgpack", help="Path to the .msgpack file to evaluate")
+    parser.add_argument("--data_dir", type=str, default="./logs/val_trajs/tworoom_noswap_with_sr")
+    parser.add_argument("--checkpoint_path", type=str, default="./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_49.msgpack", help="Path to the .msgpack file to evaluate")
     parser.add_argument("--output_dir", type=str, default="./eval_results")
     
     # Config Args (Must match training!)
     parser.add_argument("--model_type", type=str, default="third_person", choices=["third_person", "dual_perspective"])
+    parser.add_argument("--use_sr", action="store_true", default=True, 
+                            help="Enable Successor Representation prediction and loss.")
+    parser.add_argument("--num_states", type=int, default=81, 
+                        help="Total number of discrete states for the SR (update based on your grid size).")
     parser.add_argument("--num_actions", type=int, default=6) 
     parser.add_argument("--fp_emb", type=int, default=16)
     parser.add_argument("--fp_rnn", type=int, default=256)
@@ -70,7 +74,7 @@ def main():
     
     # Evaluation specific
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--sample_trajs", type=int, default=1000, help="Number of trajectories to evaluate")
+    parser.add_argument("--sample_trajs", type=int, default=100, help="Number of trajectories to evaluate")
     parser.add_argument("--seed", type=int, default=42)
 
     args = parser.parse_args()
@@ -110,11 +114,11 @@ def main():
     # JIT the inference step for speed
     @jax.jit
     def eval_step(params, inputs_fp, inputs_tp, h_fp, h_tp):
-        logits, _, _ = state.apply_fn(
+        logits, pred_sr, _, _ = state.apply_fn(
             {'params': params},
             inputs_fp, h_fp, inputs_tp, h_tp
         )
-        return logits
+        return logits, pred_sr
 
     for batch in dataloader:
         if trajs_processed >= args.sample_trajs:
@@ -150,10 +154,7 @@ def main():
         # --- Input Formatting ---
         inputs_tp = {"obs_img": inputs_jax["obs_img"]}
         obs_fp = inputs_jax["obs_img"]
-        if obs_fp.shape[-1] == 2:
-            B_dim, S_dim, H_dim, W_dim, _ = obs_fp.shape
-            zeros = jnp.zeros((B_dim, S_dim, H_dim, W_dim, 1), dtype=obs_fp.dtype)
-            obs_fp = jnp.concatenate([obs_fp, zeros], axis=-1)
+
         
         inputs_fp = {
             "obs_img": obs_fp,
@@ -164,7 +165,7 @@ def main():
 
         # --- Inference ---
         h_fp, h_tp = model.initialize_carry(obs_raw.shape[0])
-        logits = eval_step(state.params, inputs_fp, inputs_tp, h_fp, h_tp)
+        logits, pred_sr = eval_step(state.params, inputs_fp, inputs_tp, h_fp, h_tp)
         
         # --- Metrics Extraction ---
         preds = jnp.argmax(logits, axis=-1)  # [B, S]
@@ -193,8 +194,8 @@ def main():
     
     # Define Action Labels (Modify based on your environment)
     action_map = {
-        0: "Forward", 1: "Left", 2: "Right", 3: "Open/Close", 
-        4: "", 5: "", 6: ""
+        0: "Forward", 1: "Left", 2: "Right", 3: "", 
+        4: "", 5: "Open/Close"
     }
     # Create labels list based on what actually appears in data or num_actions
     labels = [action_map.get(i, str(i)) for i in range(args.num_actions)]

@@ -542,55 +542,62 @@ class NpzEpisodeDataset(Dataset):
         except Exception as e:
             print(f"Error loading {path}: {e}")
             return self.__getitem__((idx + 1) % len(self.files))
-
 def pad_collate(batch):
-    """Pads batch to the maximum length and aggregates metadata."""
-    max_len = max(x['length'] for x in batch)
+    """Pads batch to a FIXED maximum length to prevent JAX recompilation."""
     B = len(batch)
-    
+    MAX_SEQ_LEN = 100
     v_obs = batch[0]['o_obs']
-    print(batch[0].keys())
+    
+    # Safely check for SR targets
+    use_sr = False
     out_target_sr = None
-    # use_sr = False
-    # if 'target_sr' in batch[0]:
-    #     use_sr = True
-    #     sr_obs = batch[0]['target_sr']
-    #     _, Ns, Ngamma = sr_obs.shape
-    #     out_target_sr = np.zeros((B, max_len, Ns, Ngamma), dtype=np.float32)
+    if 'target_sr' in batch[0]:
+        use_sr = True
+        sr_obs = batch[0]['target_sr']
+        _, Ns, Ngamma = sr_obs.shape
+        # Initialize with MAX_SEQ_LEN instead of dynamic max_len
+        out_target_sr = np.zeros((B, MAX_SEQ_LEN, Ns, Ngamma), dtype=np.float32)
 
     _, H, W, C = v_obs.shape
     
-    out_obs = np.zeros((B, max_len, H, W, C), dtype=np.int32)
-    out_dir = np.zeros((B, max_len, 4), dtype=np.float32)
-    out_act = np.zeros((B, max_len), dtype=np.int32)
-    out_rew = np.zeros((B, max_len), dtype=np.float32)
-    out_next_act = np.zeros((B, max_len), dtype=np.int32)
-    out_done = np.zeros((B, max_len), dtype=np.float32)
-    mask_pad = np.zeros((B, max_len), dtype=np.float32)
+    # Initialize all arrays with MAX_SEQ_LEN
+    out_obs = np.zeros((B, MAX_SEQ_LEN, H, W, C), dtype=np.int32)
+    out_dir = np.zeros((B, MAX_SEQ_LEN, 4), dtype=np.float32)
+    out_act = np.zeros((B, MAX_SEQ_LEN), dtype=np.int32)
+    out_rew = np.zeros((B, MAX_SEQ_LEN), dtype=np.float32)
+    out_next_act = np.zeros((B, MAX_SEQ_LEN), dtype=np.int32)
+    out_done = np.zeros((B, MAX_SEQ_LEN), dtype=np.float32)
+    mask_pad = np.zeros((B, MAX_SEQ_LEN), dtype=np.float32)
     
     # New lists for metadata
     file_ids = [] 
     lengths = []
 
     for i, x in enumerate(batch):
-        L = x['length']
-        # if use_sr:
-        #     out_target_sr[i, :L] = x['target_sr']
-        out_obs[i, :L] = x['o_obs']
-        out_dir[i, :L] = x['dir']
-        out_act[i, :L] = x['act']
-        out_rew[i, :L] = x['rew']
-        out_next_act[i, :L] = x['next_act']
-        out_done[i, :L] = x['done']
+        # Clip L just in case an episode somehow exceeds the MAX_SEQ_LEN
+        L = min(x['length'], MAX_SEQ_LEN) 
+        
+        if use_sr:
+            out_target_sr[i, :L] = x['target_sr'][:L]
+        
+        # Truncate inputs to :L to prevent shape broadcasting errors
+        out_obs[i, :L] = x['o_obs'][:L]
+        out_dir[i, :L] = x['dir'][:L]
+        out_act[i, :L] = x['act'][:L]
+        if x['rew']: # if not None
+            out_rew[i, :L] = x['rew'][:L]
+        
+        out_next_act[i, :L] = x['next_act'][:L]
+        out_done[i, :L] = x['done'][:L]
         mask_pad[i, :L] = 1.0
         
         # Collect metadata
         file_ids.append(x['file_id']) 
-        lengths.append(L)             
+        lengths.append(x['length'])             
         
     return {
         "o_obs": out_obs,
-        # "target_sr" : out_target_sr,
+        "target_sr" : out_target_sr,
         "dir": out_dir,
         "act": out_act,
         "rew": out_rew,

@@ -233,10 +233,10 @@ def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, en
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9//MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
-    parser.add_argument("--vid_out_dir", type=str, default="logs/train_trajs/tworoom_swap")
-    parser.add_argument("--episodes", type=int, default=5000)
-    parser.add_argument("--seed", type=int, default=1)
+    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
+    parser.add_argument("--vid_out_dir", type=str, default="logs/val_trajs/tworoom_noswap")
+    parser.add_argument("--episodes", type=int, default=100)
+    parser.add_argument("--seed", type=int, default=99)
 
     args = parser.parse_args()
 
@@ -266,7 +266,7 @@ def main():
 
     # train
     collect_obs(env, env_params, net, params,
-                        episodes=args.episodes, max_steps=1000, seed=0,
+                        episodes=args.episodes, max_steps=1000, seed=args.seed,
                         out_dir=args.vid_out_dir,
                         observer_r = 5,
                         observer_c = 1,
@@ -275,7 +275,7 @@ def main():
 
     # test
     # collect_obs(env, env_params, net, params,
-    #                     episodes=args.episodes, max_steps=1000, seed=0,
+    #                     episodes=args.episodes, max_steps=1000, seed=args.seed,
     #                     out_dir=args.vid_out_dir,
     #                     observer_r = 9,
     #                     observer_c = 5,

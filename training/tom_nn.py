@@ -23,156 +23,6 @@ from xminigrid.core.constants import NUM_COLORS, NUM_TILES
 from .nn import BatchedRNNModel, ActorCriticInput, EmbeddingEncoder, ActorCriticRNN
 
 TOTAL_TILES = NUM_TILES + 4
-class AuxiliaryPredictorRNN(nn.Module):
-    #TODO Add the version that can get action and direction of an agent as inputs
-    """
-    Same encoders and RNN core as ActorCriticRNN, but with heads for:
-      - next-frame prediction: per-cell Categorical over TOTAL_TILES
-      - other-agent next-action prediction: Categorical over num_actions
-    You can turn either head on or off via `predict_frame` / `predict_action`.
-
-    Returns:
-      outputs: Dict with (present if enabled)
-        - "action_dist": distrax.Categorical over other agent actions, shape [B, S, num_actions]
-        - "frame_logits": jnp.float32 logits with shape [B, S, view_size, view_size, TOTAL_TILES]
-      new_hidden: jnp.ndarray, the new RNN hidden state (same shape as ActorCriticRNN)
-    """
-    num_actions: int
-    view_size: int
-    predict_frame: bool = False
-    predict_action: bool = True
-
-    # encoder/core config
-    obs_emb_dim: int = 16
-    action_emb_dim: int = 16
-    rnn_hidden_dim: int = 64
-    rnn_num_layers: int = 1
-    head_hidden_dim: int = 64
-    use_dir: bool = False # use agent direction as input
-    use_action: bool = False # use agent action as input
-    img_obs: bool = False
-
-    dtype: Optional[Dtype] = None
-    param_dtype: Dtype = jnp.float32
-
-    @nn.compact
-    def __call__(
-        self,
-        inputs: ActorCriticInput,
-        hidden: jax.Array,
-    ):
-        """
-        Args:
-          inputs: same TypedDict as ActorCriticRNN (obs_img, obs_dir, prev_action, prev_reward)
-          hidden: [batch, rnn_num_layers, rnn_hidden_dim]
-        Returns:
-          (outputs, new_hidden)
-        """
-        B, S = inputs["obs_img"].shape[:2]
-
-        # === Encoders (identical to ActorCriticRNN) ===
-        if self.img_obs:
-            img_encoder = nn.Sequential(
-                [
-                    nn.Conv(16, (3, 3), strides=2, padding="VALID",
-                            kernel_init=orthogonal(math.sqrt(2)),
-                            dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.relu,
-                    nn.Conv(32, (3, 3), strides=2, padding="VALID",
-                            kernel_init=orthogonal(math.sqrt(2)),
-                            dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.relu,
-                    nn.Conv(32, (3, 3), strides=2, padding="VALID",
-                            kernel_init=orthogonal(math.sqrt(2)),
-                            dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.relu,
-                    nn.Conv(32, (3, 3), strides=2, padding="VALID",
-                            kernel_init=orthogonal(math.sqrt(2)),
-                            dtype=self.dtype, param_dtype=self.param_dtype),
-                ]
-            )
-        else:
-            img_encoder = nn.Sequential(
-                [
-                    EmbeddingEncoder(emb_dim=self.obs_emb_dim, dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.Conv(16, (2, 2), padding="VALID",
-                            kernel_init=orthogonal(math.sqrt(2)),
-                            dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.relu,
-                    nn.Conv(32, (2, 2), padding="VALID",
-                            kernel_init=orthogonal(math.sqrt(2)),
-                            dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.relu,
-                    nn.Conv(64, (2, 2), padding="VALID",
-                            kernel_init=orthogonal(math.sqrt(2)),
-                            dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.relu,
-                ]
-            )
-        if self.use_dir:
-            direction_encoder = nn.Dense(self.action_emb_dim, dtype=self.dtype, param_dtype=self.param_dtype)
-       
-        if self.use_action:
-            action_encoder = nn.Embed(self.num_actions, self.action_emb_dim)
-
-        rnn_core = BatchedRNNModel(
-            self.rnn_hidden_dim, self.rnn_num_layers, dtype=self.dtype, param_dtype=self.param_dtype
-        )
-
-        # Other-agent action head (same shape/init style as your actor).
-        if self.predict_action:
-            other_actor_head = nn.Sequential(
-                [
-                    nn.Dense(self.head_hidden_dim, kernel_init=orthogonal(2.0),
-                             dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.tanh,
-                    nn.Dense(self.num_actions, kernel_init=orthogonal(0.01),
-                             dtype=self.dtype, param_dtype=self.param_dtype),
-                ]
-            )
-
-        # Next-frame head: decode RNN features to per-cell tile logits.
-        # We keep it simple with MLP -> Dense to view_size*view_size*TOTAL_TILES and reshape.
-        if self.predict_frame:
-            frame_head = nn.Sequential(
-                [
-                    nn.Dense(self.head_hidden_dim, kernel_init=orthogonal(2.0),
-                             dtype=self.dtype, param_dtype=self.param_dtype),
-                    nn.tanh,
-                    nn.Dense(self.view_size * self.view_size * TOTAL_TILES,
-                             kernel_init=orthogonal(0.01),
-                             dtype=self.dtype, param_dtype=self.param_dtype),
-                ]
-            )
-
-        # === Build sequence inputs (identical concat) ===
-        # [B, S, ...] -> flatten spatial after conv/emb
-        obs_emb = img_encoder(inputs["obs_img"].astype(jnp.int32)).reshape(B, S, -1)
-
-        if self.use_action:
-            act_emb = action_encoder(inputs["prev_action"])
-
-        # Concatenate: [B, S, hidden_dim + 2*action_emb_dim + 1]
-        rnn_in = obs_emb
-        rnn_out, new_hidden = rnn_core(rnn_in, hidden)  # rnn_out: [B, S, rnn_hidden_dim]
-
-        outputs: Dict[str, Any] = {}
-
-        if self.predict_action:
-            # Cast to full precision for stable softmax
-            logits = other_actor_head(rnn_out).astype(jnp.float32)  # [B, S, num_actions]
-            outputs["action_dist"] = distrax.Categorical(logits=logits)
-
-        if self.predict_frame:
-            raw = frame_head(rnn_out).astype(jnp.float32)  # [B, S, V*V*TOTAL_TILES]
-            frame_logits = raw.reshape(B, S, self.view_size, self.view_size, TOTAL_TILES)
-            outputs["frame_logits"] = frame_logits  # Per-cell tile logits
-
-        return outputs, new_hidden
-
-    def initialize_carry(self, batch_size):
-        return jnp.zeros((batch_size, self.rnn_num_layers, self.rnn_hidden_dim), dtype=self.dtype)
-
 
 
 class LocalProtagonistRNN(nn.Module):
@@ -432,28 +282,31 @@ def create_model(model_type: str, config: Dict, rng):
     return model, freeze({'params': params})
 
 # --- 5. Passive Data Utils ---
-
 class PassiveTargets(struct.PyTreeNode):
     """
     next_frame: [B, S, V, V] int32   (tile ids in [0, TOTAL_TILES))
     next_action: [B, S] int32        (other agent action ids)
     mask: [B, S] float32             (1.0 for valid steps, 0.0 for padding/terminal)
     spatial_mask: [B, S, V, V] float32 (change detection mask)
+    target_sr: [B, S, Ns, Ngamma] float32 (successor representation targets)
     """
     next_frame: Optional[jax.Array] = None
     next_action: Optional[jax.Array] = None
     mask: Optional[jax.Array] = None
     spatial_mask: Optional[jax.Array] = None
+    target_sr: Optional[jax.Array] = None  # <--- ADDED
+
 
 def build_passive_batch_from_sequences(
     *,
-    obs_seq: jax.Array,          # [B,S, H, W, 2] or your packed symbolic obs
-    prev_action_seq: jax.Array,  # [B,S] (your own previous action)
-    prev_reward_seq: jax.Array,  # [B,S]
-    next_frame_seq: Optional[jax.Array],   # [B,S, V, V] (tile ids)  OR None
-    next_other_action_seq: Optional[jax.Array],  # [B,S]            OR None
-    done_seq: jax.Array,         # [B,S] 1.0 when episode ended *at* t (i.e., obs_{t+1} is invalid)
+    obs_seq: jax.Array,          
+    prev_action_seq: jax.Array,  
+    prev_reward_seq: jax.Array,  
+    next_frame_seq: Optional[jax.Array] = None,   
+    next_other_action_seq: Optional[jax.Array] = None,  
+    done_seq: jax.Array,         
     spatial_mask_seq: Optional[jax.Array] = None,
+    target_sr_seq: Optional[jax.Array] = None,
 ):
     """
     Prepares teacher-forcing inputs at time t and supervision at t+1.
@@ -461,24 +314,21 @@ def build_passive_batch_from_sequences(
     """
     B, S = obs_seq.shape[:2]
 
-    # Inputs are taken at t = 0..S-2; we keep shapes [B,S,...] by shifting targets and masking the last step.
     inputs = {
-        "obs_img": obs_seq,              # [B,S,...] as your model expects
+        "obs_img": obs_seq,              
         "prev_action": prev_action_seq,
         "prev_reward": prev_reward_seq,
     }
 
-    # Valid if not terminal *and* not on the very last time index
-    # If your `done` indicates episode finished *after* taking a_t (i.e., obs_{t+1} is terminal),
-    # then targets at t are invalid whenever done[t] == 1.
     valid_steps = (1.0 - done_seq).astype(jnp.float32)
-    # Optionally mask the final index to be safe (no t+1 exists in padded batches)
     valid_steps = valid_steps.at[:, -1].set(0.0)
+    
     targets = PassiveTargets(
         next_frame=next_frame_seq,
         next_action=next_other_action_seq,
         mask=valid_steps,
         spatial_mask=spatial_mask_seq,
+        target_sr=target_sr_seq,
     )
 
     return inputs, targets
