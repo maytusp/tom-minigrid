@@ -10,6 +10,7 @@ register(
     height=9,
     width=9,
     view_size=9,
+    door_close_delay=1
     testing=False,
 )
 register(
@@ -18,18 +19,9 @@ register(
     height=9,
     width=9,
     view_size=9,
+    door_close_delay=1,
     testing=True,
 )
-register(
-    id="MiniGrid-ToM-TwoRoomsSwapDoorOpen-9x9vs9",
-    entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
-    height=9,
-    width=9,
-    view_size=9,
-    testing=True,
-    door_can_close=False,
-)
-
 
 register(
     id="MiniGrid-Protagonist-ProcGen-9x9vs9",
