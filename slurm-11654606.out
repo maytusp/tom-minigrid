@@ -1,0 +1,51 @@
+Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
+wandb: Currently logged in as: maytusp to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: creating run
+wandb: Tracking run with wandb version 0.21.1
+wandb: Run data is saved locally in /net/scratch/n70579mp/tom-minigrid/wandb/run-20260225_091604-th76dn5b
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo
+wandb: ⭐️ View project at https://wandb.ai/maytusp/tomminigrid
+wandb: 🚀 View run at https://wandb.ai/maytusp/tomminigrid/runs/th76dn5b
+2026-02-25 09:16:28.161594: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-02-25 09:16:28.163608: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+wandb:                                                                                
+wandb: 
+wandb: Run history:
+wandb:   actor_loss █▇▇▆▃▃▄▄▄▄▅▅▄▄▆▁▁▁▂▂▃▃▃▄▄▄▅▅▅▅▅▅▅▅▅▅▆▆▇█
+wandb:      entropy ████▇▇▇▇▇▇▇▇▇▇▇▆▆▄▄▃▂▂▂▂▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁
+wandb: eval/lengths ███████████▇█▇▄▃▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
+wandb: eval/returns ▁▁▁▁▁▁▁▁▁▁▁▂▂▆▆█████████████████████████
+wandb:           lr ████▇▇▇▆▆▆▆▆▆▅▅▅▅▅▄▄▄▄▄▃▃▃▃▃▃▃▃▂▂▂▂▂▁▁▁▁
+wandb:     progress ▁▁▁▂▂▂▂▂▂▃▃▃▃▃▃▄▄▄▄▄▄▅▅▅▅▆▆▆▆▇▇▇▇▇▇█████
+wandb:   total_loss ▂▂▂▂▃▃▃▁▂▁▁▁▃▄▄▄▄▄▅▅▆▆▆▆▆▆▆▆▆▆▆▆▆▆▇▇▇▇▇█
+wandb:  transitions ▁▁▁▂▂▂▂▃▃▃▄▄▄▄▄▄▅▅▅▅▅▅▆▆▆▆▆▇▇▇▇█████████
+wandb:   value_loss ▂▂▂▂▁▁▁▁▁▁▆▅▇█▅▄▄▃▃▃▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂▂
+wandb: 
+wandb: Run summary:
+wandb:       actor_loss -0.00134
+wandb:          entropy 0.07143
+wandb:     eval/lengths 32.15
+wandb:     eval/returns 0.91069
+wandb:               lr 1e-05
+wandb:         progress 0.99475
+wandb: steps_per_second 50215.9191
+wandb:       total_loss -0.00182
+wandb:    training_time 995.70019
+wandb:      transitions 49807360
+wandb:       value_loss 0.00048
+wandb: 
+wandb: 🚀 View run MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo at: https://wandb.ai/maytusp/tomminigrid/runs/th76dn5b
+wandb: ⭐️ View project at: https://wandb.ai/maytusp/tomminigrid
+wandb: Synced 7 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
+wandb: Find logs at: ./wandb/run-20260225_091604-th76dn5b/logs
+Num devices: 1, Num updates: 381
+NUM ACTIONS: 6
+Compiling...
+Compilation Complete.
+Starting training for 381 updates (38 logging chunks)...
+Saved checkpoint: ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_step_100.msgpack
+Saved checkpoint: ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_step_200.msgpack
+Saved checkpoint: ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_step_300.msgpack
+Training finished in 995.70s
+Final model saved to ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack

@@ -53,8 +53,8 @@ def compute_sr_numpy(obs_seq, done_seq, agent_ids, num_states, gammas):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_dir", type=str, default="./logs/val_trajs/tworoom_noswap", help="Path to original data")
-    parser.add_argument("--output_dir", type=str, default="./logs/val_trajs/tworoom_noswap_with_sr", help="Path to save processed data")
+    parser.add_argument("--input_dir", type=str, default="./logs/train_trajs/tworoom_noswap_door_open_close", help="Path to original data")
+    parser.add_argument("--output_dir", type=str, default="./logs/train_trajs/tworoom_noswap_door_open_close_with_sr", help="Path to save processed data")
     parser.add_argument("--agent_ids", type=int, nargs="+", default=[13, 14, 15, 16])
     parser.add_argument("--num_states", type=int, default=81)
     parser.add_argument("--gammas", type=float, nargs="+", default=[0.5, 0.9, 0.99])

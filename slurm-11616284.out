@@ -1,2 +1,0 @@
-Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
-[2026-02-22T16:55:23.680] error: *** JOB 11616284 ON node875 CANCELLED AT 2026-02-22T16:55:23 DUE to SIGNAL Terminated ***

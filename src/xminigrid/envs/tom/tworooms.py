@@ -43,6 +43,7 @@ class ToMEnvParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
     use_color: bool = struct.field(pytree_node=False, default=True)
+    door_can_close: bool = struct.field(pytree_node=False, default=True)
 
 class TwoRooms(Environment[EnvParams, SwapCarry]):
     """Four squares, one goal, one star.
@@ -56,7 +57,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
     def default_params(self, **kwargs) -> ToMEnvParams:
         params = ToMEnvParams(height=13, width=13)
         params = params.replace(**{k: v for k, v in kwargs.items() if k in {
-            "height","width","view_size","max_steps","render_mode","testing","swap_prob"}})
+            "height","width","view_size","max_steps","render_mode","testing","swap_prob", "door_can_close"}})
         if params.max_steps is None:
             params = params.replace(max_steps=4 * (params.height * params.width))
         return params
@@ -246,7 +247,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             carry=carry,
         )
 
-    def handle_star_reach(self, state: State[SwapCarry], testing: bool) -> State[SwapCarry]:
+    def handle_star_reach(self, state: State[SwapCarry], testing: bool, door_can_close: bool) -> State[SwapCarry]:
         carry = state.carry
 
         def _no_change(_): return state
@@ -334,9 +335,12 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
 
         swap_done = jnp.logical_or(carry.star_reached, carry.swap_done)
         new_state = jax.lax.cond(swap_done, _no_change, _process_swap, operand=None)
-
-        close_door = (swap_done) & (state.step_num == new_state.carry.star_reached_step + 1)
+        new_key, k_door = jax.random.split(new_state.key)
+        random_close = jax.random.bernoulli(k_door, p=0.5)  # 50% chance of door closed or open
+        new_state = new_state.replace(key=new_key)
+        close_door = (swap_done) & (state.step_num == new_state.carry.star_reached_step + 1) & door_can_close & random_close
         new_state = jax.lax.cond(close_door, _process_door, lambda s: s, operand=new_state)
+
         return new_state
 
     def _get_observer_view(self, grid: jnp.ndarray, view_size: int) -> jnp.ndarray:
@@ -390,7 +394,8 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
 
         # swap tiles
         testing = getattr(params, "testing", False)
-        new_state = self.handle_star_reach(new_state, testing=testing)
+        door_can_close = getattr(params, "door_can_close", True)
+        new_state = self.handle_star_reach(new_state, testing, door_can_close)
 
         # Generate the separate agent layer
         agent_layer = get_agent_layer(new_state.agent, new_grid)

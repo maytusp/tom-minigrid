@@ -31,8 +31,8 @@ import jax.numpy as jnp
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_with_sr")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tp-sr/")
+    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_door_open_close_with_sr")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tp/")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -56,7 +56,7 @@ def main():
     parser.add_argument("--wandb_project", type=str, default="tom_observer_training")
     parser.add_argument("--save_every", type=int, default=10)
 
-    parser.add_argument("--use_sr", action="store_true", default=True, 
+    parser.add_argument("--use_sr", action="store_true", default=False, 
                             help="Enable Successor Representation prediction and loss.")
     parser.add_argument("--sr_coef", type=float, default=0.1, 
                         help="Weight multiplier for the SR loss.")

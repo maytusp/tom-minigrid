@@ -1,0 +1,112 @@
+Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
+2026-02-25 09:39:52.808672: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-02-25 09:39:52.810209: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+2026-02-25 09:39:52.810432: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
+[Dataset] Found 5000 episodes in ./logs/train_trajs/tworoom_noswap_door_open_close_with_sr
+--- Creating Model: third_person ---
+
+Epoch 0 Finished | Avg Loss: 1.7752 | Time: 15.96s
+Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp/checkpoint_0.msgpack
+
+Epoch 1 Finished | Avg Loss: 1.6654 | Time: 6.18s
+
+Epoch 2 Finished | Avg Loss: 1.6230 | Time: 6.17s
+
+Epoch 3 Finished | Avg Loss: 1.5444 | Time: 6.17s
+
+Epoch 4 Finished | Avg Loss: 1.3561 | Time: 5.59s
+
+Epoch 5 Finished | Avg Loss: 1.1902 | Time: 4.58s
+
+Epoch 6 Finished | Avg Loss: 1.0809 | Time: 4.57s
+
+Epoch 7 Finished | Avg Loss: 0.9705 | Time: 4.75s
+
+Epoch 8 Finished | Avg Loss: 0.8809 | Time: 4.58s
+
+Epoch 9 Finished | Avg Loss: 0.8110 | Time: 4.57s
+
+Epoch 10 Finished | Avg Loss: 0.7628 | Time: 4.57s
+Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp/checkpoint_10.msgpack
+
+Epoch 11 Finished | Avg Loss: 0.7318 | Time: 4.57s
+
+Epoch 12 Finished | Avg Loss: 0.7104 | Time: 4.57s
+
+Epoch 13 Finished | Avg Loss: 0.6931 | Time: 4.57s
+
+Epoch 14 Finished | Avg Loss: 0.6787 | Time: 4.59s
+
+Epoch 15 Finished | Avg Loss: 0.6677 | Time: 4.58s
+
+Epoch 16 Finished | Avg Loss: 0.6580 | Time: 4.60s
+
+Epoch 17 Finished | Avg Loss: 0.6492 | Time: 4.58s
+
+Epoch 18 Finished | Avg Loss: 0.6405 | Time: 4.57s
+
+Epoch 19 Finished | Avg Loss: 0.6344 | Time: 4.58s
+
+Epoch 20 Finished | Avg Loss: 0.6280 | Time: 4.58s
+Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp/checkpoint_20.msgpack
+
+Epoch 21 Finished | Avg Loss: 0.6230 | Time: 4.57s
+
+Epoch 22 Finished | Avg Loss: 0.6180 | Time: 4.57s
+
+Epoch 23 Finished | Avg Loss: 0.6132 | Time: 4.57s
+
+Epoch 24 Finished | Avg Loss: 0.6084 | Time: 4.58s
+
+Epoch 25 Finished | Avg Loss: 0.6043 | Time: 4.57s
+
+Epoch 26 Finished | Avg Loss: 0.6017 | Time: 4.57s
+
+Epoch 27 Finished | Avg Loss: 0.5982 | Time: 4.72s
+
+Epoch 28 Finished | Avg Loss: 0.5943 | Time: 4.57s
+
+Epoch 29 Finished | Avg Loss: 0.5919 | Time: 4.56s
+
+Epoch 30 Finished | Avg Loss: 0.5893 | Time: 4.56s
+Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp/checkpoint_30.msgpack
+
+Epoch 31 Finished | Avg Loss: 0.5848 | Time: 4.58s
+
+Epoch 32 Finished | Avg Loss: 0.5826 | Time: 4.57s
+
+Epoch 33 Finished | Avg Loss: 0.5801 | Time: 4.58s
+
+Epoch 34 Finished | Avg Loss: 0.5778 | Time: 4.58s
+
+Epoch 35 Finished | Avg Loss: 0.5756 | Time: 4.58s
+
+Epoch 36 Finished | Avg Loss: 0.5736 | Time: 4.58s
+
+Epoch 37 Finished | Avg Loss: 0.5711 | Time: 4.59s
+
+Epoch 38 Finished | Avg Loss: 0.5700 | Time: 4.59s
+
+Epoch 39 Finished | Avg Loss: 0.5679 | Time: 4.60s
+
+Epoch 40 Finished | Avg Loss: 0.5672 | Time: 4.59s
+Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp/checkpoint_40.msgpack
+
+Epoch 41 Finished | Avg Loss: 0.5652 | Time: 4.59s
+
+Epoch 42 Finished | Avg Loss: 0.5639 | Time: 4.59s
+
+Epoch 43 Finished | Avg Loss: 0.5628 | Time: 4.59s
+
+Epoch 44 Finished | Avg Loss: 0.5613 | Time: 4.59s
+
+Epoch 45 Finished | Avg Loss: 0.5596 | Time: 4.59s
+
+Epoch 46 Finished | Avg Loss: 0.5579 | Time: 4.60s
+
+Epoch 47 Finished | Avg Loss: 0.5572 | Time: 4.71s
+
+Epoch 48 Finished | Avg Loss: 0.5560 | Time: 4.56s
+
+Epoch 49 Finished | Avg Loss: 0.5539 | Time: 4.55s
+Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp/checkpoint_49.msgpack

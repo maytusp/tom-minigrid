@@ -37,8 +37,8 @@ class TrainConfig:
     '''
     project: str = "tomminigrid"
     group: str = "default"
-    env_id: str = "MiniGrid-Protagonist-ProcGen-9x9vs9" # 9x9 grid with view_size (receptive field) = 9
-    # env_id: str = "MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9"
+    # env_id: str = "MiniGrid-Protagonist-ProcGen-9x9vs9" # 9x9 grid with view_size (receptive field) = 9
+    env_id: str = "MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9"
     name: str = f"{env_id}-ppo"
     benchmark_id: Optional[str] = None
     ruleset_id: Optional[int] = None
@@ -58,7 +58,7 @@ class TrainConfig:
     num_steps: int = 128
     update_epochs: int = 4
     num_minibatches: int = 16
-    total_timesteps: int = 100_000_000 # 100M step
+    total_timesteps: int = 50_000_000 # 100M step
     lr: float = 0.001
     clip_eps: float = 0.2
     gamma: float = 0.99
@@ -69,7 +69,7 @@ class TrainConfig:
     eval_episodes: int = 80
     seed: int = 1
     save_dir: str = f"./checkpoints/{env_id}"        # save model path
-    save_every: int = 10000                   # save model every X updates
+    save_every: int = 100                   # save model every X updates
     log_frequency: int = 10  # Run 10 updates, then log, then continue
 
     def __post_init__(self):

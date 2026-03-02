@@ -24,8 +24,44 @@ from .nn import ActorCriticRNN
 from .tom_nn import create_model, DualPerspectivePredictor, ThirdPersonPredictor
 from .utils import _dir_to_id, crop_fov_from_allocentric_rgb, crop_fov_symbolic_allocentric
 
+def get_first_visited_door(obs_seq, pos_seq, crop_border=1):
+    """
+    Scans a sequence of agent positions to find the first time it steps on a door cell
+    AFTER the STAR has been reached (i.e., when the STAR disappears from the grid).
+    obs is the cropped of full grid (excluding border) so we must add the offset
+    #TODO xy of obs_seq depends on the direction of the observer.
+    """
+    T = obs_seq.shape[0]
+    if T == 0:
+        return None
+        
+    # 1. Map door locations from the first frame
+    initial_grid = obs_seq[0]
+    # Channel 0: 8 is DOOR_LOCKED, 9 is DOOR_CLOSED, 10 is DOOR_OPEN
+    is_door = (initial_grid[..., 0] == 8) | (initial_grid[..., 0] == 9) | (initial_grid[..., 0] == 10) 
+    
+    # Get all coordinates where a door exists. np.argwhere returns (row, col)
+    door_coords_yx = set(map(tuple, np.argwhere(is_door)+1)) 
+    
+    star_reached = False
+    
+    # 2. Check the agent's position step-by-step
+    for t in range(T):
+        # The STAR is ID 12 in channel 0. If it's missing, it has been reached.
+        star_present = np.any(obs_seq[t, ..., 0] == 12)
+    
+        if not star_present:
+            star_reached = True
+            
+        pos = tuple(pos_seq[t])
+        
+        # Only evaluate door visits if the STAR has already been collected
+        if star_reached and pos in door_coords_yx:
+            print(f"POS {pos}")
+            return pos
+            
+    return None
 # --- Configs ---
-
 @dataclass
 class PModelCfg:
     """Config for Protagonist (P)"""
@@ -241,13 +277,13 @@ def run_dual_rollout(
             
             # Print only when simulating (star gone) to avoid spam
             # The format string uses {x} where x is the value passed in ordered args
-            jax.debug.print(
-                "Step: Star={x} | Action={y} | Entropy={z:.3f} | Probs={p}",
-                x=star_visible,
-                y=action_o,
-                z=entropy,
-                p=probs_o[0, 0] # Print the probability distribution
-            )
+            # jax.debug.print(
+            #     "Step: Star={x} | Action={y} | Entropy={z:.3f} | Probs={p}",
+            #     x=star_visible,
+            #     y=action_o,
+            #     z=entropy,
+            #     p=probs_o[0, 0] # Print the probability distribution
+            # )
 
             action_for_pred = jnp.where(star_visible, action_p, action_o)
             # --- 5. Environment Step ---
@@ -261,10 +297,14 @@ def run_dual_rollout(
                 action_p, action_for_pred, 
                 _rng
             )
-            
+            act_pos = ts_act.state.agent.position
+            pred_pos = ts_pred.state.agent.position
+
             outs = {
                 "act_o_img": ts_act.observation["o_img"],
                 "pred_o_img": ts_pred.observation["o_img"],
+                "act_pos": act_pos,        
+                "pred_pos": pred_pos,           
                 "action_p": action_p,
                 "action_o": action_o,
                 "used_action": action_for_pred,
@@ -273,6 +313,7 @@ def run_dual_rollout(
                 "done_act": ts_act.last(),
             }
             return new_carry, outs
+
 
         final_carry, scan_out = jax.lax.scan(step_fn, init_carry, None, length=max_steps)
         return scan_out
@@ -299,6 +340,9 @@ def run_dual_rollout(
 
     rng = jax.random.key(seed)
     
+    correct_predictions = 0
+    failed_predictions = 0
+    ignored_episodes = 0
     for ep in range(episodes):
         rng, sub_rng = jax.random.split(rng)
         out = run_one_episode(sub_rng)
@@ -307,8 +351,30 @@ def run_dual_rollout(
         T = (np.argmax(dones) + 1) if dones.any() else max_steps
         
         reward = np.sum(out["reward_act"][:T])
-        print(f"Episode {ep}: T={T}, Reward={reward}")
+
+        # Extract the grids and positions up to time T
+        act_grids = np.array(out["act_o_img"][:T])
+        pred_grids = np.array(out["pred_o_img"][:T])
+        act_positions = np.array(out["act_pos"][:T])
+        pred_positions = np.array(out["pred_pos"][:T])
         
+        # Find the first VISITED door in both environments
+        first_door_act = get_first_visited_door(act_grids, act_positions)
+        first_door_pred = get_first_visited_door(pred_grids, pred_positions)
+        
+        # Evaluate Alignment
+        if first_door_act is None:
+            alignment_status = "IGNORED (Actual agent did not visit a door)"
+            ignored_episodes += 1
+        elif first_door_act == first_door_pred:
+            alignment_status = "CORRECT"
+            correct_predictions += 1
+        else:
+            alignment_status = f"FAILED (Actual: {first_door_act}, Pred: {first_door_pred})"
+            failed_predictions += 1
+        
+        print(f"Episode {ep:03d}: T={T}, Reward={reward:.2f} | ToM Alignment: {alignment_status}")
+        print(f"Actual: {first_door_act}, Predicted: {first_door_pred}")
         video_frames = render_traj(out, T)
         video_np = np.array(video_frames)
         
@@ -323,19 +389,19 @@ def run_dual_rollout(
             star_visible=out["star_visible"][:T]
         )
         print(f"Saved {vid_path}")
-
+    print(f"Accuracy: {correct_predictions / (episodes - ignored_episodes)}")
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_49.msgpack", help="Observer checkpoint path")
+    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/tworoom-noswap/tp/checkpoint_49.msgpack", help="Observer checkpoint path")
     parser.add_argument("--model_type", type=str, default="third_person", choices=["third_person", "dual_perspective"])
-    parser.add_argument("--use_sr", action="store_true", default=True, 
+    parser.add_argument("--use_sr", action="store_true", default=False, 
                             help="Enable Successor Representation prediction and loss.")
     parser.add_argument("--num_states", type=int, default=81, 
                         help="Total number of discrete states for the SR (update based on your grid size).")
     parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9")
-    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/tp-sr/")
-    parser.add_argument("--episodes", type=int, default=10)
+    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/tp/swap_door_close_open")
+    parser.add_argument("--episodes", type=int, default=20)
     parser.add_argument("--seed", type=int, default=42)
     
     # O args (must match training)
