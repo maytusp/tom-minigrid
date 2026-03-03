@@ -3,16 +3,19 @@ from .registration import make, register, registered_environments
 
 # TODO: add __all__
 __version__ = "0.9.1"
-
+# training environment for O and P to learn to solve the task without item swapping, some randomness in the door close delay to prevent overfitting.
 register(
     id="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9",
     entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
     height=9,
     width=9,
     view_size=9,
-    door_close_delay=1,
+    door_close_delay=20,
+    random_door_close_delay=True,
     testing=False,
 )
+
+# eval environments: items swap after 1, 2, 4, or 8 steps (with no randomness)
 register(
     id="MiniGrid-ToM-TwoRoomsSwap-9x9vs9",
     entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
@@ -20,6 +23,7 @@ register(
     width=9,
     view_size=9,
     door_close_delay=1,
+    random_door_close_delay=False,
     testing=True,
 )
 
@@ -30,19 +34,35 @@ register(
     width=9,
     view_size=9,
     door_close_delay=2,
+    random_door_close_delay=False,
     testing=True,
 )
 
 register(
-    id="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d20",
+    id="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d4",
     entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
     height=9,
     width=9,
     view_size=9,
-    door_close_delay=20,
+    door_close_delay=4,
+    random_door_close_delay=False,
     testing=True,
 )
 
+register(
+    id="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d8",
+    entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
+    height=9,
+    width=9,
+    view_size=9,
+    door_close_delay=8,
+    random_door_close_delay=False,
+    testing=True,
+)
+
+
+
+# ProcGen Environments (currently not used)
 register(
     id="MiniGrid-Protagonist-ProcGen-9x9vs9",
     entry_point="xminigrid.envs.tom.protagonist_procgen:SallyAnneRooms",

@@ -36,19 +36,27 @@ class SwapCarry:
     empty_tile: jnp.ndarray              # tile dtype
     p_swap_test: jnp.ndarray             # float32[] scalar
     doors_yx: jnp.ndarray                # int32[2,2] -> [left_door_yx, right_door_yx]
+    door_close_delay: jnp.ndarray        # int32[] scalar (The actual delay for this episode)
     
 class ToMEnvParams(EnvParams):
     testing: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
     use_color: bool = struct.field(pytree_node=False, default=True)
+    
+    # If random_door_close_delay is True: delay is sampled from [1, door_close_delay]
+    # If random_door_close_delay is False: delay is exactly door_close_delay
     door_close_delay: int = struct.field(pytree_node=False, default=1)
+    random_door_close_delay: bool = struct.field(pytree_node=False, default=False)
 
 class TwoRooms(Environment[EnvParams, SwapCarry]):
     """Four squares, one goal, one star.
     Task: go to STAR first (adjacent & facing) → STAR disappears. Then go to GOAL.
     Test-time Sally–Anne: with prob `swap_prob` right after STAR is reached, swap the GOAL with a
     randomly chosen SQUARE.
-    Doors close exactly `door_close_delay` steps after star is reached.
+    
+    Doors close logic:
+    - If random_door_close_delay=False: Closes `door_close_delay` steps after star reach.
+    - If random_door_close_delay=True: Closes random(1, door_close_delay) steps after star reach.
     """
     def num_actions(self, params: EnvParamsT) -> int:
         return 6
@@ -57,10 +65,9 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         params = ToMEnvParams(height=13, width=13)
         params = params.replace(**{k: v for k, v in kwargs.items() if k in {
             "height","width","view_size","max_steps","render_mode",
-            "testing","swap_prob", "door_close_delay"}})
+            "testing","swap_prob", "door_close_delay", "random_door_close_delay"}})
         if params.max_steps is None:
             params = params.replace(max_steps=4 * (params.height * params.width))
-        print(f"env params {params}")
         return params
 
 
@@ -223,6 +230,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             empty_tile=empty_tile,
             p_swap_test=jnp.asarray(params.swap_prob, dtype=jnp.float32),
             doors_yx=jnp.stack([left_door_yx, right_door_yx], axis=0),
+            door_close_delay=jnp.asarray(-1, dtype=jnp.int32),
         )
 
         return State(
@@ -238,7 +246,8 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
     def handle_star_reach(self, state: State[SwapCarry], params: EnvParams) -> State[SwapCarry]:
         # Unpack params
         testing = params.testing
-        door_close_delay = params.door_close_delay
+        random_delay_enabled = params.random_door_close_delay
+        max_delay = params.door_close_delay
         
         carry = state.carry
         
@@ -246,15 +255,25 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         is_at_star = self._is_adjacent_and_facing(state.agent, carry.star_yx)
         trigger_first_reach = is_at_star & (~carry.star_reached)
 
-        # --- 1. HANDLE GOAL SWAP (On First Reach) ---
+        # --- 1. HANDLE GOAL SWAP & DELAY SAMPLING (On First Reach) ---
         def _process_first_reach(_state: State[SwapCarry]) -> State[SwapCarry]:
             # Sample keys
-            _key, k_move, k_pick = jax.random.split(_state.key, 3)
+            _key, k_move, k_pick, k_delay = jax.random.split(_state.key, 4)
 
-            # A. Remove Star
+            # Determine delay for this specific episode
+            sampled_delay = jax.random.randint(k_delay, shape=(), minval=1, maxval=max_delay + 1)
+            fixed_delay = jnp.asarray(max_delay, dtype=jnp.int32)
+            
+            actual_delay = jax.lax.select(
+                jnp.asarray(random_delay_enabled),
+                sampled_delay,
+                fixed_delay
+            )
+
+            # B. Remove Star
             g1 = _state.grid.at[_state.carry.star_yx[0], _state.carry.star_yx[1]].set(_state.carry.empty_tile)
 
-            # B. Determine Room Masks for Swapping
+            # C. Determine Room Masks for Swapping
             H, W = _state.grid.shape[0], _state.grid.shape[1]
             y0, y1, x0, x1, midx = self._get_building_bounds(H, W)
             Y, X = jnp.meshgrid(jnp.arange(H), jnp.arange(W), indexing="ij")
@@ -267,30 +286,31 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             goal_is_left = gx < midx
             target_mask = jax.lax.select(goal_is_left, right_mask, left_mask)
 
-            # C. Sample New Goal Position (Gumbel-Max)
+            # D. Sample New Goal Position (Gumbel-Max)
             flat_mask = target_mask.reshape(-1)
             logits = jnp.where(flat_mask, 0.0, -1e9)
             flat_idx = jax.random.categorical(k_pick, logits)
             ny, nx = jnp.divmod(flat_idx, W)
             new_yx = jnp.stack([ny, nx])
 
-            # D. Decide if Swap Happens
+            # E. Decide if Swap Happens
             do_move = jax.lax.select(
                 jnp.asarray(testing),
                 jax.random.bernoulli(k_move, p=_state.carry.p_swap_test),
                 jnp.asarray(False, dtype=jnp.bool_)
             )
 
-            # E. Update Carry
+            # F. Update Carry (Store the actual delay!)
             def _update_carry(c, new_g_yx):
                 return dataclasses.replace(c, 
                     star_reached=True, 
                     star_reached_step=_state.step_num, 
                     swap_done=True, 
-                    goal_yx=new_g_yx
+                    goal_yx=new_g_yx,
+                    door_close_delay=actual_delay
                 )
 
-            # F. Update Grid
+            # G. Update Grid
             def _move(s):
                 gy, gx = s.carry.goal_yx[0], s.carry.goal_yx[1]
                 g2 = g1.at[gy, gx].set(s.carry.empty_tile)
@@ -307,11 +327,11 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         # Apply First Reach Logic if triggered
         state = jax.lax.cond(trigger_first_reach, _process_first_reach, lambda s: s, state)
 
-        # --- 2. HANDLE DOOR CLOSING (Deterministic Delay) ---
+        # --- 2. HANDLE DOOR CLOSING (Based on Stored Delay) ---
         # Logic: If star has been reached, check if current_step matches target time
-        # Target Time = star_reached_step + door_close_delay
+        # Target Time = star_reached_step + stored_episode_delay
         
-        target_step = state.carry.star_reached_step + door_close_delay
+        target_step = state.carry.star_reached_step + state.carry.door_close_delay
         should_close_now = state.carry.star_reached & (state.step_num == target_step)
 
         def _close_doors(s):
@@ -372,8 +392,11 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             agent=new_agent,
             step_num=timestep.state.step_num + 1,
         )
+
+        # 2. Swap tiles & Handle Doors
         new_state = self.handle_star_reach(new_state, params)
 
+        # 3. Observations
         agent_layer = get_agent_layer(new_state.agent, new_grid)
         visual_grid = jnp.where(
             agent_layer != TILES_REGISTRY[Tiles.EMPTY, Colors.EMPTY], 
