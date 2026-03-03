@@ -17,7 +17,8 @@ import functools
 from .tom_nn import (
     create_model,
     build_passive_batch_from_sequences,
-    PassiveTargets
+    PassiveTargets,
+    create_optimizer
 )
 from .utils import (
     NpzEpisodeDataset,
@@ -31,16 +32,19 @@ import jax.numpy as jnp
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_door_open_close_with_sr")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tp/")
+    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_doordelay1")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tpfp_nofp/")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--seed", type=int, default=1)
     
     # Model Config
-    parser.add_argument("--model_type", type=str, default="third_person", 
+    parser.add_argument("--model_type", type=str, default="dual_perspective", 
                         choices=["third_person", "dual_perspective"])
+
+    parser.add_argument("--freeze_fp", action="store_true", default=False)
+
     parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack",
                         help="Path to protagonist checkpoint")
     
@@ -52,7 +56,7 @@ def main():
     parser.add_argument("--tp_rnn", type=int, default=256)
 
     # Logging
-    parser.add_argument("--track", action="store_true", default=True) 
+    parser.add_argument("--track", default=True) 
     parser.add_argument("--wandb_project", type=str, default="tom_observer_training")
     parser.add_argument("--save_every", type=int, default=10)
 
@@ -80,8 +84,13 @@ def main():
     
     # create_model handles the dual/third switch and P-loading
     model, params = create_model(args.model_type, config, rng)
+    if args.freeze_fp and args.model_type == "dual_perspective":
+        print("Freeze FP network")
+        tx = create_optimizer(learning_rate=args.lr, params=params)
+    else:
+        tx = optax.adam(args.lr)
     
-    tx = optax.adam(args.lr)
+
     state = TrainState.create(apply_fn=model.apply, params=params['params'], tx=tx)
     
     @jax.jit

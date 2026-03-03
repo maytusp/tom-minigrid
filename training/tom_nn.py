@@ -12,6 +12,8 @@ from flax.linen.initializers import glorot_normal, orthogonal, zeros_init
 from flax.typing import Dtype
 from flax.serialization import to_bytes, msgpack_restore, from_state_dict
 from flax.core import freeze
+import flax.traverse_util
+
 
 from typing import Optional, Dict, Any
 import math
@@ -265,7 +267,7 @@ def create_model(model_type: str, config: Dict, rng):
     params = flax.core.unfreeze(variables['params'])
 
     # Grafting Logic
-    if model_type == "dual_perspective" and config.get('p_checkpoint'):
+    if model_type == "dual_perspective" and len(config.get('p_checkpoint')) > 0:
         print(f"Loading FP weights from: {config['p_checkpoint']}")
         with open(config['p_checkpoint'], "rb") as f:
             raw_p = msgpack_restore(f.read())
@@ -297,6 +299,45 @@ class PassiveTargets(struct.PyTreeNode):
     target_sr: Optional[jax.Array] = None  # <--- ADDED
 
 
+def partition_params(params):
+    """
+    Returns a PyTree of strings matching the structure of params.
+    Labels 'fp_module' params as 'frozen' and everything else as 'trainable'.
+    """
+    flat_params = flax.traverse_util.flatten_dict(params)
+    flat_labels = {}
+    
+    for path, _ in flat_params.items():
+        # path is a tuple of keys, e.g., ('fp_module', 'Dense_0', 'kernel')
+        # We check if the top-level key is 'fp_module'
+        if path[0] == 'fp_module':
+            flat_labels[path] = 'frozen'
+        else:
+            flat_labels[path] = 'trainable'
+            
+    return flax.traverse_util.unflatten_dict(flat_labels)
+
+
+def create_optimizer(learning_rate, params):
+    # 1. Define the mapping of labels to optimizers
+    # 'trainable': your standard optimizer (e.g., Adam, AdamW)
+    # 'frozen': optax.set_to_zero() ensures parameters never change
+    transforms = {
+        'trainable': optax.chain(
+            optax.clip_by_global_norm(1.0),  # Optional: Gradient clipping
+            optax.adam(learning_rate)
+        ),
+        'frozen': optax.set_to_zero()
+    }
+    
+    # 2. Generate the labels for your specific parameters
+    param_labels = partition_params(params)
+    
+    # 3. Create the multi-transformed optimizer
+    tx = optax.multi_transform(transforms, param_labels)
+    return tx
+
+    
 def build_passive_batch_from_sequences(
     *,
     obs_seq: jax.Array,          

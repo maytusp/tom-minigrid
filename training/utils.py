@@ -551,7 +551,7 @@ def pad_collate(batch):
     # Safely check for SR targets
     use_sr = False
     out_target_sr = None
-    if 'target_sr' in batch[0]:
+    if batch[0]['target_sr']: # check if not None
         use_sr = True
         sr_obs = batch[0]['target_sr']
         _, Ns, Ngamma = sr_obs.shape

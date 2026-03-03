@@ -60,6 +60,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             "testing","swap_prob", "door_close_delay"}})
         if params.max_steps is None:
             params = params.replace(max_steps=4 * (params.height * params.width))
+        print(f"env params {params}")
         return params
 
 

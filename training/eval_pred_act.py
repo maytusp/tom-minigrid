@@ -24,43 +24,47 @@ from .nn import ActorCriticRNN
 from .tom_nn import create_model, DualPerspectivePredictor, ThirdPersonPredictor
 from .utils import _dir_to_id, crop_fov_from_allocentric_rgb, crop_fov_symbolic_allocentric
 
-def get_first_visited_door(obs_seq, pos_seq, crop_border=1):
+def get_door_sequence(obs_seq):
     """
-    Scans a sequence of agent positions to find the first time it steps on a door cell
-    AFTER the STAR has been reached (i.e., when the STAR disappears from the grid).
-    obs is the cropped of full grid (excluding border) so we must add the offset
-    #TODO xy of obs_seq depends on the direction of the observer.
+    Extracts coordinates of doors that transitioned from CLOSED to OPEN.
+    obs_seq shape: (T, 9, 9, 2)
     """
     T = obs_seq.shape[0]
-    if T == 0:
-        return None
-        
-    # 1. Map door locations from the first frame
-    initial_grid = obs_seq[0]
-    # Channel 0: 8 is DOOR_LOCKED, 9 is DOOR_CLOSED, 10 is DOOR_OPEN
-    is_door = (initial_grid[..., 0] == 8) | (initial_grid[..., 0] == 9) | (initial_grid[..., 0] == 10) 
-    
-    # Get all coordinates where a door exists. np.argwhere returns (row, col)
-    door_coords_yx = set(map(tuple, np.argwhere(is_door)+1)) 
-    
+    if T < 2:
+        return []
+
     star_reached = False
-    
-    # 2. Check the agent's position step-by-step
-    for t in range(T):
-        # The STAR is ID 12 in channel 0. If it's missing, it has been reached.
-        star_present = np.any(obs_seq[t, ..., 0] == 12)
-    
-        if not star_present:
-            star_reached = True
-            
-        pos = tuple(pos_seq[t])
-        
-        # Only evaluate door visits if the STAR has already been collected
-        if star_reached and pos in door_coords_yx:
-            print(f"POS {pos}")
-            return pos
-            
-    return None
+    visited_sequence = []
+    # Use a set to ensure we don't log the same door-opening event 
+    # multiple times if the logic triggers over consecutive frames
+    opened_doors = set()
+
+    for t in range(1, T):
+        # 1. Identify if the star is reached (Star ID = 12)
+        # We only care about doors opened AFTER the star is gone
+        if not star_reached:
+            star_present = np.any(obs_seq[t, ..., 0] == 12)
+            if not star_present:
+                star_reached = True
+            continue # Skip processing until star is reached
+
+        # 2. Compare current grid with previous grid (Channel 0 only)
+        prev_grid = obs_seq[t-1, ..., 0]
+        curr_grid = obs_seq[t, ..., 0]
+
+        # 3. Find coordinates where state changed from 9 (CLOSED) to 10 (OPEN)
+        # This captures the "Toggle" effect regardless of agent position
+        changed_to_open = (prev_grid == 9) & (curr_grid == 10)
+        coords = np.argwhere(changed_to_open)
+
+        for c in coords:
+            door_pos = tuple(c)
+            if door_pos not in opened_doors:
+                visited_sequence.append(door_pos)
+                opened_doors.add(door_pos)
+
+    return visited_sequence
+
 # --- Configs ---
 @dataclass
 class PModelCfg:
@@ -187,7 +191,7 @@ def run_dual_rollout(
     net_o, params_o,
     *,
     episodes: int = 1,
-    max_steps: int = 1000,
+    max_steps: int = 80,
     seed: int = 0,
     out_dir: str = "trajs_pred",
     # observer_r: int = 8,
@@ -275,16 +279,6 @@ def run_dual_rollout(
             # Check if we are in the "Predicted" phase (Star is gone)
             star_visible = jnp.any(obs_o[..., 0] == 12)
             
-            # Print only when simulating (star gone) to avoid spam
-            # The format string uses {x} where x is the value passed in ordered args
-            # jax.debug.print(
-            #     "Step: Star={x} | Action={y} | Entropy={z:.3f} | Probs={p}",
-            #     x=star_visible,
-            #     y=action_o,
-            #     z=entropy,
-            #     p=probs_o[0, 0] # Print the probability distribution
-            # )
-
             action_for_pred = jnp.where(star_visible, action_p, action_o)
             # --- 5. Environment Step ---
             new_ts_act = env.step(env_params, ts_act, action_p)
@@ -311,6 +305,7 @@ def run_dual_rollout(
                 "star_visible": star_visible,
                 "reward_act": ts_act.reward,
                 "done_act": ts_act.last(),
+                "done_pred": ts_pred.last(),
             }
             return new_carry, outs
 
@@ -318,10 +313,36 @@ def run_dual_rollout(
         final_carry, scan_out = jax.lax.scan(step_fn, init_carry, None, length=max_steps)
         return scan_out
 
-    def render_traj(scan_out, T):
-        o_img_act = scan_out["act_o_img"][:T]
-        o_img_pred = scan_out["pred_o_img"][:T]
+    # def render_traj(scan_out, T):
+    #     o_img_act = scan_out["act_o_img"][:T]
+    #     o_img_pred = scan_out["pred_o_img"][:T]
         
+    #     rgb_act = jax.vmap(_render)(o_img_act)
+    #     rgb_pred = jax.vmap(_render)(o_img_pred)
+
+    #     def _crop(rgb, sym):
+    #         Hc, Wc = sym.shape[0], sym.shape[1]
+    #         return crop_fov_from_allocentric_rgb(rgb, Hc, Wc, observer_r, observer_c, fov_size, dir_id)
+        
+    #     rgb_act_crop = jax.vmap(_crop)(rgb_act, o_img_act)
+    #     rgb_pred_crop = jax.vmap(_crop)(rgb_pred, o_img_pred)
+        
+    #     B, H, W, C = rgb_act_crop.shape
+    #     sep = jnp.ones((B, H, 2, C), dtype=rgb_act_crop.dtype) * 255
+        
+    #     combined = jnp.concatenate([rgb_act_crop, sep, rgb_pred_crop], axis=2)
+    #     return combined
+    def render_traj(scan_out, T_act, T_pred):
+        # 1. Determine the maximum length for the video
+        T_max = max(T_act, T_pred)
+
+        # 2. Slice the raw symbolic grids up to their respective 'done' points
+        #    We only process valid frames to save compute
+        o_img_act = scan_out["act_o_img"][:T_act]
+        o_img_pred = scan_out["pred_o_img"][:T_pred]
+        
+        # 3. Render and Crop (JAX operations)
+        #    Note: This returns arrays of shape (T_act, H, W, C) and (T_pred, H, W, C)
         rgb_act = jax.vmap(_render)(o_img_act)
         rgb_pred = jax.vmap(_render)(o_img_pred)
 
@@ -332,50 +353,103 @@ def run_dual_rollout(
         rgb_act_crop = jax.vmap(_crop)(rgb_act, o_img_act)
         rgb_pred_crop = jax.vmap(_crop)(rgb_pred, o_img_pred)
         
-        B, H, W, C = rgb_act_crop.shape
-        sep = jnp.ones((B, H, 2, C), dtype=rgb_act_crop.dtype) * 255
+        # Convert to Numpy for easy padding
+        vid_act = np.array(rgb_act_crop)
+        vid_pred = np.array(rgb_pred_crop)
         
-        combined = jnp.concatenate([rgb_act_crop, sep, rgb_pred_crop], axis=2)
+        # 4. Pad with Black Frames (Zeros)
+        #    Shape is (Time, Height, Width, Channels)
+        H, W, C = vid_act.shape[1:]
+        
+        # Pad Act if it finished early
+        if T_act < T_max:
+            pad_len = T_max - T_act
+            black_frames = np.zeros((pad_len, H, W, C), dtype=vid_act.dtype)
+            vid_act = np.concatenate([vid_act, black_frames], axis=0)
+            
+        # Pad Pred if it finished early
+        if T_pred < T_max:
+            pad_len = T_max - T_pred
+            black_frames = np.zeros((pad_len, H, W, C), dtype=vid_pred.dtype)
+            vid_pred = np.concatenate([vid_pred, black_frames], axis=0)
+            
+        # 5. Combine Side-by-Side
+        #    Create a white separator line
+        sep = np.ones((T_max, H, 2, C), dtype=vid_act.dtype) * 255
+        
+        combined = np.concatenate([vid_act, sep, vid_pred], axis=2)
         return combined
 
     rng = jax.random.key(seed)
     
     correct_predictions = 0
+    first_door_correct = 0
     failed_predictions = 0
     ignored_episodes = 0
+    valid_episodes = 0
+
     for ep in range(episodes):
         rng, sub_rng = jax.random.split(rng)
         out = run_one_episode(sub_rng)
         
-        dones = np.array(out["done_act"])
-        T = (np.argmax(dones) + 1) if dones.any() else max_steps
-        
-        reward = np.sum(out["reward_act"][:T])
+        dones_act = np.array(out["done_act"])
+        dones_pred = np.array(out["done_pred"])
+
+        if dones_act.any():
+            T_act = np.argmax(dones_act) + 1  # +1 to include the step where done=True
+        else:
+            T_act = max_steps 
+
+        if dones_pred.any():
+            T_pred = np.argmax(dones_pred) + 1
+        else:
+            T_pred = max_steps
+      
+        reward = np.sum(out["reward_act"][:T_act])
 
         # Extract the grids and positions up to time T
-        act_grids = np.array(out["act_o_img"][:T])
-        pred_grids = np.array(out["pred_o_img"][:T])
-        act_positions = np.array(out["act_pos"][:T])
-        pred_positions = np.array(out["pred_pos"][:T])
+        act_grids = np.array(out["act_o_img"][:T_act])
+        pred_grids = np.array(out["pred_o_img"][:T_pred])
+        act_positions = np.array(out["act_pos"][:T_act])
+        pred_positions = np.array(out["pred_pos"][:T_pred])
         
-        # Find the first VISITED door in both environments
-        first_door_act = get_first_visited_door(act_grids, act_positions)
-        first_door_pred = get_first_visited_door(pred_grids, pred_positions)
-        
-        # Evaluate Alignment
-        if first_door_act is None:
-            alignment_status = "IGNORED (Actual agent did not visit a door)"
+        # Get sequences of opened doors
+        doors_act = get_door_sequence(act_grids)
+        doors_pred = get_door_sequence(pred_grids)
+
+        # Variables to track specific failures
+        is_full_match = False
+        is_first_match = False
+
+        if len(doors_act) == 0:
+            alignment_status = "IGNORED (Actual agent opened no doors)"
             ignored_episodes += 1
-        elif first_door_act == first_door_pred:
-            alignment_status = "CORRECT"
-            correct_predictions += 1
         else:
-            alignment_status = f"FAILED (Actual: {first_door_act}, Pred: {first_door_pred})"
-            failed_predictions += 1
-        
-        print(f"Episode {ep:03d}: T={T}, Reward={reward:.2f} | ToM Alignment: {alignment_status}")
-        print(f"Actual: {first_door_act}, Predicted: {first_door_pred}")
-        video_frames = render_traj(out, T)
+            # --- Check First Door Alignment ---
+            # Did the observer at least get the first door right?
+            if len(doors_pred) > 0 and doors_act[0] == doors_pred[0]:
+                is_first_match = True
+                first_door_correct += 1  # Ensure this counter is initialized outside loop
+            
+            # --- Check Full Sequence Alignment ---
+            if doors_act == doors_pred:
+                is_full_match = True
+                correct_predictions += 1
+                alignment_status = "CORRECT (Full Match)"
+            else:
+                # Descriptive status for logging
+                num_match = sum(1 for a, p in zip(doors_act, doors_pred) if a == p)
+                alignment_status = (
+                    f"MISMATCH | Act: {len(doors_act)}, Pred: {len(doors_pred)}. "
+                    f"First Door Match: {is_first_match}"
+                )
+                failed_predictions += 1
+
+        print(f"Episode {ep:03d}: {alignment_status}")
+        print(f"  > Actual: {doors_act}")
+        print(f"  > Pred:   {doors_pred}")
+
+        video_frames = render_traj(out, T_act, T_pred)
         video_np = np.array(video_frames)
         
         vid_path = os.path.join(out_dir, f"ep_{ep:03d}_pred_comparison.mp4")
@@ -383,13 +457,19 @@ def run_dual_rollout(
         
         np.savez(
             os.path.join(out_dir, f"ep_{ep:03d}_data.npz"),
-            action_p=out["action_p"][:T],
-            action_o=out["action_o"][:T],
-            used_action=out["used_action"][:T],
-            star_visible=out["star_visible"][:T]
+            action_p=out["action_p"][:T_act],
+            action_o=out["action_o"][:T_pred],
         )
         print(f"Saved {vid_path}")
-    print(f"Accuracy: {correct_predictions / (episodes - ignored_episodes)}")
+
+    valid_episodes = episodes - ignored_episodes
+    if valid_episodes > 0:
+        print(f"\n--- Results over {valid_episodes} valid episodes ---")
+        print(f"Full Sequence Accuracy: {correct_predictions / valid_episodes:.2%}")
+        print(f"First Door Accuracy:    {first_door_correct / valid_episodes:.2%}")
+    else:
+        print("No valid episodes found (Protag never opened a door).")
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
@@ -399,10 +479,10 @@ def main():
                             help="Enable Successor Representation prediction and loss.")
     parser.add_argument("--num_states", type=int, default=81, 
                         help="Total number of discrete states for the SR (update based on your grid size).")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9")
-    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/tp/swap_door_close_open")
-    parser.add_argument("--episodes", type=int, default=20)
-    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d20")
+    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/tp/swap_delay20")
+    parser.add_argument("--episodes", type=int, default=30)
+    parser.add_argument("--seed", type=int, default=1)
     
     # O args (must match training)
     parser.add_argument("--o_fov", type=int, default=9)

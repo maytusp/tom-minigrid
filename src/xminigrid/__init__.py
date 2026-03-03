@@ -10,7 +10,7 @@ register(
     height=9,
     width=9,
     view_size=9,
-    door_close_delay=1
+    door_close_delay=1,
     testing=False,
 )
 register(
@@ -20,6 +20,26 @@ register(
     width=9,
     view_size=9,
     door_close_delay=1,
+    testing=True,
+)
+
+register(
+    id="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d2",
+    entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
+    height=9,
+    width=9,
+    view_size=9,
+    door_close_delay=2,
+    testing=True,
+)
+
+register(
+    id="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d20",
+    entry_point="xminigrid.envs.tom.tworooms:TwoRooms",
+    height=9,
+    width=9,
+    view_size=9,
+    door_close_delay=20,
     testing=True,
 )
 

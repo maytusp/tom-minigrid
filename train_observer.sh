@@ -19,4 +19,4 @@ echo "Job is using $SLURM_GPUS GPU(s) with ID(s) $CUDA_VISIBLE_DEVICES and $SLUR
 source activate jax
 
 
-python -m training.train_pred
+python -m training.train_pred --p_checkpoint ""

@@ -1,141 +1,0 @@
-Job is using 1 GPU(s) with ID(s) 0 and 12 CPU core(s)
-/var/spool/slurmd/job11654858/slurm_script: line 19: activate: No such file or directory
-wandb: Currently logged in as: maytusp to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
-wandb: Tracking run with wandb version 0.21.1
-wandb: Run data is saved locally in /net/scratch/n70579mp/tom-minigrid/wandb/run-20260225_093859-r40a99nh
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run giddy-disco-46
-wandb: ⭐️ View project at https://wandb.ai/maytusp/tom_observer_training
-wandb: 🚀 View run at https://wandb.ai/maytusp/tom_observer_training/runs/r40a99nh
-2026-02-25 09:39:11.986480: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
-2026-02-25 09:39:11.986761: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
-2026-02-25 09:39:11.986980: W external/xla/xla/service/gpu/autotuning/dot_search_space.cc:200] All configs were filtered out because none of them sufficiently match the hints. Maybe the hints set does not contain a good representative set of valid configs?Working around this by using the full hints set instead.
-wandb: uploading history steps 193-199, summary, console lines 103-107
-wandb:                                                                                
-wandb: 
-wandb: Run history:
-wandb: train/action_loss █▄▄▄▃▃▃▂▂▂▂▂▂▁▁▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-wandb:       train/epoch ▁▁▁▁▁▂▂▂▂▂▃▃▃▃▃▃▃▃▄▄▅▅▅▅▆▆▆▆▆▆▆▇▇▇▇▇▇▇██
-wandb: train/global_step ▁▁▁▁▁▁▂▂▂▂▃▃▃▃▃▃▃▃▃▄▄▄▄▅▅▅▆▆▆▆▆▇▇▇▇▇████
-wandb:     train/sr_loss █▇▇▄▃▂▂▂▂▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-wandb:  train/total_loss █▅▄▄▄▃▂▂▂▂▂▂▂▂▂▂▂▂▁▂▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁
-wandb: 
-wandb: Run summary:
-wandb: train/action_loss 0.01969
-wandb:       train/epoch 49
-wandb: train/global_step 1942
-wandb:     train/sr_loss 5.28926
-wandb:  train/total_loss 0.54861
-wandb: 
-wandb: 🚀 View run giddy-disco-46 at: https://wandb.ai/maytusp/tom_observer_training/runs/r40a99nh
-wandb: ⭐️ View project at: https://wandb.ai/maytusp/tom_observer_training
-wandb: Synced 5 W&B file(s), 0 media file(s), 0 artifact file(s) and 0 other file(s)
-wandb: Find logs at: ./wandb/run-20260225_093859-r40a99nh/logs
-[Dataset] Found 5000 episodes in ./logs/train_trajs/tworoom_noswap_door_open_close_with_sr
---- Creating Model: third_person ---
-Ep 0 | It 0 | Loss: 2.3569Ep 0 | It 10 | Loss: 1.7709Ep 0 | It 20 | Loss: 1.7147Ep 0 | It 30 | Loss: 1.6815
-Epoch 0 Finished | Avg Loss: 1.7751 | Time: 26.17s
-Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_0.msgpack
-Ep 1 | It 0 | Loss: 1.6522Ep 1 | It 10 | Loss: 1.6810Ep 1 | It 20 | Loss: 1.6776Ep 1 | It 30 | Loss: 1.6662
-Epoch 1 Finished | Avg Loss: 1.6670 | Time: 6.13s
-Ep 2 | It 0 | Loss: 1.6574Ep 2 | It 10 | Loss: 1.6272Ep 2 | It 20 | Loss: 1.6336Ep 2 | It 30 | Loss: 1.6172
-Epoch 2 Finished | Avg Loss: 1.6316 | Time: 6.12s
-Ep 3 | It 0 | Loss: 1.6145Ep 3 | It 10 | Loss: 1.5762Ep 3 | It 20 | Loss: 1.5400Ep 3 | It 30 | Loss: 1.4961
-Epoch 3 Finished | Avg Loss: 1.5467 | Time: 6.13s
-Ep 4 | It 0 | Loss: 1.4377Ep 4 | It 10 | Loss: 1.3718Ep 4 | It 20 | Loss: 1.3353Ep 4 | It 30 | Loss: 1.2750
-Epoch 4 Finished | Avg Loss: 1.3381 | Time: 5.52s
-Ep 5 | It 0 | Loss: 1.2394Ep 5 | It 10 | Loss: 1.1808Ep 5 | It 20 | Loss: 1.1565Ep 5 | It 30 | Loss: 1.1374
-Epoch 5 Finished | Avg Loss: 1.1684 | Time: 4.54s
-Ep 6 | It 0 | Loss: 1.0859Ep 6 | It 10 | Loss: 1.0408Ep 6 | It 20 | Loss: 1.0411Ep 6 | It 30 | Loss: 0.9938
-Epoch 6 Finished | Avg Loss: 1.0334 | Time: 4.52s
-Ep 7 | It 0 | Loss: 0.9671Ep 7 | It 10 | Loss: 0.9350Ep 7 | It 20 | Loss: 0.9210Ep 7 | It 30 | Loss: 0.9149
-Epoch 7 Finished | Avg Loss: 0.9264 | Time: 4.52s
-Ep 8 | It 0 | Loss: 0.8990Ep 8 | It 10 | Loss: 0.8667Ep 8 | It 20 | Loss: 0.8572Ep 8 | It 30 | Loss: 0.8210
-Epoch 8 Finished | Avg Loss: 0.8495 | Time: 4.69s
-Ep 9 | It 0 | Loss: 0.8246Ep 9 | It 10 | Loss: 0.7768Ep 9 | It 20 | Loss: 0.7916Ep 9 | It 30 | Loss: 0.7832
-Epoch 9 Finished | Avg Loss: 0.7901 | Time: 4.51s
-Ep 10 | It 0 | Loss: 0.7617Ep 10 | It 10 | Loss: 0.7364Ep 10 | It 20 | Loss: 0.7607Ep 10 | It 30 | Loss: 0.7345
-Epoch 10 Finished | Avg Loss: 0.7470 | Time: 4.52s
-Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_10.msgpack
-Ep 11 | It 0 | Loss: 0.7226Ep 11 | It 10 | Loss: 0.7073Ep 11 | It 20 | Loss: 0.7296Ep 11 | It 30 | Loss: 0.7245
-Epoch 11 Finished | Avg Loss: 0.7184 | Time: 4.55s
-Ep 12 | It 0 | Loss: 0.6955Ep 12 | It 10 | Loss: 0.7102Ep 12 | It 20 | Loss: 0.6953Ep 12 | It 30 | Loss: 0.6956
-Epoch 12 Finished | Avg Loss: 0.6973 | Time: 4.53s
-Ep 13 | It 0 | Loss: 0.6668Ep 13 | It 10 | Loss: 0.6895Ep 13 | It 20 | Loss: 0.6805Ep 13 | It 30 | Loss: 0.6955
-Epoch 13 Finished | Avg Loss: 0.6804 | Time: 4.53s
-Ep 14 | It 0 | Loss: 0.6637Ep 14 | It 10 | Loss: 0.6595Ep 14 | It 20 | Loss: 0.6701Ep 14 | It 30 | Loss: 0.6642
-Epoch 14 Finished | Avg Loss: 0.6688 | Time: 4.53s
-Ep 15 | It 0 | Loss: 0.6568Ep 15 | It 10 | Loss: 0.6701Ep 15 | It 20 | Loss: 0.6467Ep 15 | It 30 | Loss: 0.6564
-Epoch 15 Finished | Avg Loss: 0.6579 | Time: 4.53s
-Ep 16 | It 0 | Loss: 0.6622Ep 16 | It 10 | Loss: 0.6474Ep 16 | It 20 | Loss: 0.6547Ep 16 | It 30 | Loss: 0.6510
-Epoch 16 Finished | Avg Loss: 0.6485 | Time: 4.54s
-Ep 17 | It 0 | Loss: 0.6311Ep 17 | It 10 | Loss: 0.6414Ep 17 | It 20 | Loss: 0.6278Ep 17 | It 30 | Loss: 0.6440
-Epoch 17 Finished | Avg Loss: 0.6404 | Time: 4.54s
-Ep 18 | It 0 | Loss: 0.6386Ep 18 | It 10 | Loss: 0.6318Ep 18 | It 20 | Loss: 0.6467Ep 18 | It 30 | Loss: 0.6364
-Epoch 18 Finished | Avg Loss: 0.6341 | Time: 4.53s
-Ep 19 | It 0 | Loss: 0.6310Ep 19 | It 10 | Loss: 0.6290Ep 19 | It 20 | Loss: 0.6144Ep 19 | It 30 | Loss: 0.6278
-Epoch 19 Finished | Avg Loss: 0.6272 | Time: 4.54s
-Ep 20 | It 0 | Loss: 0.6200Ep 20 | It 10 | Loss: 0.6215Ep 20 | It 20 | Loss: 0.6258Ep 20 | It 30 | Loss: 0.6241
-Epoch 20 Finished | Avg Loss: 0.6226 | Time: 4.54s
-Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_20.msgpack
-Ep 21 | It 0 | Loss: 0.6185Ep 21 | It 10 | Loss: 0.6240Ep 21 | It 20 | Loss: 0.6407Ep 21 | It 30 | Loss: 0.6362
-Epoch 21 Finished | Avg Loss: 0.6179 | Time: 4.54s
-Ep 22 | It 0 | Loss: 0.5977Ep 22 | It 10 | Loss: 0.6217Ep 22 | It 20 | Loss: 0.6079Ep 22 | It 30 | Loss: 0.5949
-Epoch 22 Finished | Avg Loss: 0.6127 | Time: 4.53s
-Ep 23 | It 0 | Loss: 0.6071Ep 23 | It 10 | Loss: 0.6030Ep 23 | It 20 | Loss: 0.6194Ep 23 | It 30 | Loss: 0.6160
-Epoch 23 Finished | Avg Loss: 0.6088 | Time: 4.53s
-Ep 24 | It 0 | Loss: 0.6185Ep 24 | It 10 | Loss: 0.5965Ep 24 | It 20 | Loss: 0.5997Ep 24 | It 30 | Loss: 0.6099
-Epoch 24 Finished | Avg Loss: 0.6046 | Time: 4.53s
-Ep 25 | It 0 | Loss: 0.6035Ep 25 | It 10 | Loss: 0.6018Ep 25 | It 20 | Loss: 0.5950Ep 25 | It 30 | Loss: 0.6063
-Epoch 25 Finished | Avg Loss: 0.6000 | Time: 4.55s
-Ep 26 | It 0 | Loss: 0.5899Ep 26 | It 10 | Loss: 0.5999Ep 26 | It 20 | Loss: 0.5996Ep 26 | It 30 | Loss: 0.5839
-Epoch 26 Finished | Avg Loss: 0.5963 | Time: 4.54s
-Ep 27 | It 0 | Loss: 0.6045Ep 27 | It 10 | Loss: 0.6075Ep 27 | It 20 | Loss: 0.5944Ep 27 | It 30 | Loss: 0.6004
-Epoch 27 Finished | Avg Loss: 0.5931 | Time: 4.53s
-Ep 28 | It 0 | Loss: 0.5875Ep 28 | It 10 | Loss: 0.5930Ep 28 | It 20 | Loss: 0.6087Ep 28 | It 30 | Loss: 0.6062
-Epoch 28 Finished | Avg Loss: 0.5906 | Time: 4.71s
-Ep 29 | It 0 | Loss: 0.5862Ep 29 | It 10 | Loss: 0.5789Ep 29 | It 20 | Loss: 0.5796Ep 29 | It 30 | Loss: 0.5984
-Epoch 29 Finished | Avg Loss: 0.5878 | Time: 4.52s
-Ep 30 | It 0 | Loss: 0.5808Ep 30 | It 10 | Loss: 0.5836Ep 30 | It 20 | Loss: 0.5882Ep 30 | It 30 | Loss: 0.5928
-Epoch 30 Finished | Avg Loss: 0.5845 | Time: 4.52s
-Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_30.msgpack
-Ep 31 | It 0 | Loss: 0.5734Ep 31 | It 10 | Loss: 0.5765Ep 31 | It 20 | Loss: 0.5917Ep 31 | It 30 | Loss: 0.5919
-Epoch 31 Finished | Avg Loss: 0.5821 | Time: 4.52s
-Ep 32 | It 0 | Loss: 0.5797Ep 32 | It 10 | Loss: 0.5872Ep 32 | It 20 | Loss: 0.5922Ep 32 | It 30 | Loss: 0.5820
-Epoch 32 Finished | Avg Loss: 0.5789 | Time: 4.52s
-Ep 33 | It 0 | Loss: 0.5716Ep 33 | It 10 | Loss: 0.5841Ep 33 | It 20 | Loss: 0.5711Ep 33 | It 30 | Loss: 0.5730
-Epoch 33 Finished | Avg Loss: 0.5764 | Time: 4.52s
-Ep 34 | It 0 | Loss: 0.5664Ep 34 | It 10 | Loss: 0.5717Ep 34 | It 20 | Loss: 0.5816Ep 34 | It 30 | Loss: 0.5729
-Epoch 34 Finished | Avg Loss: 0.5754 | Time: 4.52s
-Ep 35 | It 0 | Loss: 0.5776Ep 35 | It 10 | Loss: 0.5559Ep 35 | It 20 | Loss: 0.5628Ep 35 | It 30 | Loss: 0.5717
-Epoch 35 Finished | Avg Loss: 0.5728 | Time: 4.52s
-Ep 36 | It 0 | Loss: 0.5800Ep 36 | It 10 | Loss: 0.5625Ep 36 | It 20 | Loss: 0.5673Ep 36 | It 30 | Loss: 0.5768
-Epoch 36 Finished | Avg Loss: 0.5708 | Time: 4.53s
-Ep 37 | It 0 | Loss: 0.5613Ep 37 | It 10 | Loss: 0.5800Ep 37 | It 20 | Loss: 0.5615Ep 37 | It 30 | Loss: 0.5684
-Epoch 37 Finished | Avg Loss: 0.5687 | Time: 4.52s
-Ep 38 | It 0 | Loss: 0.5632Ep 38 | It 10 | Loss: 0.5678Ep 38 | It 20 | Loss: 0.5735Ep 38 | It 30 | Loss: 0.5653
-Epoch 38 Finished | Avg Loss: 0.5672 | Time: 4.53s
-Ep 39 | It 0 | Loss: 0.5552Ep 39 | It 10 | Loss: 0.5679Ep 39 | It 20 | Loss: 0.5631Ep 39 | It 30 | Loss: 0.5691
-Epoch 39 Finished | Avg Loss: 0.5659 | Time: 4.54s
-Ep 40 | It 0 | Loss: 0.5701Ep 40 | It 10 | Loss: 0.5591Ep 40 | It 20 | Loss: 0.5636Ep 40 | It 30 | Loss: 0.5647
-Epoch 40 Finished | Avg Loss: 0.5639 | Time: 4.53s
-Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_40.msgpack
-Ep 41 | It 0 | Loss: 0.5564Ep 41 | It 10 | Loss: 0.5520Ep 41 | It 20 | Loss: 0.5777Ep 41 | It 30 | Loss: 0.5607
-Epoch 41 Finished | Avg Loss: 0.5618 | Time: 4.54s
-Ep 42 | It 0 | Loss: 0.5524Ep 42 | It 10 | Loss: 0.5448Ep 42 | It 20 | Loss: 0.5521Ep 42 | It 30 | Loss: 0.5593
-Epoch 42 Finished | Avg Loss: 0.5607 | Time: 4.54s
-Ep 43 | It 0 | Loss: 0.5562Ep 43 | It 10 | Loss: 0.5588Ep 43 | It 20 | Loss: 0.5628Ep 43 | It 30 | Loss: 0.5668
-Epoch 43 Finished | Avg Loss: 0.5598 | Time: 4.55s
-Ep 44 | It 0 | Loss: 0.5513Ep 44 | It 10 | Loss: 0.5514Ep 44 | It 20 | Loss: 0.5587Ep 44 | It 30 | Loss: 0.5574
-Epoch 44 Finished | Avg Loss: 0.5587 | Time: 4.56s
-Ep 45 | It 0 | Loss: 0.5638Ep 45 | It 10 | Loss: 0.5560Ep 45 | It 20 | Loss: 0.5551Ep 45 | It 30 | Loss: 0.5597
-Epoch 45 Finished | Avg Loss: 0.5571 | Time: 4.56s
-Ep 46 | It 0 | Loss: 0.5579Ep 46 | It 10 | Loss: 0.5605Ep 46 | It 20 | Loss: 0.5512Ep 46 | It 30 | Loss: 0.5447
-Epoch 46 Finished | Avg Loss: 0.5559 | Time: 4.57s
-Ep 47 | It 0 | Loss: 0.5461Ep 47 | It 10 | Loss: 0.5527Ep 47 | It 20 | Loss: 0.5592Ep 47 | It 30 | Loss: 0.5624
-Epoch 47 Finished | Avg Loss: 0.5545 | Time: 4.59s
-Ep 48 | It 0 | Loss: 0.5540Ep 48 | It 10 | Loss: 0.5573Ep 48 | It 20 | Loss: 0.5598Ep 48 | It 30 | Loss: 0.5600
-Epoch 48 Finished | Avg Loss: 0.5535 | Time: 4.71s
-Ep 49 | It 0 | Loss: 0.5556Ep 49 | It 10 | Loss: 0.5603Ep 49 | It 20 | Loss: 0.5569Ep 49 | It 30 | Loss: 0.5486
-Epoch 49 Finished | Avg Loss: 0.5527 | Time: 4.54s
-Saved checkpoint to: ./checkpoints/observers/tworoom-noswap/tp-sr/checkpoint_49.msgpack
