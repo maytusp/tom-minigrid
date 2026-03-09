@@ -19,7 +19,7 @@ from flax.serialization import from_bytes, to_bytes, msgpack_restore, from_state
 from flax.core import freeze, unfreeze
 from flax import traverse_util
 
-from .utils import rollout, rollout_with_obs, crop_fov_from_allocentric_rgb, _dir_to_id, crop_fov_symbolic_allocentric
+from .utils import rollout, rollout_with_obs, _dir_to_id
 
 from .nn import ActorCriticRNN
 
@@ -190,7 +190,7 @@ def collect_obs(
 
 
             # print(f"[record] {out_obs_rgb_mp4}      frames={T_int} size={o_rgb_np.shape[1]}x{o_rgb_np.shape[2]}")
-            print(f"[record] {out_o_sym_npz}      saved raw symbolic crops")
+            print(f"[record] {out_o_sym_npz}      saved raw symbolic")
         else:
             print(f"episode {ep} failed")
 
