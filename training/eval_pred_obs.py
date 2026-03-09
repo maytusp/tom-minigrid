@@ -1,3 +1,5 @@
+# WARNING: THIS CODE IS OUTDATED AND NOT USED. IT WON'T BE ALIGNED WITH THE CURRENT CODE.
+
 import os
 import argparse
 import imageio

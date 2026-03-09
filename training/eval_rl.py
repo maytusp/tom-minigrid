@@ -119,35 +119,35 @@ def collect_obs(
 
     @jax.jit
     def run_one(rng):
-        def _crop_rgb(frame_rgb, grid_symbolic):
-            Hc = grid_symbolic.shape[0]
-            Wc = grid_symbolic.shape[1]
-            return crop_fov_from_allocentric_rgb(
-                frame_rgb=frame_rgb,
-                grid_cells_h=Hc,
-                grid_cells_w=Wc,
-                r=observer_r,
-                c=observer_c,
-                view_size=fov_size,
-                dir_id=dir_id,
-            )
+        # def _crop_rgb(frame_rgb, grid_symbolic):
+        #     Hc = grid_symbolic.shape[0]
+        #     Wc = grid_symbolic.shape[1]
+        #     return crop_fov_from_allocentric_rgb(
+        #         frame_rgb=frame_rgb,
+        #         grid_cells_h=Hc,
+        #         grid_cells_w=Wc,
+        #         r=observer_r,
+        #         c=observer_c,
+        #         view_size=fov_size,
+        #         dir_id=dir_id,
+        #     )
         out = rollout_with_obs(rng, env, env_params, ts, h0, max_steps=max_steps)
         p_sym_frames = out.obs_seq
         
         # observer's frames in RGB
         o_rgb_frames = jax.vmap(_render)(out.o_obs_seq)  # [T,Hpx,Wpx,3] uint8
-        o_rgb_frames = jax.vmap(_crop_rgb)(o_rgb_frames, out.o_obs_seq)  # [T, fpx, fpx, 3]
+        # o_rgb_frames = jax.vmap(_crop_rgb)(o_rgb_frames, out.o_obs_seq)  # [T, fpx, fpx, 3]
 
         p_rgb_frames = jax.vmap(_render)(p_sym_frames) 
         
         # observer's frames in symbolic
-        o_sym_frames = jax.vmap(
-            lambda grid_sym: crop_fov_symbolic_allocentric(
-                grid_sym=grid_sym, r=observer_r, c=observer_c, view_size=fov_size, dir_id=dir_id
-            )
-        )(out.o_obs_seq)  # [T, V, V, C]
-        
-        return o_rgb_frames, o_sym_frames, p_rgb_frames, p_sym_frames, out.action_seq, out.stats.reward, out.length - 1
+        # o_sym_frames = jax.vmap(
+        #     lambda grid_sym: crop_fov_symbolic_allocentric(
+        #         grid_sym=grid_sym, r=observer_r, c=observer_c, view_size=fov_size, dir_id=dir_id
+        #     )
+        # )(out.o_obs_seq)  # [T, V, V, C]
+
+        return o_rgb_frames, out.o_obs_seq, p_rgb_frames, p_sym_frames, out.action_seq, out.stats.reward, out.length - 1
 
     rng = jax.random.key(seed)
     for ep in range(episodes):
@@ -264,20 +264,11 @@ def main():
     params = load_params(args.checkpoint, net, env, env_params, cfg)
     print(f"Loaded params from: {args.checkpoint}")
 
-    # train
-    # collect_obs(env, env_params, net, params,
-    #                     episodes=args.episodes, max_steps=1000, seed=args.seed,
-    #                     out_dir=args.vid_out_dir,
-    #                     observer_r = 5,
-    #                     observer_c = 1,
-    #                     fov_size = 9,
-    #                     fov_dir = "right")
-
     collect_obs(env, env_params, net, params,
                         episodes=args.episodes, max_steps=1000, seed=args.seed,
                         out_dir=args.vid_out_dir,
-                        observer_r = 9,
-                        observer_c = 5,
+                        observer_r = 8,
+                        observer_c = 4,
                         fov_size = 9,
                         fov_dir = "up")
     eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed)

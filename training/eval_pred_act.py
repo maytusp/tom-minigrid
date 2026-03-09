@@ -22,7 +22,7 @@ import imageio.v2 as imageio
 from .nn import ActorCriticRNN
 # Import O's networks (Standard + Dual) and factory
 from .tom_nn import create_model, DualPerspectivePredictor, ThirdPersonPredictor
-from .utils import _dir_to_id, crop_fov_from_allocentric_rgb, crop_fov_symbolic_allocentric
+from .utils import _dir_to_id
 
 def get_door_sequence(obs_seq):
     """
@@ -197,9 +197,6 @@ def run_dual_rollout(
     observer_r: int = 8,
     observer_c: int = 5,
     fov_dir: str = "up",
-    # observer_r: int = 5,
-    # observer_c: int = 1,
-    # fov_dir = "right",
     fov_size: int = 9,
     model_type: str = "third_person",
     
@@ -241,13 +238,13 @@ def run_dual_rollout(
             # --- 1. Observations ---
             obs_p = ts_act.observation["p_img"]
             obs_o = ts_pred.observation["o_img"]
-            obs_o = crop_fov_symbolic_allocentric(
-                grid_sym=obs_o, 
-                r=observer_r, 
-                c=observer_c, 
-                view_size=fov_size, 
-                dir_id=dir_id
-            )
+            # obs_o = crop_fov_symbolic_allocentric(
+            #     grid_sym=obs_o, 
+            #     r=observer_r, 
+            #     c=observer_c, 
+            #     view_size=fov_size, 
+            #     dir_id=dir_id
+            # )
             # Protagonist Inference
             in_p = {
                 "obs_img": obs_p[None, None, ...],
@@ -325,25 +322,7 @@ def run_dual_rollout(
         final_carry, scan_out = jax.lax.scan(step_fn, init_carry, None, length=max_steps)
         return scan_out
 
-    # def render_traj(scan_out, T):
-    #     o_img_act = scan_out["act_o_img"][:T]
-    #     o_img_pred = scan_out["pred_o_img"][:T]
-        
-    #     rgb_act = jax.vmap(_render)(o_img_act)
-    #     rgb_pred = jax.vmap(_render)(o_img_pred)
 
-    #     def _crop(rgb, sym):
-    #         Hc, Wc = sym.shape[0], sym.shape[1]
-    #         return crop_fov_from_allocentric_rgb(rgb, Hc, Wc, observer_r, observer_c, fov_size, dir_id)
-        
-    #     rgb_act_crop = jax.vmap(_crop)(rgb_act, o_img_act)
-    #     rgb_pred_crop = jax.vmap(_crop)(rgb_pred, o_img_pred)
-        
-    #     B, H, W, C = rgb_act_crop.shape
-    #     sep = jnp.ones((B, H, 2, C), dtype=rgb_act_crop.dtype) * 255
-        
-    #     combined = jnp.concatenate([rgb_act_crop, sep, rgb_pred_crop], axis=2)
-    #     return combined
     def render_traj(scan_out, T_act, T_pred):
         # 1. Determine the maximum length for the video
         T_max = max(T_act, T_pred)
@@ -358,16 +337,16 @@ def run_dual_rollout(
         rgb_act = jax.vmap(_render)(o_img_act)
         rgb_pred = jax.vmap(_render)(o_img_pred)
 
-        def _crop(rgb, sym):
-            Hc, Wc = sym.shape[0], sym.shape[1]
-            return crop_fov_from_allocentric_rgb(rgb, Hc, Wc, observer_r, observer_c, fov_size, dir_id)
+        # def _crop(rgb, sym):
+        #     Hc, Wc = sym.shape[0], sym.shape[1]
+        #     return crop_fov_from_allocentric_rgb(rgb, Hc, Wc, observer_r, observer_c, fov_size, dir_id)
         
-        rgb_act_crop = jax.vmap(_crop)(rgb_act, o_img_act)
-        rgb_pred_crop = jax.vmap(_crop)(rgb_pred, o_img_pred)
+        # rgb_act_crop = rgb_act # jax.vmap(_crop)(rgb_act, o_img_act)
+        # rgb_pred_crop = rgb_pred # jax.vmap(_crop)(rgb_pred, o_img_pred)
         
         # Convert to Numpy for easy padding
-        vid_act = np.array(rgb_act_crop)
-        vid_pred = np.array(rgb_pred_crop)
+        vid_act = np.array(rgb_act)
+        vid_pred = np.array(rgb_pred)
         
         # 4. Pad with Black Frames (Zeros)
         #    Shape is (Time, Height, Width, Channels)

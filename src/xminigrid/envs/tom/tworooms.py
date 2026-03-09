@@ -47,6 +47,8 @@ class ToMEnvParams(EnvParams):
     # If random_door_close_delay is False: delay is exactly door_close_delay
     door_close_delay: int = struct.field(pytree_node=False, default=1)
     random_door_close_delay: bool = struct.field(pytree_node=False, default=False)
+    static_observer_pos: tuple[int, int] = struct.field(pytree_node=False, default=(8, 4))  # (y, x)
+    static_observer_dir: int = struct.field(pytree_node=False, default=0)  # 0=UP, 1=RIGHT, 2=DOWN, 3=LEFT
 
 class TwoRooms(Environment[EnvParams, SwapCarry]):
     """Four squares, one goal, one star.
@@ -345,13 +347,15 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
 
         return state
 
-    def _get_observer_view(self, grid: jnp.ndarray, view_size: int) -> jnp.ndarray:
+    def _get_observer_view(self, grid: jnp.ndarray, params: EnvParams) -> jnp.ndarray:
         """Generates the view for the fixed observer at (9,5) facing up."""
+        observer_y, observer_x = params.static_observer_pos
+        observer_dir = params.static_observer_dir
         observer_state = AgentState(
-            position=jnp.array([9, 5], dtype=jnp.int32),
-            direction=jnp.array(0, dtype=jnp.int32)  # 0 = UP
+            position=jnp.array([observer_y, observer_x], dtype=jnp.int32),
+            direction=jnp.array(observer_dir, dtype=jnp.int32)  # 0 = UP
         )
-        return transparent_field_of_view(grid, observer_state, view_size, view_size)
+        return transparent_field_of_view(grid, observer_state, params.view_size, params.view_size)
 
     def reset(self, params: EnvParams, key: jax.Array) -> TimeStep[SwapCarry]:
         state = self._generate_problem(params, key)
@@ -363,7 +367,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         )
 
         obs_main = transparent_field_of_view(visual_grid, state.agent, params.view_size, params.view_size)
-        obs_observer = self._get_observer_view(visual_grid, params.view_size)
+        obs_observer = self._get_observer_view(visual_grid, params)
         combined_obs = {}
         combined_obs["p_img"] = obs_main
         combined_obs["o_img"] = obs_observer
@@ -405,7 +409,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         )
 
         obs_main = transparent_field_of_view(visual_grid, new_state.agent, params.view_size, params.view_size)
-        obs_observer = self._get_observer_view(visual_grid, params.view_size)
+        obs_observer = self._get_observer_view(visual_grid, params)
         combined_obs = {}
         combined_obs["p_img"] = obs_main
         combined_obs["o_img"] = obs_observer
