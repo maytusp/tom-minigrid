@@ -12,7 +12,7 @@ from flax import struct  # <-- make carry a JAX pytree
 
 from ...core.constants import TILES_REGISTRY, Colors, Tiles, NUM_LAYERS
 from ...core.goals import AgentOnTileGoal, check_goal
-from ...core.grid import room, sample_coordinates, sample_direction, horizontal_line, vertical_line, rectangle
+from ...core.grid import empty_world, sample_coordinates, sample_direction, horizontal_line, vertical_line, rectangle
 from ...core.rules import EmptyRule, check_rule
 from ...core.actions import take_action
 from ...core.observation import minigrid_field_of_view as transparent_field_of_view
@@ -121,8 +121,8 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         Calculates the walls of the two-room building 
         Returns: y0 (top), y1 (bot), x0 (left), x1 (right), midx (split)
         """
-        h_room = H // 2
-        w_room = W // 2
+        h_room = H // 2 + 1
+        w_room = W // 2 + 1
         
         y0 = (H - h_room) // 2 - 1
         y1 = y0 + h_room + 1
@@ -137,8 +137,8 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
     # -------------------------
     def _generate_problem(self, params: EnvParams, key: jax.Array) -> State[SwapCarry]:
         
-        H, W = params.height+2, params.width+2
-        grid = room(H, W)
+        H, W = params.height, params.width
+        grid = empty_world(H, W)
         empty_tile = grid[1, 1]
 
         WALL = TILES_REGISTRY[Tiles.WALL, Colors.GREY]
@@ -195,10 +195,10 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         grid = self._place(grid, goal_yx, TILES_REGISTRY[Tiles.GOAL, Colors.BLUE])
 
         corner_candidates = jnp.array([
-            [1, 1],                # Top-Left
-            [1, W - 2],            # Top-Right
-            [H - 2, 1],            # Bottom-Left
-            [H - 2, W - 2]         # Bottom-Right
+            [0, 0],                # Top-Left
+            [0, W - 1],            # Top-Right
+            [H - 1, 0],            # Bottom-Left
+            [H - 1, W - 1]         # Bottom-Right
         ], dtype=jnp.int32)
         corner_idx = jax.random.randint(k_star, shape=(), minval=0, maxval=4)
         star_yx = corner_candidates[corner_idx]
