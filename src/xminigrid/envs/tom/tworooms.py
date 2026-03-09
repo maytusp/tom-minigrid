@@ -39,7 +39,7 @@ class SwapCarry:
     door_close_delay: jnp.ndarray        # int32[] scalar (The actual delay for this episode)
     
 class ToMEnvParams(EnvParams):
-    testing: bool = struct.field(pytree_node=False, default=True)
+    apply_swap: bool = struct.field(pytree_node=False, default=True)
     swap_prob: float = struct.field(pytree_node=False, default=1.0)
     use_color: bool = struct.field(pytree_node=False, default=True)
     
@@ -67,7 +67,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
         params = ToMEnvParams(height=13, width=13)
         params = params.replace(**{k: v for k, v in kwargs.items() if k in {
             "height","width","view_size","max_steps","render_mode",
-            "testing","swap_prob", "door_close_delay", "random_door_close_delay"}})
+            "apply_swap","swap_prob", "door_close_delay", "random_door_close_delay"}})
         if params.max_steps is None:
             params = params.replace(max_steps=4 * (params.height * params.width))
         return params
@@ -247,7 +247,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
 
     def handle_star_reach(self, state: State[SwapCarry], params: EnvParams) -> State[SwapCarry]:
         # Unpack params
-        testing = params.testing
+        apply_swap = params.apply_swap
         random_delay_enabled = params.random_door_close_delay
         max_delay = params.door_close_delay
         
@@ -297,7 +297,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
 
             # E. Decide if Swap Happens
             do_move = jax.lax.select(
-                jnp.asarray(testing),
+                jnp.asarray(apply_swap),
                 jax.random.bernoulli(k_move, p=_state.carry.p_swap_test),
                 jnp.asarray(False, dtype=jnp.bool_)
             )
