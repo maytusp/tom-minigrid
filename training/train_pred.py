@@ -9,6 +9,7 @@ import jax.numpy as jnp
 import optax
 from flax.training import train_state
 from flax.serialization import to_bytes
+import flax
 
 import wandb
 from torch.utils.data import DataLoader
@@ -32,15 +33,15 @@ import jax.numpy as jnp
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_doordelay1")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/tpfp_nofp/")
+    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_randdelay")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--seed", type=int, default=1)
     
     # Model Config
-    parser.add_argument("--model_type", type=str, default="dual_perspective", 
+    parser.add_argument("--model_type", type=str, default="third_person", 
                         choices=["third_person", "dual_perspective"])
 
     parser.add_argument("--freeze_fp", action="store_true", default=False)
@@ -56,7 +57,7 @@ def main():
     parser.add_argument("--tp_rnn", type=int, default=256)
 
     # Logging
-    parser.add_argument("--track", default=True) 
+    parser.add_argument("--track", action="store_true", default=False)
     parser.add_argument("--wandb_project", type=str, default="tom_observer_training")
     parser.add_argument("--save_every", type=int, default=10)
 
@@ -67,9 +68,30 @@ def main():
     parser.add_argument("--num_states", type=int, default=81, 
                         help="Total number of discrete states for the SR (update based on your grid size).")
     args = parser.parse_args()
+    print(f"Freeze FP {args.freeze_fp}")
+    print(f"len(p_checkpoint) {len(args.p_checkpoint)}")
+    if args.model_type == "third_person":
+        model_name = "SingleNet"
+    elif args.model_type == "dual_perspective" and not(args.freeze_fp) and len(args.p_checkpoint) > 0:
+        model_name = "DualNet-FinetuneFPnet"
+    elif args.model_type == "dual_perspective" and args.freeze_fp and len(args.p_checkpoint) > 0:
+        model_name = "DualNet-FreezeFPnet"
+    elif args.model_type == "dual_perspective" and not(args.freeze_fp) and len(args.p_checkpoint) == 0:
+        model_name = "DualNet-FromScratch"
+    else:
+        raise ValueError("Invalid model configuration. Check model_type, freeze_fp, and p_checkpoint arguments.")
+    
+    if args.use_sr:
+        model_name += "-SR"
 
+
+    run_name = f"{model_name}_lr{args.lr}_bs{args.batch_size}_seed{args.seed}"
+    args.work_dir = os.path.join(args.work_dir, run_name)
+    print(f"Run Name: {run_name}")
     if args.track:
-        wandb.init(project=args.wandb_project, config=vars(args))
+        wandb.init(project=args.wandb_project, 
+                    name=run_name,
+                    config=vars(args))
 
     # 1. Setup Data
     dataset = NpzEpisodeDataset(args.data_dir)
@@ -84,14 +106,20 @@ def main():
     
     # create_model handles the dual/third switch and P-loading
     model, params = create_model(args.model_type, config, rng)
+    params_inner = params['params']
+
     if args.freeze_fp and args.model_type == "dual_perspective":
-        print("Freeze FP network")
-        tx = create_optimizer(learning_rate=args.lr, params=params)
+        tx = create_optimizer(learning_rate=args.lr, params=params_inner)
     else:
         tx = optax.adam(args.lr)
-    
 
-    state = TrainState.create(apply_fn=model.apply, params=params['params'], tx=tx)
+    params_inner_dict = flax.core.frozen_dict.unfreeze(params_inner)
+
+    state = TrainState.create(
+        apply_fn=model.apply, 
+        params=params_inner_dict,
+        tx=tx
+    )
     
     @jax.jit
     def train_step(state, inputs_fp, inputs_tp, h_fp, h_tp, targets: PassiveTargets):

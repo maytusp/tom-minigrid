@@ -194,13 +194,14 @@ def run_dual_rollout(
     max_steps: int = 80,
     seed: int = 0,
     out_dir: str = "trajs_pred",
-    # observer_r: int = 8,
-    # observer_c: int = 5,
-    # fov_dir: str = "up",
-    observer_r: int = 5,
-    observer_c: int = 1,
-    fov_dir = "right",
+    observer_r: int = 8,
+    observer_c: int = 5,
+    fov_dir: str = "up",
+    # observer_r: int = 5,
+    # observer_c: int = 1,
+    # fov_dir = "right",
     fov_size: int = 9,
+    model_type: str = "third_person",
     
 ):
     os.makedirs(out_dir, exist_ok=True)
@@ -209,7 +210,11 @@ def run_dual_rollout(
     h0_p = net_p.initialize_carry(batch_size=1)
     
     # O Init (Dual model returns 2 states: h_fp, h_tp)
-    h0_o_fp, h0_o_tp = net_o.initialize_carry(batch_size=1)
+    if model_type == "transformed_fp":
+        h0_o_fp = net_o.initialize_carry(batch_size=1)
+        h0_o_tp = None
+    else:
+        h0_o_fp, h0_o_tp = net_o.initialize_carry(batch_size=1)
     
     dir_id = _dir_to_id(fov_dir)
 
@@ -266,15 +271,22 @@ def run_dual_rollout(
             in_o_tp = {
                 "obs_img": obs_o[None, None, ...],
             }
-
-            logits_o, _, new_h_o_fp, new_h_o_tp = net_o.apply(
-                {"params": params_o}, 
-                in_o_fp, h_o_fp, in_o_tp, h_o_tp
-            )
-
-            probs_o = jax.nn.softmax(logits_o)
-            entropy = -jnp.sum(probs_o * jnp.log(probs_o + 1e-6))
-            action_o = jnp.argmax(logits_o, axis=-1).squeeze()
+            if model_type == "transformed_fp":
+                # If we use the Transformed FP model, the structure of network is the same as net_p
+                # So the output is distribution object, not logits (distribution parameters) 
+                dist_o, _, new_h_o_fp, _ = net_o.apply(params_o,
+                                                in_o_fp, h_o_fp)
+                _rng, rng_o = jax.random.split(_rng, 2)
+                action_o = dist_o.sample(seed=rng_o).squeeze()
+                new_h_o_tp = None # No TP state for this model
+            else:
+                logits_o, _, new_h_o_fp, new_h_o_tp = net_o.apply(
+                    {"params": params_o}, 
+                    in_o_fp, h_o_fp, in_o_tp, h_o_tp
+                )
+                probs_o = jax.nn.softmax(logits_o)
+                entropy = -jnp.sum(probs_o * jnp.log(probs_o + 1e-6))
+                action_o = jnp.argmax(logits_o, axis=-1).squeeze()
 
             # Check if we are in the "Predicted" phase (Star is gone)
             star_visible = jnp.any(obs_o[..., 0] == 12)
@@ -473,20 +485,18 @@ def run_dual_rollout(
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--checkpoint", type=str, default="./checkpoints/observers/tworoom-noswap/tp/checkpoint_49.msgpack", help="Observer checkpoint path")
-    parser.add_argument("--model_type", type=str, default="third_person", choices=["third_person", "dual_perspective"])
+    parser.add_argument("--checkpoint", type=str, default="", help="Observer checkpoint path")
+    parser.add_argument("--model_type", type=str, default="transformed_fp", choices=["third_person", "dual_perspective", "transformed_fp"])
     parser.add_argument("--use_sr", action="store_true", default=False, 
                             help="Enable Successor Representation prediction and loss.")
     parser.add_argument("--num_states", type=int, default=81, 
                         help="Total number of discrete states for the SR (update based on your grid size).")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d20")
-    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/tp/swap_delay20")
-    parser.add_argument("--episodes", type=int, default=30)
+    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d4")
+    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/FPNet-RL/swap_delay4")
+    parser.add_argument("--episodes", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
-    
     # O args (must match training)
     parser.add_argument("--o_fov", type=int, default=9)
-
     parser.add_argument("--num_actions", type=int, default=6) 
     parser.add_argument("--fp_emb", type=int, default=16)
     parser.add_argument("--fp_rnn", type=int, default=256)
@@ -494,6 +504,9 @@ def main():
     parser.add_argument("--tp_rnn", type=int, default=256)
     args = parser.parse_args()
 
+
+    print("eval checkpoint", args.checkpoint)
+    
     # 1. Env
     env, env_params = build_env(args.env_id, img_obs=False) 
     
@@ -523,10 +536,13 @@ def main():
     # Note: we need a minimal config dict
     config = vars(args)
     rng = jax.random.key(args.seed)
-    net_o, _ = create_model(args.model_type, config, rng)
+    net_o, params_o = create_model(args.model_type, config, rng)
     
     # Load parameters
-    params_o = load_o_params(args.checkpoint, net_o, o_cfg, args.model_type)
+    if len(args.checkpoint) > 0:
+        params_o = load_o_params(args.checkpoint, net_o, o_cfg, args.model_type)
+    else:
+        print("No TP checkpoint provided, using randomly initialized parameters.")
 
     # 4. Run
     run_dual_rollout(
@@ -536,7 +552,8 @@ def main():
         episodes=args.episodes,
         seed=args.seed,
         out_dir=args.vid_out_dir,
-        fov_size=args.o_fov
+        fov_size=args.o_fov,
+        model_type=args.model_type,
     )
 
 if __name__ == "__main__":

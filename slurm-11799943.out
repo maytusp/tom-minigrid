@@ -1,0 +1,1543 @@
+/var/spool/slurmd/job11799943/slurm_script: line 12: activate: No such file or directory
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/subprocess.py:1796: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = _posixsubprocess.fork_exec(
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+eval checkpoint ./checkpoints/observers/tworoom-noswap/DualNet-FinetuneFPnet_lr0.001_bs128_seed1/checkpoint_49.msgpack
+[P-Loader] Loaded from ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack
+--- Creating Model: dual_perspective ---
+Loading FP weights from: ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack
+FP weights grafted successfully.
+
+[O-Loader] Architecture matches perfectly (4,106,221 params).
+[O-Loader] Successfully mapped parameters from ./checkpoints/observers/tworoom-noswap/DualNet-FinetuneFPnet_lr0.001_bs128_seed1/checkpoint_49.msgpack
+Episode 000: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (2, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_000_pred_comparison.mp4
+Episode 001: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (2, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_001_pred_comparison.mp4
+Episode 002: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (1, 3)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_002_pred_comparison.mp4
+Episode 003: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (3, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_003_pred_comparison.mp4
+Episode 004: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (3, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_004_pred_comparison.mp4
+Episode 005: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (4, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_005_pred_comparison.mp4
+Episode 006: CORRECT (Full Match)
+  > Actual: [(1, 5), (5, 1)]
+  > Pred:   [(1, 5), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_006_pred_comparison.mp4
+Episode 007: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (5, 7)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_007_pred_comparison.mp4
+Episode 008: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 2), (2, 7)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_008_pred_comparison.mp4
+Episode 009: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 1), (7, 6)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_009_pred_comparison.mp4
+Episode 010: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (3, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_010_pred_comparison.mp4
+Episode 011: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (3, 7)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_011_pred_comparison.mp4
+Episode 012: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 6), (3, 1)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_012_pred_comparison.mp4
+Episode 013: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (5, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_013_pred_comparison.mp4
+Episode 014: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (4, 7)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_014_pred_comparison.mp4
+Episode 015: CORRECT (Full Match)
+  > Actual: [(2, 7), (7, 2)]
+  > Pred:   [(2, 7), (7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_015_pred_comparison.mp4
+Episode 016: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 5), (1, 3)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_016_pred_comparison.mp4
+Episode 017: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (2, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_017_pred_comparison.mp4
+Episode 018: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (5, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_018_pred_comparison.mp4
+Episode 019: CORRECT (Full Match)
+  > Actual: [(2, 7), (5, 1)]
+  > Pred:   [(2, 7), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_019_pred_comparison.mp4
+Episode 020: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (3, 1)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_020_pred_comparison.mp4
+Episode 021: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (4, 7)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_021_pred_comparison.mp4
+Episode 022: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (3, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_022_pred_comparison.mp4
+Episode 023: CORRECT (Full Match)
+  > Actual: [(2, 7), (1, 3)]
+  > Pred:   [(2, 7), (1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_023_pred_comparison.mp4
+Episode 024: MISMATCH | Act: 1, Pred: 2. First Door Match: True
+  > Actual: [(3, 1)]
+  > Pred:   [(3, 1), (3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_024_pred_comparison.mp4
+Episode 025: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 5), (7, 3)]
+  > Pred:   [(1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_025_pred_comparison.mp4
+Episode 026: CORRECT (Full Match)
+  > Actual: [(7, 6), (1, 3)]
+  > Pred:   [(7, 6), (1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_026_pred_comparison.mp4
+Episode 027: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (6, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_027_pred_comparison.mp4
+Episode 028: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (4, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_028_pred_comparison.mp4
+Episode 029: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (1, 6)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_029_pred_comparison.mp4
+Episode 030: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 3), (1, 5)]
+  > Pred:   [(1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_030_pred_comparison.mp4
+Episode 031: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (2, 7)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_031_pred_comparison.mp4
+Episode 032: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (2, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_032_pred_comparison.mp4
+Episode 033: CORRECT (Full Match)
+  > Actual: [(5, 1)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_033_pred_comparison.mp4
+Episode 034: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (5, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_034_pred_comparison.mp4
+Episode 035: CORRECT (Full Match)
+  > Actual: [(3, 1), (7, 5)]
+  > Pred:   [(3, 1), (7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_035_pred_comparison.mp4
+Episode 036: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (6, 1)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_036_pred_comparison.mp4
+Episode 037: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 5), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_037_pred_comparison.mp4
+Episode 038: CORRECT (Full Match)
+  > Actual: [(3, 1), (7, 6)]
+  > Pred:   [(3, 1), (7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_038_pred_comparison.mp4
+Episode 039: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (6, 7)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_039_pred_comparison.mp4
+Episode 040: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (3, 7)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_040_pred_comparison.mp4
+Episode 041: CORRECT (Full Match)
+  > Actual: [(1, 5), (5, 1)]
+  > Pred:   [(1, 5), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_041_pred_comparison.mp4
+Episode 042: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (4, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_042_pred_comparison.mp4
+Episode 043: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 1), (4, 7)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_043_pred_comparison.mp4
+Episode 044: CORRECT (Full Match)
+  > Actual: [(1, 3)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_044_pred_comparison.mp4
+Episode 045: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (5, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_045_pred_comparison.mp4
+Episode 046: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(7, 2)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_046_pred_comparison.mp4
+Episode 047: CORRECT (Full Match)
+  > Actual: [(4, 7)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_047_pred_comparison.mp4
+Episode 048: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (4, 1)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_048_pred_comparison.mp4
+Episode 049: CORRECT (Full Match)
+  > Actual: [(3, 7)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_049_pred_comparison.mp4
+Episode 050: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (7, 3)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_050_pred_comparison.mp4
+Episode 051: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (7, 2)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_051_pred_comparison.mp4
+Episode 052: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(2, 7), (7, 3)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_052_pred_comparison.mp4
+Episode 053: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(2, 7), (4, 1)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_053_pred_comparison.mp4
+Episode 054: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (1, 6)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_054_pred_comparison.mp4
+Episode 055: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 6), (7, 3)]
+  > Pred:   [(1, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_055_pred_comparison.mp4
+Episode 056: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (6, 7)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_056_pred_comparison.mp4
+Episode 057: CORRECT (Full Match)
+  > Actual: [(1, 5)]
+  > Pred:   [(1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_057_pred_comparison.mp4
+Episode 058: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(2, 1), (5, 7)]
+  > Pred:   [(2, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_058_pred_comparison.mp4
+Episode 059: CORRECT (Full Match)
+  > Actual: [(3, 1), (7, 6)]
+  > Pred:   [(3, 1), (7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_059_pred_comparison.mp4
+Episode 060: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (1, 3)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_060_pred_comparison.mp4
+Episode 061: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 6), (2, 1)]
+  > Pred:   [(2, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_061_pred_comparison.mp4
+Episode 062: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 6), (6, 1)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_062_pred_comparison.mp4
+Episode 063: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (1, 3)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_063_pred_comparison.mp4
+Episode 064: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 3), (5, 7)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_064_pred_comparison.mp4
+Episode 065: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 6), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_065_pred_comparison.mp4
+Episode 066: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(2, 1), (7, 6)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_066_pred_comparison.mp4
+Episode 067: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 3), (7, 5)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_067_pred_comparison.mp4
+Episode 068: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 6), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_068_pred_comparison.mp4
+Episode 069: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (4, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_069_pred_comparison.mp4
+Episode 070: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (1, 6)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_070_pred_comparison.mp4
+Episode 071: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (6, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_071_pred_comparison.mp4
+Episode 072: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (1, 6)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_072_pred_comparison.mp4
+Episode 073: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 1), (2, 7)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_073_pred_comparison.mp4
+Episode 074: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (2, 1)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_074_pred_comparison.mp4
+Episode 075: CORRECT (Full Match)
+  > Actual: [(7, 6), (1, 3)]
+  > Pred:   [(7, 6), (1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_075_pred_comparison.mp4
+Episode 076: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 3), (5, 7)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_076_pred_comparison.mp4
+Episode 077: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(5, 7), (1, 2)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_077_pred_comparison.mp4
+Episode 078: CORRECT (Full Match)
+  > Actual: [(3, 1), (5, 7)]
+  > Pred:   [(3, 1), (5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_078_pred_comparison.mp4
+Episode 079: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 2), (7, 6)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_079_pred_comparison.mp4
+Episode 080: CORRECT (Full Match)
+  > Actual: [(1, 5), (6, 1)]
+  > Pred:   [(1, 5), (6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_080_pred_comparison.mp4
+Episode 081: CORRECT (Full Match)
+  > Actual: [(3, 7)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_081_pred_comparison.mp4
+Episode 082: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (2, 7)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_082_pred_comparison.mp4
+Episode 083: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (7, 5)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_083_pred_comparison.mp4
+Episode 084: CORRECT (Full Match)
+  > Actual: [(6, 1)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_084_pred_comparison.mp4
+Episode 085: CORRECT (Full Match)
+  > Actual: [(2, 7), (7, 2)]
+  > Pred:   [(2, 7), (7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_085_pred_comparison.mp4
+Episode 086: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (1, 3)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_086_pred_comparison.mp4
+Episode 087: CORRECT (Full Match)
+  > Actual: [(7, 2), (1, 5)]
+  > Pred:   [(7, 2), (1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_087_pred_comparison.mp4
+Episode 088: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (3, 1)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_088_pred_comparison.mp4
+Episode 089: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 5), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_089_pred_comparison.mp4
+Episode 090: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (1, 5)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_090_pred_comparison.mp4
+Episode 091: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 5), (5, 1)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_091_pred_comparison.mp4
+Episode 092: MISMATCH | Act: 2, Pred: 2. First Door Match: False
+  > Actual: [(7, 5), (4, 1)]
+  > Pred:   [(4, 1), (7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_092_pred_comparison.mp4
+Episode 093: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (1, 5)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_093_pred_comparison.mp4
+Episode 094: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 3), (1, 5)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_094_pred_comparison.mp4
+Episode 095: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (5, 7)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_095_pred_comparison.mp4
+Episode 096: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (4, 7)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_096_pred_comparison.mp4
+Episode 097: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (1, 5)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_097_pred_comparison.mp4
+Episode 098: CORRECT (Full Match)
+  > Actual: [(7, 6), (5, 1)]
+  > Pred:   [(7, 6), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_098_pred_comparison.mp4
+Episode 099: CORRECT (Full Match)
+  > Actual: [(4, 7)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay1/ep_099_pred_comparison.mp4
+
+--- Results over 100 valid episodes ---
+Full Sequence Accuracy: 23.00%
+First Door Accuracy:    83.00%
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/subprocess.py:1796: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = _posixsubprocess.fork_exec(
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+eval checkpoint ./checkpoints/observers/tworoom-noswap/DualNet-FinetuneFPnet_lr0.001_bs128_seed1/checkpoint_49.msgpack
+[P-Loader] Loaded from ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack
+--- Creating Model: dual_perspective ---
+Loading FP weights from: ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack
+FP weights grafted successfully.
+
+[O-Loader] Architecture matches perfectly (4,106,221 params).
+[O-Loader] Successfully mapped parameters from ./checkpoints/observers/tworoom-noswap/DualNet-FinetuneFPnet_lr0.001_bs128_seed1/checkpoint_49.msgpack
+Episode 000: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (2, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_000_pred_comparison.mp4
+Episode 001: CORRECT (Full Match)
+  > Actual: [(6, 7)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_001_pred_comparison.mp4
+Episode 002: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (1, 3)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_002_pred_comparison.mp4
+Episode 003: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (3, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_003_pred_comparison.mp4
+Episode 004: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(6, 7), (3, 1)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_004_pred_comparison.mp4
+Episode 005: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (4, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_005_pred_comparison.mp4
+Episode 006: CORRECT (Full Match)
+  > Actual: [(1, 5), (5, 1)]
+  > Pred:   [(1, 5), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_006_pred_comparison.mp4
+Episode 007: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (5, 7)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_007_pred_comparison.mp4
+Episode 008: CORRECT (Full Match)
+  > Actual: [(2, 7)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_008_pred_comparison.mp4
+Episode 009: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 1), (7, 6)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_009_pred_comparison.mp4
+Episode 010: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (3, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_010_pred_comparison.mp4
+Episode 011: CORRECT (Full Match)
+  > Actual: [(3, 1)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_011_pred_comparison.mp4
+Episode 012: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(3, 1)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_012_pred_comparison.mp4
+Episode 013: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (5, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_013_pred_comparison.mp4
+Episode 014: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (4, 7)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_014_pred_comparison.mp4
+Episode 015: CORRECT (Full Match)
+  > Actual: [(2, 7), (7, 2)]
+  > Pred:   [(2, 7), (7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_015_pred_comparison.mp4
+Episode 016: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 5), (1, 3)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_016_pred_comparison.mp4
+Episode 017: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (2, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_017_pred_comparison.mp4
+Episode 018: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (5, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_018_pred_comparison.mp4
+Episode 019: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(2, 7), (5, 1)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_019_pred_comparison.mp4
+Episode 020: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (3, 1)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_020_pred_comparison.mp4
+Episode 021: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (4, 7)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_021_pred_comparison.mp4
+Episode 022: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (3, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_022_pred_comparison.mp4
+Episode 023: CORRECT (Full Match)
+  > Actual: [(2, 7), (1, 3)]
+  > Pred:   [(2, 7), (1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_023_pred_comparison.mp4
+Episode 024: CORRECT (Full Match)
+  > Actual: [(3, 1)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_024_pred_comparison.mp4
+Episode 025: CORRECT (Full Match)
+  > Actual: [(1, 5), (7, 3)]
+  > Pred:   [(1, 5), (7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_025_pred_comparison.mp4
+Episode 026: CORRECT (Full Match)
+  > Actual: [(7, 6), (1, 3)]
+  > Pred:   [(7, 6), (1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_026_pred_comparison.mp4
+Episode 027: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (6, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_027_pred_comparison.mp4
+Episode 028: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (4, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_028_pred_comparison.mp4
+Episode 029: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (1, 6)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_029_pred_comparison.mp4
+Episode 030: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 3), (1, 5)]
+  > Pred:   [(1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_030_pred_comparison.mp4
+Episode 031: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (2, 7)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_031_pred_comparison.mp4
+Episode 032: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (2, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_032_pred_comparison.mp4
+Episode 033: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (3, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_033_pred_comparison.mp4
+Episode 034: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (5, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_034_pred_comparison.mp4
+Episode 035: CORRECT (Full Match)
+  > Actual: [(3, 1), (7, 5)]
+  > Pred:   [(3, 1), (7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_035_pred_comparison.mp4
+Episode 036: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (6, 1)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_036_pred_comparison.mp4
+Episode 037: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (7, 3)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_037_pred_comparison.mp4
+Episode 038: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (7, 6)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_038_pred_comparison.mp4
+Episode 039: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (6, 7)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_039_pred_comparison.mp4
+Episode 040: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (3, 7)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_040_pred_comparison.mp4
+Episode 041: CORRECT (Full Match)
+  > Actual: [(1, 5), (5, 1)]
+  > Pred:   [(1, 5), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_041_pred_comparison.mp4
+Episode 042: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (4, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_042_pred_comparison.mp4
+Episode 043: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 1), (4, 7)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_043_pred_comparison.mp4
+Episode 044: CORRECT (Full Match)
+  > Actual: [(1, 3)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_044_pred_comparison.mp4
+Episode 045: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (5, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_045_pred_comparison.mp4
+Episode 046: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(7, 2)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_046_pred_comparison.mp4
+Episode 047: CORRECT (Full Match)
+  > Actual: [(4, 7)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_047_pred_comparison.mp4
+Episode 048: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(4, 7), (4, 1)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_048_pred_comparison.mp4
+Episode 049: CORRECT (Full Match)
+  > Actual: [(3, 7)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_049_pred_comparison.mp4
+Episode 050: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(7, 3)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_050_pred_comparison.mp4
+Episode 051: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (7, 2)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_051_pred_comparison.mp4
+Episode 052: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(7, 3)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_052_pred_comparison.mp4
+Episode 053: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(2, 7), (4, 1)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_053_pred_comparison.mp4
+Episode 054: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (1, 6)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_054_pred_comparison.mp4
+Episode 055: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 6), (7, 3)]
+  > Pred:   [(1, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_055_pred_comparison.mp4
+Episode 056: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 2), (6, 7)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_056_pred_comparison.mp4
+Episode 057: CORRECT (Full Match)
+  > Actual: [(1, 5)]
+  > Pred:   [(1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_057_pred_comparison.mp4
+Episode 058: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(2, 1), (5, 7)]
+  > Pred:   [(2, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_058_pred_comparison.mp4
+Episode 059: CORRECT (Full Match)
+  > Actual: [(3, 1), (7, 6)]
+  > Pred:   [(3, 1), (7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_059_pred_comparison.mp4
+Episode 060: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (1, 3)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_060_pred_comparison.mp4
+Episode 061: CORRECT (Full Match)
+  > Actual: [(7, 6), (2, 1)]
+  > Pred:   [(7, 6), (2, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_061_pred_comparison.mp4
+Episode 062: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 6), (6, 1)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_062_pred_comparison.mp4
+Episode 063: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (1, 3)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_063_pred_comparison.mp4
+Episode 064: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(5, 7)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_064_pred_comparison.mp4
+Episode 065: CORRECT (Full Match)
+  > Actual: [(7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_065_pred_comparison.mp4
+Episode 066: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(2, 1), (7, 6)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_066_pred_comparison.mp4
+Episode 067: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 3), (7, 5)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_067_pred_comparison.mp4
+Episode 068: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 6), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_068_pred_comparison.mp4
+Episode 069: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (4, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_069_pred_comparison.mp4
+Episode 070: CORRECT (Full Match)
+  > Actual: [(3, 1), (1, 6)]
+  > Pred:   [(3, 1), (1, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_070_pred_comparison.mp4
+Episode 071: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (6, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_071_pred_comparison.mp4
+Episode 072: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (1, 6)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_072_pred_comparison.mp4
+Episode 073: CORRECT (Full Match)
+  > Actual: [(4, 1)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_073_pred_comparison.mp4
+Episode 074: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 7), (2, 1)]
+  > Pred:   [(2, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_074_pred_comparison.mp4
+Episode 075: CORRECT (Full Match)
+  > Actual: [(7, 6), (1, 3)]
+  > Pred:   [(7, 6), (1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_075_pred_comparison.mp4
+Episode 076: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(5, 7)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_076_pred_comparison.mp4
+Episode 077: CORRECT (Full Match)
+  > Actual: [(5, 7)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_077_pred_comparison.mp4
+Episode 078: CORRECT (Full Match)
+  > Actual: [(3, 1), (5, 7)]
+  > Pred:   [(3, 1), (5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_078_pred_comparison.mp4
+Episode 079: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 2), (7, 6)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_079_pred_comparison.mp4
+Episode 080: CORRECT (Full Match)
+  > Actual: [(1, 5), (6, 1)]
+  > Pred:   [(1, 5), (6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_080_pred_comparison.mp4
+Episode 081: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (1, 2)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_081_pred_comparison.mp4
+Episode 082: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (2, 7)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_082_pred_comparison.mp4
+Episode 083: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (7, 5)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_083_pred_comparison.mp4
+Episode 084: CORRECT (Full Match)
+  > Actual: [(6, 1)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_084_pred_comparison.mp4
+Episode 085: CORRECT (Full Match)
+  > Actual: [(2, 7), (7, 2)]
+  > Pred:   [(2, 7), (7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_085_pred_comparison.mp4
+Episode 086: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (1, 3)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_086_pred_comparison.mp4
+Episode 087: CORRECT (Full Match)
+  > Actual: [(7, 2), (1, 5)]
+  > Pred:   [(7, 2), (1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_087_pred_comparison.mp4
+Episode 088: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (3, 1)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_088_pred_comparison.mp4
+Episode 089: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 5), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_089_pred_comparison.mp4
+Episode 090: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(1, 5)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_090_pred_comparison.mp4
+Episode 091: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 5), (5, 1)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_091_pred_comparison.mp4
+Episode 092: CORRECT (Full Match)
+  > Actual: [(4, 1), (7, 5)]
+  > Pred:   [(4, 1), (7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_092_pred_comparison.mp4
+Episode 093: MISMATCH | Act: 2, Pred: 2. First Door Match: False
+  > Actual: [(7, 3), (1, 5)]
+  > Pred:   [(1, 5), (7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_093_pred_comparison.mp4
+Episode 094: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 3), (1, 5)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_094_pred_comparison.mp4
+Episode 095: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (5, 7)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_095_pred_comparison.mp4
+Episode 096: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (4, 7)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_096_pred_comparison.mp4
+Episode 097: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (1, 5)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_097_pred_comparison.mp4
+Episode 098: CORRECT (Full Match)
+  > Actual: [(7, 6), (5, 1)]
+  > Pred:   [(7, 6), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_098_pred_comparison.mp4
+Episode 099: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (4, 1)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay4/ep_099_pred_comparison.mp4
+
+--- Results over 100 valid episodes ---
+Full Sequence Accuracy: 29.00%
+First Door Accuracy:    78.00%
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+/mnt/iusers01/fatpou01/compsci01/n70579mp/.conda/envs/jax/lib/python3.10/subprocess.py:1796: RuntimeWarning: os.fork() was called. os.fork() is incompatible with multithreaded code, and JAX is multithreaded, so this will likely lead to a deadlock.
+  self.pid = _posixsubprocess.fork_exec(
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+IMAGEIO FFMPEG_WRITER WARNING: input image is not divisible by macro_block_size=16, resizing from (578, 288) to (592, 288) to ensure video compatibility with most codecs and players. To prevent resizing, make your input image divisible by the macro_block_size or set the macro_block_size to 1 (risking incompatibility).
+eval checkpoint ./checkpoints/observers/tworoom-noswap/DualNet-FinetuneFPnet_lr0.001_bs128_seed1/checkpoint_49.msgpack
+[P-Loader] Loaded from ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack
+--- Creating Model: dual_perspective ---
+Loading FP weights from: ./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack
+FP weights grafted successfully.
+
+[O-Loader] Architecture matches perfectly (4,106,221 params).
+[O-Loader] Successfully mapped parameters from ./checkpoints/observers/tworoom-noswap/DualNet-FinetuneFPnet_lr0.001_bs128_seed1/checkpoint_49.msgpack
+Episode 000: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (2, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_000_pred_comparison.mp4
+Episode 001: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (2, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_001_pred_comparison.mp4
+Episode 002: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (1, 3)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_002_pred_comparison.mp4
+Episode 003: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(5, 7), (3, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_003_pred_comparison.mp4
+Episode 004: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(6, 7), (3, 1)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_004_pred_comparison.mp4
+Episode 005: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(5, 1)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_005_pred_comparison.mp4
+Episode 006: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(5, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_006_pred_comparison.mp4
+Episode 007: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (5, 7)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_007_pred_comparison.mp4
+Episode 008: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(2, 7)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_008_pred_comparison.mp4
+Episode 009: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 1), (7, 6)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_009_pred_comparison.mp4
+Episode 010: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 5), (3, 1)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_010_pred_comparison.mp4
+Episode 011: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (3, 7)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_011_pred_comparison.mp4
+Episode 012: IGNORED (Actual agent opened no doors)
+  > Actual: []
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_012_pred_comparison.mp4
+Episode 013: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (5, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_013_pred_comparison.mp4
+Episode 014: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(4, 7), (7, 3)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_014_pred_comparison.mp4
+Episode 015: MISMATCH | Act: 2, Pred: 2. First Door Match: False
+  > Actual: [(2, 7), (7, 2)]
+  > Pred:   [(7, 2), (2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_015_pred_comparison.mp4
+Episode 016: IGNORED (Actual agent opened no doors)
+  > Actual: []
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_016_pred_comparison.mp4
+Episode 017: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(5, 7), (2, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_017_pred_comparison.mp4
+Episode 018: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(5, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_018_pred_comparison.mp4
+Episode 019: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(2, 7), (5, 1)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_019_pred_comparison.mp4
+Episode 020: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 7), (3, 1)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_020_pred_comparison.mp4
+Episode 021: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 1), (4, 7)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_021_pred_comparison.mp4
+Episode 022: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(6, 1), (3, 7)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_022_pred_comparison.mp4
+Episode 023: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(2, 7), (1, 3)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_023_pred_comparison.mp4
+Episode 024: CORRECT (Full Match)
+  > Actual: [(3, 1)]
+  > Pred:   [(3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_024_pred_comparison.mp4
+Episode 025: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(1, 5), (7, 3)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_025_pred_comparison.mp4
+Episode 026: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 6), (1, 3)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_026_pred_comparison.mp4
+Episode 027: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (6, 1)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_027_pred_comparison.mp4
+Episode 028: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(5, 7), (4, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_028_pred_comparison.mp4
+Episode 029: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (1, 6)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_029_pred_comparison.mp4
+Episode 030: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(1, 5)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_030_pred_comparison.mp4
+Episode 031: MISMATCH | Act: 1, Pred: 2. First Door Match: False
+  > Actual: [(3, 1)]
+  > Pred:   [(2, 7), (3, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_031_pred_comparison.mp4
+Episode 032: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (2, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_032_pred_comparison.mp4
+Episode 033: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 1), (3, 7)]
+  > Pred:   [(5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_033_pred_comparison.mp4
+Episode 034: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (5, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_034_pred_comparison.mp4
+Episode 035: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (7, 5)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_035_pred_comparison.mp4
+Episode 036: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (6, 1)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_036_pred_comparison.mp4
+Episode 037: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(7, 3)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_037_pred_comparison.mp4
+Episode 038: CORRECT (Full Match)
+  > Actual: [(7, 6)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_038_pred_comparison.mp4
+Episode 039: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (6, 7)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_039_pred_comparison.mp4
+Episode 040: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (3, 7)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_040_pred_comparison.mp4
+Episode 041: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(1, 5), (5, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_041_pred_comparison.mp4
+Episode 042: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (4, 7)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_042_pred_comparison.mp4
+Episode 043: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(4, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_043_pred_comparison.mp4
+Episode 044: CORRECT (Full Match)
+  > Actual: [(1, 3)]
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_044_pred_comparison.mp4
+Episode 045: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(7, 5), (5, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_045_pred_comparison.mp4
+Episode 046: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(7, 2)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_046_pred_comparison.mp4
+Episode 047: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(4, 7)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_047_pred_comparison.mp4
+Episode 048: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(4, 7), (4, 1)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_048_pred_comparison.mp4
+Episode 049: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(3, 7)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_049_pred_comparison.mp4
+Episode 050: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 5), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_050_pred_comparison.mp4
+Episode 051: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (7, 2)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_051_pred_comparison.mp4
+Episode 052: IGNORED (Actual agent opened no doors)
+  > Actual: []
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_052_pred_comparison.mp4
+Episode 053: CORRECT (Full Match)
+  > Actual: [(2, 7)]
+  > Pred:   [(2, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_053_pred_comparison.mp4
+Episode 054: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(5, 1), (1, 6)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_054_pred_comparison.mp4
+Episode 055: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(1, 6), (7, 3)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_055_pred_comparison.mp4
+Episode 056: CORRECT (Full Match)
+  > Actual: [(6, 7)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_056_pred_comparison.mp4
+Episode 057: CORRECT (Full Match)
+  > Actual: [(1, 5)]
+  > Pred:   [(1, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_057_pred_comparison.mp4
+Episode 058: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(2, 1)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_058_pred_comparison.mp4
+Episode 059: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (7, 6)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_059_pred_comparison.mp4
+Episode 060: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 7), (1, 3)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_060_pred_comparison.mp4
+Episode 061: CORRECT (Full Match)
+  > Actual: [(7, 6), (2, 1)]
+  > Pred:   [(7, 6), (2, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_061_pred_comparison.mp4
+Episode 062: CORRECT (Full Match)
+  > Actual: [(6, 1)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_062_pred_comparison.mp4
+Episode 063: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(5, 7), (1, 3)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_063_pred_comparison.mp4
+Episode 064: IGNORED (Actual agent opened no doors)
+  > Actual: []
+  > Pred:   [(1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_064_pred_comparison.mp4
+Episode 065: IGNORED (Actual agent opened no doors)
+  > Actual: []
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_065_pred_comparison.mp4
+Episode 066: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(2, 1), (7, 6)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_066_pred_comparison.mp4
+Episode 067: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(7, 5)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_067_pred_comparison.mp4
+Episode 068: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(1, 6), (7, 3)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_068_pred_comparison.mp4
+Episode 069: CORRECT (Full Match)
+  > Actual: [(4, 7), (5, 1)]
+  > Pred:   [(4, 7), (5, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_069_pred_comparison.mp4
+Episode 070: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 1), (1, 6)]
+  > Pred:   [(1, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_070_pred_comparison.mp4
+Episode 071: CORRECT (Full Match)
+  > Actual: [(6, 7)]
+  > Pred:   [(6, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_071_pred_comparison.mp4
+Episode 072: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (1, 6)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_072_pred_comparison.mp4
+Episode 073: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 1), (2, 7)]
+  > Pred:   [(4, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_073_pred_comparison.mp4
+Episode 074: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(3, 7), (2, 1)]
+  > Pred:   [(2, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_074_pred_comparison.mp4
+Episode 075: CORRECT (Full Match)
+  > Actual: [(7, 6), (1, 3)]
+  > Pred:   [(7, 6), (1, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_075_pred_comparison.mp4
+Episode 076: IGNORED (Actual agent opened no doors)
+  > Actual: []
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_076_pred_comparison.mp4
+Episode 077: CORRECT (Full Match)
+  > Actual: [(5, 7)]
+  > Pred:   [(5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_077_pred_comparison.mp4
+Episode 078: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(3, 1), (5, 7)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_078_pred_comparison.mp4
+Episode 079: MISMATCH | Act: 2, Pred: 1. First Door Match: False
+  > Actual: [(7, 2), (7, 6)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_079_pred_comparison.mp4
+Episode 080: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(1, 5), (6, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_080_pred_comparison.mp4
+Episode 081: MISMATCH | Act: 1, Pred: 1. First Door Match: False
+  > Actual: [(3, 7)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_081_pred_comparison.mp4
+Episode 082: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 3), (2, 7)]
+  > Pred:   [(7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_082_pred_comparison.mp4
+Episode 083: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(3, 1), (7, 5)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_083_pred_comparison.mp4
+Episode 084: CORRECT (Full Match)
+  > Actual: [(6, 1)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_084_pred_comparison.mp4
+Episode 085: CORRECT (Full Match)
+  > Actual: [(2, 7), (7, 2)]
+  > Pred:   [(2, 7), (7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_085_pred_comparison.mp4
+Episode 086: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (1, 3)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_086_pred_comparison.mp4
+Episode 087: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (1, 5)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_087_pred_comparison.mp4
+Episode 088: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(3, 7), (3, 1)]
+  > Pred:   [(3, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_088_pred_comparison.mp4
+Episode 089: MISMATCH | Act: 2, Pred: 0. First Door Match: False
+  > Actual: [(1, 5), (7, 3)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_089_pred_comparison.mp4
+Episode 090: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(6, 1), (1, 5)]
+  > Pred:   [(6, 1)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_090_pred_comparison.mp4
+Episode 091: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(5, 1)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_091_pred_comparison.mp4
+Episode 092: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 5), (4, 1)]
+  > Pred:   [(7, 5)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_092_pred_comparison.mp4
+Episode 093: MISMATCH | Act: 2, Pred: 2. First Door Match: False
+  > Actual: [(7, 3), (1, 5)]
+  > Pred:   [(1, 5), (7, 3)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_093_pred_comparison.mp4
+Episode 094: MISMATCH | Act: 1, Pred: 0. First Door Match: False
+  > Actual: [(1, 5)]
+  > Pred:   []
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_094_pred_comparison.mp4
+Episode 095: CORRECT (Full Match)
+  > Actual: [(1, 2), (5, 7)]
+  > Pred:   [(1, 2), (5, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_095_pred_comparison.mp4
+Episode 096: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 2), (4, 7)]
+  > Pred:   [(7, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_096_pred_comparison.mp4
+Episode 097: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(1, 2), (1, 5)]
+  > Pred:   [(1, 2)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_097_pred_comparison.mp4
+Episode 098: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(7, 6), (5, 1)]
+  > Pred:   [(7, 6)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_098_pred_comparison.mp4
+Episode 099: MISMATCH | Act: 2, Pred: 1. First Door Match: True
+  > Actual: [(4, 7), (4, 1)]
+  > Pred:   [(4, 7)]
+Saved logs/eval_pred_action/DualNet-FromScratch/swap_delay8/ep_099_pred_comparison.mp4
+
+--- Results over 94 valid episodes ---
+Full Sequence Accuracy: 15.96%
+First Door Accuracy:    50.00%

@@ -18,5 +18,26 @@ echo "Job is using $SLURM_GPUS GPU(s) with ID(s) $CUDA_VISIBLE_DEVICES and $SLUR
 
 source activate jax
 
+python -m training.train_pred --model_type third_person --track --seed 2
+python -m training.train_pred --model_type dual_perspective --track --seed 2
+python -m training.train_pred --model_type dual_perspective --p_checkpoint "" --track --seed 2
+python -m training.train_pred --model_type dual_perspective --freeze_fp --track --seed 2
 
-python -m training.train_pred --p_checkpoint ""
+
+python -m training.train_pred --model_type third_person --track --seed 3
+python -m training.train_pred --model_type dual_perspective --track --seed 3
+python -m training.train_pred --model_type dual_perspective --p_checkpoint "" --track --seed 3
+python -m training.train_pred --model_type dual_perspective --freeze_fp --track --seed 3
+
+
+
+python -m training.train_pred --model_type third_person --track --seed 4
+python -m training.train_pred --model_type dual_perspective --track --seed 4
+python -m training.train_pred --model_type dual_perspective --p_checkpoint "" --track --seed 4
+python -m training.train_pred --model_type dual_perspective --freeze_fp --track --seed 4
+
+
+python -m training.train_pred --model_type third_person --track --seed 5
+python -m training.train_pred --model_type dual_perspective --track --seed 5
+python -m training.train_pred --model_type dual_perspective --p_checkpoint "" --track --seed 5
+python -m training.train_pred --model_type dual_perspective --freeze_fp --track --seed 5

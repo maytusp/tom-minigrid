@@ -234,7 +234,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
     parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
-    parser.add_argument("--vid_out_dir", type=str, default="logs/train_trajs/tworoom_noswap_doordelay1/")
+    parser.add_argument("--vid_out_dir", type=str, default="logs/train_trajs/tworoom_noswap_randdelay/")
     parser.add_argument("--episodes", type=int, default=5000)
     parser.add_argument("--seed", type=int, default=1)
 
@@ -265,22 +265,21 @@ def main():
     print(f"Loaded params from: {args.checkpoint}")
 
     # train
-    collect_obs(env, env_params, net, params,
-                        episodes=args.episodes, max_steps=1000, seed=args.seed,
-                        out_dir=args.vid_out_dir,
-                        observer_r = 5,
-                        observer_c = 1,
-                        fov_size = 9,
-                        fov_dir = "right")
-
-    # test
     # collect_obs(env, env_params, net, params,
     #                     episodes=args.episodes, max_steps=1000, seed=args.seed,
     #                     out_dir=args.vid_out_dir,
-    #                     observer_r = 9,
-    #                     observer_c = 5,
+    #                     observer_r = 5,
+    #                     observer_c = 1,
     #                     fov_size = 9,
-    #                     fov_dir = "up")
+    #                     fov_dir = "right")
+
+    collect_obs(env, env_params, net, params,
+                        episodes=args.episodes, max_steps=1000, seed=args.seed,
+                        out_dir=args.vid_out_dir,
+                        observer_r = 9,
+                        observer_c = 5,
+                        fov_size = 9,
+                        fov_dir = "up")
     eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed)
 
 if __name__ == "__main__":

@@ -90,6 +90,155 @@ class LocalProtagonistRNN(nn.Module):
 
     def initialize_carry(self, batch_size):
         return jnp.zeros((batch_size, self.rnn_num_layers, self.rnn_hidden_dim), dtype=self.dtype)
+        
+class ManualTrafo(nn.Module):
+    """
+    Transforms a TP view into an FP view using the Pad-Crop-Rotate method.
+    """
+
+    def setup(self):
+        # Offsets for the top-left corner of the crop relative to the agent (r, c)
+        # 13 (Up):    Start at (r-8, c-4) -> Rot 0
+        # 14 (Right): Start at (r-4, c)   -> Rot 90 CCW (k=1)
+        # 15 (Down):  Start at (r,   c-4) -> Rot 180 (k=2)
+        # 16 (Left):  Start at (r-4, c-8) -> Rot 270 CCW / 90 CW (k=3)
+        
+        # We store offsets: [Row_Offset, Col_Offset]
+        # Indices: 0=Up(13), 1=Right(14), 2=Down(15), 3=Left(16)
+        self.crop_offsets = jnp.array([
+            [-8, -4], # Up
+            [-4,  0], # Right
+            [ 0, -4], # Down
+            [-4, -8]  # Left
+        ], dtype=jnp.int32)
+
+    def __call__(self, tp_obs):
+        # tp_obs: [B, S, 9, 9, 2]
+        return jax.vmap(jax.vmap(self._transform_single_frame))(tp_obs)
+
+    def _transform_single_frame(self, grid):
+        """
+        1. Pad Grid -> 2. Find Agent -> 3. Dynamic Slice -> 4. Rotate
+        """
+        H, W, C = grid.shape
+        
+        # --- 1. FIND PROTAGONIST ---
+        id_grid = grid[..., 0]
+        
+        is_up    = (id_grid == 13)
+        is_right = (id_grid == 14)
+        is_down  = (id_grid == 15)
+        is_left  = (id_grid == 16)
+        
+        is_protagonist = is_up | is_right | is_down | is_left
+        protagonist_present = jnp.max(is_protagonist)
+        
+        # Find (r, c)
+        flat_idx = jnp.argmax(is_protagonist.flatten())
+        p_r = flat_idx // W
+        p_c = flat_idx % W
+        
+        # Determine Direction Index (0=Up, 1=Right, 2=Down, 3=Left)
+        # We multiply masks by their index and sum them up
+        dir_idx = (0 * jnp.max(is_up)) + \
+                  (1 * jnp.max(is_right)) + \
+                  (2 * jnp.max(is_down)) + \
+                  (3 * jnp.max(is_left))
+        
+        # --- 2. PAD THE GRID ---
+        # Pad 9 pixels on all sides with 0
+        # New shape: [27, 27, 2]
+        padded_grid = jnp.pad(grid, ((9, 9), (9, 9), (0, 0)), constant_values=0)
+        
+        # Shift agent coordinate to padded space
+        pad_p_r = p_r + 9
+        pad_p_c = p_c + 9
+        
+        # --- 3. DYNAMIC CROP (SLICE) ---
+        # Get the offsets for the current direction
+        offsets = self.crop_offsets[dir_idx] # [row_off, col_off]
+        
+        start_r = pad_p_r + offsets[0]
+        start_c = pad_p_c + offsets[1]
+        
+        # Dynamic Slice extracts the 9x9 window
+        # crop shape: [9, 9, 2]
+        crop = jax.lax.dynamic_slice(
+            padded_grid, 
+            (start_r, start_c, 0), 
+            (9, 9, 2)
+        )
+        
+        # --- 4. ROTATE ---
+        # Rotate the crop so Agent (who is currently somewhere in the crop)
+        # moves to the standard position (8, 4) facing Up.
+        
+        # jax.lax.switch efficiently selects the rotation branch
+        # k=0 (Up)    -> No rot
+        # k=1 (Right) -> Rot 90 CCW
+        # k=2 (Down)  -> Rot 180
+        # k=3 (Left)  -> Rot 270 CCW (90 CW)
+        
+        fp_view = jax.lax.switch(
+            dir_idx,
+            [
+                lambda x: x,                       # 0: Up
+                lambda x: jnp.rot90(x, k=1),       # 1: Right
+                lambda x: jnp.rot90(x, k=2),       # 2: Down
+                lambda x: jnp.rot90(x, k=3),       # 3: Left
+            ],
+            crop
+        )
+        
+        return fp_view * protagonist_present
+
+class TransformedFPPredictor(nn.Module):
+    num_actions: int
+    fp_emb: int = 16
+    fp_rnn: int = 256
+    fp_head_dim: int = 128
+    rnn_num_layers: int = 1
+    
+    # Toggle between Manual and Learnable
+    use_manual_trafo: bool = True  
+    
+    def setup(self):
+        # 1. The Transformation Layer
+        if self.use_manual_trafo:
+            self.trafo = ManualTrafo()
+        else:
+            self.trafo = None #TODO Learnable transformation
+
+        # 2. The Core FP Model (Standard LocalProtagonistRNN)
+        self.fp_module = LocalProtagonistRNN(
+            num_actions=self.num_actions,
+            obs_emb_dim=self.fp_emb,
+            rnn_hidden_dim=self.fp_rnn,
+            rnn_num_layers=self.rnn_num_layers,
+            head_hidden_dim=self.fp_head_dim,
+        )
+
+    def __call__(self, inputs_tp, hidden_fp, **kwargs):
+        # 1. Transform TP Observation -> FP Observation
+        tp_obs = inputs_tp["obs_img"]
+        fp_obs = self.trafo(tp_obs) # [B, S, 9, 9, 2]
+        jax.debug.print("Transformed TP Obs: {}", tp_obs[0,0,:,:,0])
+        jax.debug.print("Transformed FP Obs: {}", fp_obs[0,0,:,:,0])
+        
+        # 2. Construct Input for FP Module
+        # We reuse prev_action/reward from TP input
+        inputs_fp = {
+            "obs_img": fp_obs,
+            "prev_action": inputs_tp["prev_action"],
+            "prev_reward": inputs_tp["prev_reward"],
+            "obs_dir": jnp.zeros((*fp_obs.shape[:2], 4)) 
+        }
+        
+        # 3. Forward pass through FP model
+        return self.fp_module(inputs_fp, hidden_fp)
+
+    def initialize_carry(self, batch_size):
+        return jnp.zeros((batch_size, self.rnn_num_layers, self.fp_rnn), dtype=jnp.float32)
 
 # --- 2. Dual Perspective Model ---
 class DualPerspectivePredictor(nn.Module):
@@ -250,6 +399,16 @@ def create_model(model_type: str, config: Dict, rng):
             predict_sr=use_sr,
             num_states=num_states
         )
+    elif model_type == "transformed_fp":
+            # New model type
+            use_manual = config.get('use_manual_trafo', True)
+            model = TransformedFPPredictor(
+                num_actions=config['num_actions'],
+                fp_emb=config['fp_emb'], 
+                fp_rnn=config['fp_rnn'],
+                fp_head_dim=128,
+                use_manual_trafo=use_manual
+            )
     else:
         raise ValueError(f"Unknown model_type: {model_type}")
 
@@ -262,12 +421,19 @@ def create_model(model_type: str, config: Dict, rng):
     }
     dummy_tp = {"obs_img": jnp.zeros((1, 1, 9, 9, 2), dtype=jnp.int32)}
     
-    h_fp, h_tp = model.initialize_carry(1)
-    variables = model.init(rng, dummy_fp, h_fp, dummy_tp, h_tp)
+    if model_type == "transformed_fp":
+         h_fp = model.initialize_carry(1)
+         h_tp = jnp.zeros((1, 1, 1)) # Dummy
+         # Initialize with TP inputs (since that's what we feed it)
+         variables = model.init(rng, dummy_fp, h_fp)
+    else:
+        h_fp, h_tp = model.initialize_carry(1)
+        variables = model.init(rng, dummy_fp, h_fp, dummy_tp, h_tp)
+    
     params = flax.core.unfreeze(variables['params'])
 
     # Grafting Logic
-    if model_type == "dual_perspective" and len(config.get('p_checkpoint')) > 0:
+    if (model_type == "dual_perspective" or  model_type == "transformed_fp") and len(config.get('p_checkpoint')) > 0:
         print(f"Loading FP weights from: {config['p_checkpoint']}")
         with open(config['p_checkpoint'], "rb") as f:
             raw_p = msgpack_restore(f.read())
