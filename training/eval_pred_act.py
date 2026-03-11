@@ -119,10 +119,7 @@ def load_p_params(checkpoint_path: str, net, env, env_params):
     print(f"[P-Loader] Loaded from {checkpoint_path}")
     return freeze({"params": loaded_params})
 
-import jax
-import jax.numpy as jnp
-from flax.serialization import msgpack_restore, from_state_dict
-from flax.core import freeze
+
 
 def count_params(params_tree):
     """Utility to count total parameters in a PyTree."""
@@ -144,14 +141,16 @@ def load_o_params(checkpoint_path, net, cfg, model_type="third_person"):
     }
     # Note: assuming cfg.fov_size is available
     dummy_tp = {"obs_img": jnp.zeros((1, 1, cfg.fov_size, cfg.fov_size, 2), dtype=jnp.int32)}
-    
-    # Dual/TP models usually return 2 hidden states
-    h_fp, h_tp = net.initialize_carry(batch_size=1)
-    
-    # Initialize to get correct structure
-    variables = net.init(rng, dummy_fp, h_fp, dummy_tp, h_tp)
+    if model_type == "transformed_fp":
+        h_fp = net.initialize_carry(batch_size=1)
+        variables = net.init(rng, dummy_fp, h_fp)
+    else:
+        # Dual/TP models return 2 hidden states
+        h_fp, h_tp = net.initialize_carry(batch_size=1)
+        # Initialize to get correct structure
+        variables = net.init(rng, dummy_fp, h_fp, dummy_tp, h_tp)
+
     target_params = variables['params']
-    
     # Load raw bytes -> msgpack dict
     with open(checkpoint_path, "rb") as f:
         try:
@@ -163,7 +162,8 @@ def load_o_params(checkpoint_path, net, cfg, model_type="third_person"):
         except:
             f.seek(0)
             raw_params = msgpack_restore(f.read())['params']
-
+    if model_type == "transformed_fp":
+        raw_params = {'fp_module': raw_params}
     # --- NEW: Parameter Counting and Comparison ---
     expected_count = count_params(target_params)
     checkpoint_count = count_params(raw_params)
@@ -223,17 +223,18 @@ def run_dual_rollout(
 
         prev_action_act = jnp.asarray(0, dtype=jnp.int32)
         prev_action_pred = jnp.asarray(0, dtype=jnp.int32)
-
+        has_doors_closed = jnp.asarray(False, dtype=jnp.bool_)
         init_carry = (
             timestep_act, timestep_pred, 
             h0_p,           # P's hidden state
             h0_o_fp, h0_o_tp, # O's hidden states (FP, TP)
             prev_action_act, prev_action_pred, 
+            has_doors_closed,
             rng
         )
-
+        
         def step_fn(carry, _):
-            ts_act, ts_pred, h_p, h_o_fp, h_o_tp, pa_act, pa_pred, _rng = carry
+            ts_act, ts_pred, h_p, h_o_fp, h_o_tp, pa_act, pa_pred, has_doors_closed, _rng = carry
             
             # --- 1. Observations ---
             obs_p = ts_act.observation["p_img"]
@@ -271,7 +272,7 @@ def run_dual_rollout(
             if model_type == "transformed_fp":
                 # If we use the Transformed FP model, the structure of network is the same as net_p
                 # So the output is distribution object, not logits (distribution parameters) 
-                dist_o, _, new_h_o_fp, _ = net_o.apply(params_o,
+                dist_o, _, new_h_o_fp, _ = net_o.apply({'params': params_o},
                                                 in_o_fp, h_o_fp)
                 _rng, rng_o = jax.random.split(_rng, 2)
                 action_o = dist_o.sample(seed=rng_o).squeeze()
@@ -285,10 +286,15 @@ def run_dual_rollout(
                 entropy = -jnp.sum(probs_o * jnp.log(probs_o + 1e-6))
                 action_o = jnp.argmax(logits_o, axis=-1).squeeze()
 
-            # Check if we are in the "Predicted" phase (Star is gone)
-            star_visible = jnp.any(obs_o[..., 0] == 12)
+
+            doors_currently_closed = jnp.any(obs_o[..., 0] == 9)
             
-            action_for_pred = jnp.where(star_visible, action_p, action_o)
+            # Latch the boolean so it stays True once doors are closed for the first time
+            new_has_doors_closed = has_doors_closed | doors_currently_closed
+            
+            # If doors have closed, use action_o. Otherwise, keep using action_p.
+            action_for_pred = jnp.where(new_has_doors_closed, action_o, action_p)
+
             # --- 5. Environment Step ---
             new_ts_act = env.step(env_params, ts_act, action_p)
             new_ts_pred = env.step(env_params, ts_pred, action_for_pred)
@@ -298,6 +304,7 @@ def run_dual_rollout(
                 new_h_p, 
                 new_h_o_fp, new_h_o_tp,
                 action_p, action_for_pred, 
+                new_has_doors_closed,
                 _rng
             )
             act_pos = ts_act.state.agent.position
@@ -306,13 +313,16 @@ def run_dual_rollout(
             outs = {
                 "act_o_img": ts_act.observation["o_img"],
                 "pred_o_img": ts_pred.observation["o_img"],
+                "act_p_img": ts_act.observation["p_img"],
+                "pred_p_img": ts_pred.observation["p_img"],
                 "act_pos": act_pos,        
                 "pred_pos": pred_pos,           
                 "action_p": action_p,
                 "action_o": action_o,
                 "used_action": action_for_pred,
-                "star_visible": star_visible,
+                "doors_closed": new_has_doors_closed,
                 "reward_act": ts_act.reward,
+                "reward_pred": ts_pred.reward,
                 "done_act": ts_act.last(),
                 "done_pred": ts_pred.last(),
             }
@@ -396,11 +406,15 @@ def run_dual_rollout(
         else:
             T_pred = max_steps
       
-        reward = np.sum(out["reward_act"][:T_act])
+        reward_act = np.sum(out["reward_act"][:T_act])
 
         # Extract the grids and positions up to time T
         act_grids = np.array(out["act_o_img"][:T_act])
         pred_grids = np.array(out["pred_o_img"][:T_pred])
+
+        # Extract the egocentric observation of the real environment
+        act_ego_obs = np.array(out["act_p_img"][:T_act])
+
         act_positions = np.array(out["act_pos"][:T_act])
         pred_positions = np.array(out["pred_pos"][:T_pred])
         
@@ -408,14 +422,38 @@ def run_dual_rollout(
         doors_act = get_door_sequence(act_grids)
         doors_pred = get_door_sequence(pred_grids)
 
+        # Check valid episodes using Protagonist trajectories.
+        doors_closed_latch = np.array(out["doors_closed"][:T_act])
+        is_success = reward_act > 0
+        is_valid = False
+        is_case_I = False
+        is_case_II = False
+        if is_success and doors_closed_latch.any():
+            T_door_closed = np.argmax(doors_closed_latch)
+
+            star_present = jnp.any(act_grids[..., 0] == 12, axis=(1, 2))
+            T_star_reached = jnp.argmax(~star_present)
+
+            goal_seen = np.any(act_ego_obs[T_star_reached:T_door_closed, ..., 0] == 6) #TODO Import this value (e.g., 6) from the env
+            
+
+            num_doors_opened = len(doors_act)
+            # CASEI: Before the door is closed for the first time by the environment, P sees the goal in one of these rooms.
+            # The agent must go to the correct room based on its true belief.
+            is_case_I = goal_seen and (num_doors_opened == 1)
+
+            # CASEII: Otherwise
+            # The agent must go to the wrong room based on its false belief and then go to the correct room.
+            is_case_II = (not goal_seen) and (num_doors_opened == 2)
+
+            is_valid = is_case_I | is_case_II
+
+
+
         # Variables to track specific failures
         is_full_match = False
         is_first_match = False
-
-        if len(doors_act) == 0:
-            alignment_status = "IGNORED (Actual agent opened no doors)"
-            ignored_episodes += 1
-        else:
+        if is_valid:
             # --- Check First Door Alignment ---
             # Did the observer at least get the first door right?
             if len(doors_pred) > 0 and doors_act[0] == doors_pred[0]:
@@ -435,6 +473,9 @@ def run_dual_rollout(
                     f"First Door Match: {is_first_match}"
                 )
                 failed_predictions += 1
+        else:
+            ignored_episodes += 1
+            alignment_status = "IGNORED (Invalid constraints)"
 
         print(f"Episode {ep:03d}: {alignment_status}")
         print(f"  > Actual: {doors_act}")
@@ -453,7 +494,7 @@ def run_dual_rollout(
         )
         print(f"Saved {vid_path}")
 
-    valid_episodes = episodes - ignored_episodes
+    valid_episodes = episodes - ignored_episodes 
     if valid_episodes > 0:
         print(f"\n--- Results over {valid_episodes} valid episodes ---")
         print(f"Full Sequence Accuracy: {correct_predictions / valid_episodes:.2%}")
@@ -463,15 +504,15 @@ def run_dual_rollout(
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--checkpoint", type=str, default="", help="Observer checkpoint path")
+    parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsSwap-9x9vs9-Ptraining/final.msgpack")
+    parser.add_argument("--o_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-Otraining/final.msgpack", help="Observer checkpoint path")
     parser.add_argument("--model_type", type=str, default="transformed_fp", choices=["third_person", "dual_perspective", "transformed_fp"])
     parser.add_argument("--use_sr", action="store_true", default=False, 
                             help="Enable Successor Representation prediction and loss.")
     parser.add_argument("--num_states", type=int, default=81, 
                         help="Total number of discrete states for the SR (update based on your grid size).")
     parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsSwap-9x9vs9-d4")
-    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/FPNet-RL/swap_delay4")
+    parser.add_argument("--vid_out_dir", type=str, default="logs/eval_pred_action/Protagonist/swap_delay4")
     parser.add_argument("--episodes", type=int, default=100)
     parser.add_argument("--seed", type=int, default=1)
     # O args (must match training)
@@ -484,7 +525,7 @@ def main():
     args = parser.parse_args()
 
 
-    print("eval checkpoint", args.checkpoint)
+    print("eval checkpoint", args.o_checkpoint)
     
     # 1. Env
     env, env_params = build_env(args.env_id, img_obs=False) 
@@ -515,13 +556,13 @@ def main():
     # Note: we need a minimal config dict
     config = vars(args)
     rng = jax.random.key(args.seed)
-    net_o, params_o = create_model(args.model_type, config, rng)
+    net_o, params_o = create_model(args.model_type, config, rng, train_mode=False)
     
     # Load parameters
-    if len(args.checkpoint) > 0:
-        params_o = load_o_params(args.checkpoint, net_o, o_cfg, args.model_type)
+    if len(args.o_checkpoint) > 0:
+        params_o = load_o_params(args.o_checkpoint, net_o, o_cfg, args.model_type)
     else:
-        print("No TP checkpoint provided, using randomly initialized parameters.")
+        print("No O checkpoint provided, using randomly initialized parameters.")
 
     # 4. Run
     run_dual_rollout(

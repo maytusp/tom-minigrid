@@ -38,7 +38,7 @@ class TrainConfig:
     project: str = "tomminigrid"
     group: str = "default"
     # env_id: str = "MiniGrid-Protagonist-ProcGen-9x9vs9" # 9x9 grid with view_size (receptive field) = 9
-    env_id: str = "MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9"
+    env_id: str = "MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-Otraining"
     name: str = f"{env_id}-ppo"
     benchmark_id: Optional[str] = None
     ruleset_id: Optional[int] = None
@@ -58,8 +58,8 @@ class TrainConfig:
     num_steps: int = 128
     update_epochs: int = 4
     num_minibatches: int = 16
-    total_timesteps: int = 50_000_000 # 100M step
-    lr: float = 0.001
+    total_timesteps: int = 60_000_000
+    lr: float = 2.5e-3
     clip_eps: float = 0.2
     gamma: float = 0.99
     gae_lambda: float = 0.95
@@ -318,7 +318,7 @@ def train(config: TrainConfig):
     )
     
     os.makedirs(config.save_dir, exist_ok=True)
-    checkpoint_path = os.path.join(config.save_dir, f"{config.name}_final.msgpack")
+    checkpoint_path = os.path.join(config.save_dir, f"final.msgpack")
 
     # 1. Setup States
     rng, env, env_params, init_hstate, train_state = make_states(config)
@@ -372,7 +372,7 @@ def train(config: TrainConfig):
         # --- Periodic Saving ---
         current_update = (chunk_idx + 1) * config.log_frequency
         if current_update % config.save_every == 0:
-            save_path = os.path.join(config.save_dir, f"{config.name}_step_{current_update}.msgpack")
+            save_path = os.path.join(config.save_dir, f"step_{current_update}.msgpack")
             # Extract train_state from runner_state (it's the 2nd element, index 1)
             # runner_state structure: (rng, train_state, timestep, ...)
             current_params = unreplicate(runner_state[1].params)

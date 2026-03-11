@@ -34,7 +34,7 @@ class SwapCarry:
     goal_yx: jnp.ndarray                 # int32[2]
     star_yx: jnp.ndarray                 # int32[2]
     empty_tile: jnp.ndarray              # tile dtype
-    p_swap_test: jnp.ndarray             # float32[] scalar
+    p_swap: jnp.ndarray             # float32[] scalar
     doors_yx: jnp.ndarray                # int32[2,2] -> [left_door_yx, right_door_yx]
     door_close_delay: jnp.ndarray        # int32[] scalar (The actual delay for this episode)
     
@@ -230,7 +230,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             goal_yx=goal_yx,
             star_yx=star_yx,
             empty_tile=empty_tile,
-            p_swap_test=jnp.asarray(params.swap_prob, dtype=jnp.float32),
+            p_swap=jnp.asarray(params.swap_prob, dtype=jnp.float32),
             doors_yx=jnp.stack([left_door_yx, right_door_yx], axis=0),
             door_close_delay=jnp.asarray(-1, dtype=jnp.int32),
         )
@@ -298,7 +298,7 @@ class TwoRooms(Environment[EnvParams, SwapCarry]):
             # E. Decide if Swap Happens
             do_move = jax.lax.select(
                 jnp.asarray(apply_swap),
-                jax.random.bernoulli(k_move, p=_state.carry.p_swap_test),
+                jax.random.bernoulli(k_move, p=_state.carry.p_swap),
                 jnp.asarray(False, dtype=jnp.bool_)
             )
 

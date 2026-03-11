@@ -98,7 +98,7 @@ def collect_obs(
     *,
     episodes: int = 1,
     max_videos: int = 30,
-    max_steps: int = 1000,
+    max_steps: int = 100,
     seed: int = 0,
     out_dir: str = "trajs",
     enable_bf16: bool = False,
@@ -232,9 +232,9 @@ def eval_with_rollout(env, env_params, net, params, episodes: int, seed: int, en
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack")
-    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9") # MiniGrid-Protagonist-ProcGen-9x9vs9, MiniGrid-ToM-TwoRoomsSwap-9x9vs9, MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9
-    parser.add_argument("--vid_out_dir", type=str, default="logs/train_trajs/tworoom_noswap_randdelay/")
+    parser.add_argument("--checkpoint", type=str, default="checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-Otraining/final.msgpack")
+    parser.add_argument("--env_id", type=str, default="MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-Otraining")
+    parser.add_argument("--vid_out_dir", type=str, default="logs/train_trajs/tworoom_noswap_otraining/")
     parser.add_argument("--episodes", type=int, default=5000)
     parser.add_argument("--seed", type=int, default=1)
 
@@ -265,13 +265,13 @@ def main():
     print(f"Loaded params from: {args.checkpoint}")
 
     collect_obs(env, env_params, net, params,
-                        episodes=args.episodes, max_steps=1000, seed=args.seed,
+                        episodes=args.episodes, max_steps=100, seed=args.seed,
                         out_dir=args.vid_out_dir,
                         observer_r = 8,
                         observer_c = 4,
                         fov_size = 9,
                         fov_dir = "up")
-    eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed)
+    # eval_with_rollout(env, env_params, net, params, episodes=args.episodes, seed=args.seed)
 
 if __name__ == "__main__":
     # This flag matches your training script default and will become default in newer JAX versions.

@@ -33,8 +33,8 @@ import jax.numpy as jnp
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_randdelay")
-    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tworoom-noswap/")
+    parser.add_argument("--data_dir", type=str, default="./logs/train_trajs/tworoom_noswap_otraining")
+    parser.add_argument("--work_dir", type=str, default="./checkpoints/observers/tpnet/")
     parser.add_argument("--batch_size", type=int, default=128)
     parser.add_argument("--epochs", type=int, default=50)
     parser.add_argument("--lr", type=float, default=1e-3)
@@ -46,7 +46,7 @@ def main():
 
     parser.add_argument("--freeze_fp", action="store_true", default=False)
 
-    parser.add_argument("--p_checkpoint", type=str, default="./checkpoints/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9/MiniGrid-ToM-TwoRoomsNoSwap-9x9vs9-ppo_final.msgpack",
+    parser.add_argument("--fp_checkpoint", type=str, default="",
                         help="Path to protagonist checkpoint")
     
     # Architecture Args (Must match P's training config)
@@ -69,17 +69,17 @@ def main():
                         help="Total number of discrete states for the SR (update based on your grid size).")
     args = parser.parse_args()
     print(f"Freeze FP {args.freeze_fp}")
-    print(f"len(p_checkpoint) {len(args.p_checkpoint)}")
+    print(f"len(fp_checkpoint) {len(args.fp_checkpoint)}")
     if args.model_type == "third_person":
         model_name = "SingleNet"
-    elif args.model_type == "dual_perspective" and not(args.freeze_fp) and len(args.p_checkpoint) > 0:
+    elif args.model_type == "dual_perspective" and not(args.freeze_fp) and len(args.fp_checkpoint) > 0:
         model_name = "DualNet-FinetuneFPnet"
-    elif args.model_type == "dual_perspective" and args.freeze_fp and len(args.p_checkpoint) > 0:
+    elif args.model_type == "dual_perspective" and args.freeze_fp and len(args.fp_checkpoint) > 0:
         model_name = "DualNet-FreezeFPnet"
-    elif args.model_type == "dual_perspective" and not(args.freeze_fp) and len(args.p_checkpoint) == 0:
+    elif args.model_type == "dual_perspective" and not(args.freeze_fp) and len(args.fp_checkpoint) == 0:
         model_name = "DualNet-FromScratch"
     else:
-        raise ValueError("Invalid model configuration. Check model_type, freeze_fp, and p_checkpoint arguments.")
+        raise ValueError("Invalid model configuration. Check model_type, freeze_fp, and fp_checkpoint arguments.")
     
     if args.use_sr:
         model_name += "-SR"

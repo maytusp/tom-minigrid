@@ -222,8 +222,6 @@ class TransformedFPPredictor(nn.Module):
         # 1. Transform TP Observation -> FP Observation
         tp_obs = inputs_tp["obs_img"]
         fp_obs = self.trafo(tp_obs) # [B, S, 9, 9, 2]
-        jax.debug.print("Transformed TP Obs: {}", tp_obs[0,0,:,:,0])
-        jax.debug.print("Transformed FP Obs: {}", fp_obs[0,0,:,:,0])
         
         # 2. Construct Input for FP Module
         # We reuse prev_action/reward from TP input
@@ -374,7 +372,7 @@ class ThirdPersonPredictor(nn.Module):
         h_tp = jnp.zeros((batch_size, 1, self.tp_rnn), dtype=jnp.float32)
         return h_fp, h_tp
 
-def create_model(model_type: str, config: Dict, rng):
+def create_model(model_type: str, config: Dict, rng, train_mode=True):
     print(f"--- Creating Model: {model_type} ---")
     
     use_sr = config.get('use_sr', False)
@@ -432,20 +430,17 @@ def create_model(model_type: str, config: Dict, rng):
     
     params = flax.core.unfreeze(variables['params'])
 
-    # Grafting Logic
-    if (model_type == "dual_perspective" or  model_type == "transformed_fp") and len(config.get('p_checkpoint')) > 0:
-        print(f"Loading FP weights from: {config['p_checkpoint']}")
-        with open(config['p_checkpoint'], "rb") as f:
-            raw_p = msgpack_restore(f.read())
-        
-        raw_p_params = raw_p["params"] if "params" in raw_p else raw_p
-        
-        try:
+    if train_mode:
+        # Grafting Logic
+        if (model_type == "dual_perspective" or  model_type == "transformed_fp") and len(config.get('fp_pretrained_checkpoint')) > 0:
+            print(f"Loading FP weights from: {config['fp_pretrained_checkpoint']}")
+            with open(config['fp_pretrained_checkpoint'], "rb") as f:
+                raw_p = msgpack_restore(f.read())
+            
+            raw_p_params = raw_p["params"] if "params" in raw_p else raw_p
             params['fp_module'] = from_state_dict(params['fp_module'], raw_p_params)
             print("FP weights grafted successfully.")
-        except Exception as e:
-            print(f"!!! Grafting Failed: {e}")
-            raise e
+
     
     return model, freeze({'params': params})
 
